@@ -1,7 +1,7 @@
 import pika
 import ast
 
-class SdxMQ():
+class MessageQueue():
     def __init__(self):
         pass
 

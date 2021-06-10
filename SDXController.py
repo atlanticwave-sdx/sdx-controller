@@ -1,4 +1,4 @@
-from SdxMQ import *
+from MessageQueue import *
 from optparse import OptionParser
 import argparse
 
