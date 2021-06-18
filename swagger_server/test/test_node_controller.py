@@ -17,7 +17,7 @@ class TestNodeController(BaseTestCase):
         get an existing node
         """
         response = self.client.open(
-            '/YufengXin/SDX-Controller/1.0.0/node',
+            '/SDX-Controller/1.0.0/node',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

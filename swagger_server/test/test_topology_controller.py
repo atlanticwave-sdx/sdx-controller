@@ -18,7 +18,7 @@ class TestTopologyController(BaseTestCase):
         get an existing topology
         """
         response = self.client.open(
-            '/YufengXin/SDX-Controller/1.0.0/topology',
+            '/SDX-Controller/1.0.0/topology',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -30,7 +30,7 @@ class TestTopologyController(BaseTestCase):
         """
         query_string = [('topology_id', 789)]
         response = self.client.open(
-            '/YufengXin/SDX-Controller/1.0.0/topology/{version}'.format(version=789),
+            '/SDX-Controller/1.0.0/topology/{version}'.format(version=789),
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -43,7 +43,7 @@ class TestTopologyController(BaseTestCase):
         """
         query_string = [('topology_id', 'topology_id_example')]
         response = self.client.open(
-            '/YufengXin/SDX-Controller/1.0.0/topology/version',
+            '/SDX-Controller/1.0.0/topology/version',
             method='GET',
             query_string=query_string)
         self.assert200(response,

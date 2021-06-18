@@ -14,14 +14,6 @@ externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
 servers:
-- url: https://virtserver.swaggerhub.com/YufengXin/SDX-Controller/1.0.0
-  description: SwaggerHub API Auto Mocking
-- url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
-  description: SwaggerHub API Auto Mocking
-- url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
-  description: SwaggerHub API Auto Mocking
-- url: https://virtserver.swaggerhub.com/SDX-LC/1.0.0
-  description: SwaggerHub API Auto Mocking
 - url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
   description: SwaggerHub API Auto Mocking
 - url: https://0.0.0.0:8080/v2
