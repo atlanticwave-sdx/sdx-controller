@@ -18,6 +18,8 @@ servers:
   description: SwaggerHub API Auto Mocking
 - url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
   description: SwaggerHub API Auto Mocking
+- url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
+  description: SwaggerHub API Auto Mocking
 - url: https://virtserver.swaggerhub.com/SDX-LC/1.0.0
   description: SwaggerHub API Auto Mocking
 - url: https://virtserver.swaggerhub.com/SDX-Controller/1.0.0
