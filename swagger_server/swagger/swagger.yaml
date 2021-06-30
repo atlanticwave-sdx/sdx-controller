@@ -724,7 +724,7 @@ components:
         id: id
         availability: 70.61401241503108394681476056575775146484375
         ports:
-        - node: urn:sdx:port:amlight.net:Novi06
+          - node: urn:sdx:port:amlight.net:Novi06
             name: urn:sdx:port:amlight.net:Novi06:9
             label_range:
             - label_range
