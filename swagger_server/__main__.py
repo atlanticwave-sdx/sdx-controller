@@ -9,8 +9,6 @@ from swagger_server.utils.db_utils import *
 
 from optparse import OptionParser
 import argparse
-import _pickle as pickle
-import dataset
 
 def main():
     parser = OptionParser()
@@ -27,14 +25,13 @@ def main():
     options = parser.parse_args()
     print(options.manifest)
 
-
+    # testing db
     dbname = options.database
     # Get DB connection and tables set up.
     db_tuples = [('config_table', "test-config")]
     
     db_util = DbUtils()
     db_util._initialize_db(dbname, db_tuples)
-
 
     # Start listening RabbitMQ
     # serverconfigure = RabbitMqServerConfigure(host='localhost',
@@ -50,27 +47,15 @@ def main():
     response = rpc.call(body)
     print(" [.] Got response: " + str(response))
 
+    db_util.add_key_value_pair_to_db('test', body)
+    db_util.read_from_db('test')
+
+
     # Run swagger service
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('swagger.yaml', arguments={'title': 'SDX-Controller'}, pythonic_params=True)
     app.run(port=8080)
-
-def add_manifest_filename_to_db(dbname, manifest_filename):
-    # Pushes LC network configuration info into the DB.
-    # key: "manifest_filename"
-    # value: manifest_filename
-    key = 'manifest_filename'
-    value = pickle.dumps(manifest_filename)
-    db = dataset.connect('sqlite:///' + dbname, 
-                                  engine_kwargs={'connect_args':
-                                                {'check_same_thread':False}})
-    config_table_name = "test-config"
-    config_table = db.load_table(config_table_name)
-    print("Adding new manifest filename %s" %
-                        manifest_filename)
-    config_table.insert({'key':key, 'value':value})
-
 
 if __name__ == '__main__':
     main()
