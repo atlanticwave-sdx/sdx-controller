@@ -1,8 +1,23 @@
 import connexion
 import six
+import os
 
 from swagger_server.models.topology import Topology  # noqa: E501
 from swagger_server import util
+from swagger_server.utils.db_utils import *
+from swagger_server.messaging.message_queue_consumer import *
+from swagger_server.messaging.rpc_queue_consumer import *
+
+DB_NAME = os.environ.get('DB_NAME')
+MANIFEST = os.environ.get('MANIFEST')
+
+# Get DB connection and tables set up.
+db_tuples = [('config_table', "test-config")]
+
+db_instance = DbUtils()
+db_instance._initialize_db(DB_NAME, db_tuples)
+
+rpc = RpcClient()
 
 def get_topology():  # noqa: E501
     """get an existing topology

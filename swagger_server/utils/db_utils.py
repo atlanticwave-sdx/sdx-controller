@@ -6,6 +6,7 @@ class DbUtils(object):
     def __init__(self):
         # self.table_name
         self.config_table = 'test1'
+    
     def _initialize_db(self, db_filename, db_tables_tuples,
                        print_table_on_load=False):
         # DB related utils

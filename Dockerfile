@@ -1,4 +1,8 @@
-FROM python:3.6-alpine
+#FROM python:3.6-alpine
+FROM python:3.9.6-buster
+
+RUN apt-get update \
+    && apt-get install -y gcc-
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
