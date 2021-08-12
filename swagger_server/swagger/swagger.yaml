@@ -456,20 +456,22 @@ components:
           type: boolean
           default: false
       example:
-        start_time: 2000-01-23T04:56:07.000+00:00
-        quantity: 0
+        start_time: 2000-01-23T04:56:07.000Z
         name: name
-        end_time: 2000-01-23T04:56:07.000+00:00
+        end_time: 2000-01-23T04:56:07.000Z
         id: id
-        egress_port: null
+        egress_port:
+          node: urn:sdx:port:amlight.net:Novi07
+          name: urn:sdx:port:amlight.net:Novi07:10
+          short_name: "10"
+          id: id
+          status: up
         ingress_port:
           node: urn:sdx:port:amlight.net:Novi06
           name: urn:sdx:port:amlight.net:Novi06:9
           short_name: "9"
           id: id
           status: up
-        complete: false
-        status: success
       xml:
         name: Order
     User:
@@ -585,8 +587,22 @@ components:
           id: id
           availability: 70.61401241503108394681476056575775146484375
           ports:
-          - null
-          - null
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:9
+            label_range:
+            - label_range
+            - label_range
+            short_name: "9"
+            id: id
+            status: up
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:10
+            label_range:
+            - label_range
+            - label_range
+            short_name: "10"
+            id: id
+            status: up
         - total_bandwidth: 146582.15146899645333178341388702392578125
           packet_loss: 23.0213588693476509661195450462400913238525390625
           latency: 563738.10192566714249551296234130859375
@@ -596,8 +612,22 @@ components:
           id: id
           availability: 70.61401241503108394681476056575775146484375
           ports:
-          - null
-          - null
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:9
+            label_range:
+            - label_range
+            - label_range
+            short_name: "9"
+            id: id
+            status: up
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:10
+            label_range:
+            - label_range
+            - label_range
+            short_name: "10"
+            id: id
+            status: up
         id: id
         version: 1
       xml:
@@ -694,8 +724,22 @@ components:
         id: id
         availability: 70.61401241503108394681476056575775146484375
         ports:
-        - null
-        - null
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:9
+            label_range:
+            - label_range
+            - label_range
+            short_name: "9"
+            id: id
+            status: up
+          - node: urn:sdx:port:amlight.net:Novi06
+            name: urn:sdx:port:amlight.net:Novi06:10
+            label_range:
+            - label_range
+            - label_range
+            short_name: "10"
+            id: id
+            status: up
       xml:
         name: link
     port:
@@ -805,4 +849,3 @@ components:
       name: api_key
       in: header
       x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
-
