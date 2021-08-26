@@ -1,12 +1,17 @@
 import connexion
 import six
 import os
+import json
 
 from swagger_server.models.connection import Connection  # noqa: E501
 from swagger_server import util
 from swagger_server.utils.db_utils import *
 from swagger_server.messaging.message_queue_consumer import *
 from swagger_server.messaging.rpc_queue_consumer import *
+
+class Payload(object):
+    def __init__(self, j):
+        self.__dict__ = json.loads(j)
 
 DB_NAME = os.environ.get('DB_NAME')
 MANIFEST = os.environ.get('MANIFEST')
@@ -59,17 +64,17 @@ def place_connection(body):  # noqa: E501
     :rtype: Connection
     """
     if connexion.request.is_json:
-        body = Connection.from_dict(connexion.request.get_json())  # noqa: E501
+        body = connexion.request.get_json()
+        # body = Connection.from_dict(connexion.request.get_json())  # noqa: E501
 
-    print('Body:')
-    print(body)
+    json_body = json.dumps(body)
 
     print('Placing connection. Saving to database.')
-    db_instance.add_key_value_pair_to_db('test', body)
+    db_instance.add_key_value_pair_to_db('test', json_body)
     print('Saving to database complete.')
 
     print("Published Message: {}".format(body))
-    response = rpc.call(body)
+    response = rpc.call(json_body)
     print(" [.] Got response: " + str(response))
 
     return 'do some magic!'
