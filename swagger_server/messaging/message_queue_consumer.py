@@ -1,5 +1,8 @@
 import pika
 import ast
+import os
+
+MQ_HOST = os.environ.get('MQ_HOST')
 
 class MessageQueue():
     def __init__(self):
@@ -13,7 +16,7 @@ class MetaClass(type):
             return cls._instance[cls]
 
 class RabbitMqServerConfigure(metaclass=MetaClass):
-    def __init__(self, host='localhost', queue='hello'):
+    def __init__(self, host=MQ_HOST, queue='hello'):
         self.host = host
         self.queue = queue
 
@@ -41,7 +44,7 @@ class rabbitmqServer():
         self._channel.start_consuming()
 
 if __name__ == "__main__":
-    serverconfigure = RabbitMqServerConfigure(host='localhost',
+    serverconfigure = RabbitMqServerConfigure(host=MQ_HOST,
                                               queue='hello')
 
     server = rabbitmqServer(server=serverconfigure)

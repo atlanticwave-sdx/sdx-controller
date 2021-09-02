@@ -50,7 +50,7 @@ def getconnection_by_id(connection_id):  # noqa: E501
     value = db_instance.read_from_db('test')
     print('get value back:')
     print(value)
-    return 'do some magic!'
+    return value
 
 
 def place_connection(body):  # noqa: E501
@@ -77,4 +77,4 @@ def place_connection(body):  # noqa: E501
     response = rpc.call(json_body)
     print(" [.] Got response: " + str(response))
 
-    return 'do some magic!'
+    return str(response)

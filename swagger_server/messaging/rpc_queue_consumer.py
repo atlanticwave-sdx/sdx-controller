@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 import pika
 import uuid
+import os
+
+MQ_HOST = os.environ.get('MQ_HOST')
 
 class RpcClient(object):
     def __init__(self):
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='localhost'))
+            pika.ConnectionParameters(host=MQ_HOST))
 
         self.channel = self.connection.channel()
 
