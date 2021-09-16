@@ -9,6 +9,7 @@ from swagger_server.utils.db_utils import *
 
 from optparse import OptionParser
 import argparse
+import time
 
 def main():
     # Start listening RabbitMQ
@@ -28,7 +29,8 @@ def main():
     # db_util.add_key_value_pair_to_db('test', body)
     # db_util.read_from_db('test')
 
-
+    # Sleep 10 seconds waiting for RabbitMQ to be ready
+    time.sleep(10)
     # Run swagger service
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
