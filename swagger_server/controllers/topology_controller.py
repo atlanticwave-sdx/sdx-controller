@@ -5,8 +5,8 @@ import os
 from swagger_server.models.topology import Topology  # noqa: E501
 from swagger_server import util
 from swagger_server.utils.db_utils import *
-from swagger_server.messaging.message_queue_consumer import *
-from swagger_server.messaging.rpc_queue_consumer import *
+from swagger_server.messaging.async_consumer import *
+# from swagger_server.messaging.rpc_queue_consumer import *
 
 DB_NAME = os.environ.get('DB_NAME')
 MANIFEST = os.environ.get('MANIFEST')
@@ -17,7 +17,12 @@ db_tuples = [('config_table', "test-config")]
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-rpc = RpcClient()
+amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
+consumer = AsyncConsumer(amqp_url)
+t1 = threading.Thread(target=consumer.run, args=())
+t1.start()
+
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
 def get_topology():  # noqa: E501
     """get an existing topology

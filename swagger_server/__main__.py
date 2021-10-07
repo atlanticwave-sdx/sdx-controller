@@ -5,32 +5,23 @@ import connexion
 from swagger_server import encoder
 from swagger_server.messaging.message_queue_consumer import *
 from swagger_server.messaging.rpc_queue_consumer import *
+from swagger_server.messaging.async_consumer import *
 from swagger_server.utils.db_utils import *
 
 from optparse import OptionParser
 import argparse
 import time
+import threading
+
 
 def main():
-    # Start listening RabbitMQ
-    # serverconfigure = RabbitMqServerConfigure(host='localhost',
-    #                                         queue='hello')
-
-    # server = rabbitmqServer(server=serverconfigure)
-    # server.startserver()
-
-    # Message queue rpc test
-    # rpc = RpcClient()
-    # body = "test body"
-    # print("Published Message: {}".format(body))
-    # response = rpc.call(body)
-    # print(" [.] Got response: " + str(response))
-
-    # db_util.add_key_value_pair_to_db('test', body)
-    # db_util.read_from_db('test')
 
     # Sleep 10 seconds waiting for RabbitMQ to be ready
-    time.sleep(10)
+    time.sleep(7)
+    
+    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    
+
     # Run swagger service
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
