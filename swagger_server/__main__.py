@@ -21,7 +21,6 @@ def main():
     
     logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     
-
     # Run swagger service
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
