@@ -24,8 +24,8 @@ amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
 thread_queue = Queue()
 
 def start_consumer(amqp_url, thread_queue, db_instance):
-    consumer = AsyncConsumer(amqp_url, thread_queue)
-    t1 = threading.Thread(target=consumer.run, args=())
+    rpc = RpcConsumer(thread_queue)
+    t1 = threading.Thread(target=rpc.start_consumer, args=())
     t1.start()
 
     while True:
@@ -35,17 +35,15 @@ def start_consumer(amqp_url, thread_queue, db_instance):
 
             print('Saving to database.')
             db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)
+            
             print('Saving to database complete.')
 
             print('message ID:' + str(MESSAGE_ID))
             value = db_instance.read_from_db(MESSAGE_ID)
             print('get value back:')
             print(value)
-
-
-            
-
-# logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+            # if msg is not None:
+            #     MESSAGE_ID += 1
 
 def get_topology():  # noqa: E501
     """get an existing topology

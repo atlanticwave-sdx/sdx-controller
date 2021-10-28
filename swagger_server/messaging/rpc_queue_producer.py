@@ -3,7 +3,7 @@ import pika
 import uuid
 import os
 
-MQ_HOST = 'aw-sdx-monitor.renci.org'
+MQ_HOST = os.environ.get('MQ_HOST')
 
 class RpcProducer(object):
     def __init__(self):
