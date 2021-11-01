@@ -849,4 +849,3 @@ components:
       name: api_key
       in: header
       x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
-

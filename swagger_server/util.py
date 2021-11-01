@@ -28,6 +28,13 @@ def _deserialize(data, klass):
             return _deserialize_list(data, klass.__args__[0])
         if klass.__extra__ == dict:
             return _deserialize_dict(data, klass.__args__[1])
+    # change the above elif block to this for python >3.7
+    # https://github.com/zalando/connexion/issues/739
+    # elif hasattr(klass, '__origin__'):
+    #     if klass.__origin__ == list:
+    #         return _deserialize_list(data, klass.__args__[0])
+    #     if klass.__origin__ == dict:
+    #         return _deserialize_dict(data, klass.__args__[1])
     else:
         return deserialize_model(data, klass)
 
