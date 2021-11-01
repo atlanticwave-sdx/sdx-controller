@@ -5,4 +5,4 @@ export MQ_NAME='hello'
 export MQ_HOST='aw-sdx-monitor.renci.org'
 export DB_NAME='test-db'
 export MANIFEST='README.md'
-
+export DB_CONFIG_TABLE_NAME='test-1'

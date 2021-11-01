@@ -2,12 +2,14 @@
 import pika
 import os
 import threading
+import logging
 from queue import Queue
 
 MQ_HOST = os.environ.get('MQ_HOST')
 
 class RpcConsumer(object):
     def __init__(self, thread_queue):
+        self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=MQ_HOST))
 
@@ -35,7 +37,7 @@ class RpcConsumer(object):
         self.channel.basic_consume(queue='rpc_queue', 
                                    on_message_callback=self.on_request)
 
-        print(" [x] Awaiting RPC requests")
+        self.logger.debug(" [MQ] Awaiting RPC requests")
         self.channel.start_consuming() 
 
 
