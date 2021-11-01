@@ -17,7 +17,7 @@ import threading
 def main():
 
     # Sleep 7 seconds waiting for RabbitMQ to be ready
-    # time.sleep(7)
+    time.sleep(7)
     
     logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     
