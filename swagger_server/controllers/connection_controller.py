@@ -6,8 +6,8 @@ import json
 from swagger_server.models.connection import Connection  # noqa: E501
 from swagger_server import util
 from swagger_server.utils.db_utils import *
-from swagger_server.messaging.message_queue_consumer import *
-from swagger_server.messaging.rpc_queue_consumer import *
+# from swagger_server.messaging.message_queue_consumer import *
+from swagger_server.messaging.rpc_queue_producer import *
 
 class Payload(object):
     def __init__(self, j):
@@ -22,7 +22,7 @@ db_tuples = [('config_table', "test-config")]
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-rpc = RpcClient()
+# rpc = RpcProducer(5)
 
 def delete_connection(connection_id):  # noqa: E501
     """Delete connection order by ID
@@ -74,7 +74,7 @@ def place_connection(body):  # noqa: E501
     print('Saving to database complete.')
 
     print("Published Message: {}".format(body))
-    response = rpc.call(json_body)
+    # response = rpc.call(json_body)
     print(" [.] Got response: " + str(response))
 
-    return str(response)
+    return 'do some magic!'
