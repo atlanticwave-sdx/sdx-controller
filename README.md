@@ -10,8 +10,17 @@ This example uses the [Connexion](https://github.com/zalando/connexion) library 
 ## Requirements
 Python 3.5.2+
 
-## Usage
-To run the server, please execute the following from the root directory:
+## Prerequisite: run the RabbitMQ server
+The communication between SDX controller and Local controller rely on RabbitMQ. RabbitMQ can either run on the SDX controller, or run on a separate node. The easiest way to run RabbitMQ is using docker:
+
+```
+sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
+```
+
+Then in `env` and `docker-compose.yml` files, change `MQ_HOST` host to the corresponding IP address or hostname of the RabbitMQ server
+
+## Run with Python
+To run the swagger server, please execute the following from the root directory:
 
 ```
 pip3 install -r requirements.txt
@@ -38,7 +47,7 @@ tox
 
 ## Running with Docker
 
-To run the server on a Docker container, please execute the following from the root directory:
+To run the server on a Docker container, execute the following from the root directory:
 
 ```bash
 # building the image
