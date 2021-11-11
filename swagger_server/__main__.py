@@ -12,7 +12,7 @@ import time
 import threading
 import logging
 
-def start_consumer(amqp_url, thread_queue, db_instance):
+def start_consumer(thread_queue, db_instance):
     logger = logging.getLogger(__name__)
     logging.getLogger("pika").setLevel(logging.WARNING)
 
@@ -61,9 +61,9 @@ def main():
 
     db_instance = DbUtils()
     db_instance._initialize_db(DB_NAME, db_tuples)
-    amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
+    # amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
     thread_queue = Queue()
-    start_consumer(amqp_url, thread_queue, db_instance)        
+    start_consumer(thread_queue, db_instance)        
 
 if __name__ == '__main__':
     main()
