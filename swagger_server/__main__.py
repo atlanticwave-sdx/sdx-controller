@@ -17,6 +17,7 @@ def start_consumer(thread_queue, db_instance):
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     MESSAGE_ID = 0
+    HEARTBEAT_ID = 0
     
     rpc = RpcConsumer(thread_queue)
     t1 = threading.Thread(target=rpc.start_consumer, args=())
@@ -26,16 +27,20 @@ def start_consumer(thread_queue, db_instance):
         if not thread_queue.empty():
             msg = thread_queue.get()
             logger.info("MQ received message:" + str(msg))
+            
+            if 'Heart Beat' not in str(msg):
+                logger.info('Saving to database.')
+                db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)            
+                logger.info('Save to database complete.')
 
-            logger.info('Saving to database.')
-            db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)            
-            logger.info('Save to database complete.')
-
-            logger.info('message ID:' + str(MESSAGE_ID))
-            value = db_instance.read_from_db(MESSAGE_ID)
-            logger.info('got value back:')
-            logger.info(value)
-            MESSAGE_ID += 1
+                logger.info('message ID:' + str(MESSAGE_ID))
+                value = db_instance.read_from_db(MESSAGE_ID)
+                logger.info('got value back:')
+                logger.info(value)
+                MESSAGE_ID += 1
+            else:
+                HEARTBEAT_ID += 1
+                logger.info('Heart beat received. ID: ' + str(HEARTBEAT_ID))
 
 def main():
 
@@ -53,7 +58,7 @@ def main():
     threading.Thread(target=lambda: app.run(port=8080)).start()
     # app.run(port=8080)
 
-    DB_NAME = os.environ.get('DB_NAME')
+    DB_NAME = os.environ.get('DB_NAME') + '.sqlite3'
     MANIFEST = os.environ.get('MANIFEST')
 
     # Get DB connection and tables set up.
