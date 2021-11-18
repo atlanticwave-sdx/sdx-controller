@@ -11,6 +11,14 @@ import argparse
 import time
 import threading
 import logging
+import json
+
+def is_json(myjson):
+  try:
+    json.loads(myjson)
+  except ValueError as e:
+    return False
+  return True
 
 def start_consumer(thread_queue, db_instance):
     logger = logging.getLogger(__name__)
@@ -30,7 +38,17 @@ def start_consumer(thread_queue, db_instance):
             
             if 'Heart Beat' not in str(msg):
                 logger.info('Saving to database.')
-                db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)            
+                if is_json(msg):
+                    msg_json = json.loads(msg)
+                    lc_msg_id = msg_json["id"]
+                    lc_name = msg_json["name"]
+                    lc_msg_version = msg_json["version"]
+                    db_msg_id = str(lc_name) + "-" + str(lc_msg_id) + "-" + str(lc_msg_version)
+                    # print(db_msg_id)
+                    db_instance.add_key_value_pair_to_db(db_msg_id, msg)    
+                else:
+                    db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg) 
+
                 logger.info('Save to database complete.')
 
                 logger.info('message ID:' + str(MESSAGE_ID))
