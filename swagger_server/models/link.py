@@ -15,7 +15,7 @@ class Link(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, short_name: str=None, ports: List[Port]=None, total_bandwidth: float=None, available_bandwidth: float=None, latency: float=None, packet_loss: float=None, availability: float=None):  # noqa: E501
+    def __init__(self, id: str=None, name: str=None, short_name: str=None, ports: List[Port]=None, bandwidth: float=None, residual_bandwidth: float=None, latency: float=None, packet_loss: float=None, availability: float=None, state: str=None, status: str=None):  # noqa: E501
         """Link - a model defined in Swagger
 
         :param id: The id of this Link.  # noqa: E501
@@ -26,27 +26,33 @@ class Link(Model):
         :type short_name: str
         :param ports: The ports of this Link.  # noqa: E501
         :type ports: List[Port]
-        :param total_bandwidth: The total_bandwidth of this Link.  # noqa: E501
-        :type total_bandwidth: float
-        :param available_bandwidth: The available_bandwidth of this Link.  # noqa: E501
-        :type available_bandwidth: float
+        :param bandwidth: The bandwidth of this Link.  # noqa: E501
+        :type bandwidth: float
+        :param residual_bandwidth: The residual_bandwidth of this Link.  # noqa: E501
+        :type residual_bandwidth: float
         :param latency: The latency of this Link.  # noqa: E501
         :type latency: float
         :param packet_loss: The packet_loss of this Link.  # noqa: E501
         :type packet_loss: float
         :param availability: The availability of this Link.  # noqa: E501
         :type availability: float
+        :param state: The state of this Link.  # noqa: E501
+        :type state: str
+        :param status: The status of this Link.  # noqa: E501
+        :type status: str
         """
         self.swagger_types = {
             'id': str,
             'name': str,
             'short_name': str,
             'ports': List[Port],
-            'total_bandwidth': float,
-            'available_bandwidth': float,
+            'bandwidth': float,
+            'residual_bandwidth': float,
             'latency': float,
             'packet_loss': float,
-            'availability': float
+            'availability': float,
+            'state': str,
+            'status': str
         }
 
         self.attribute_map = {
@@ -54,21 +60,25 @@ class Link(Model):
             'name': 'name',
             'short_name': 'short_name',
             'ports': 'ports',
-            'total_bandwidth': 'total_bandwidth',
-            'available_bandwidth': 'available_bandwidth',
+            'bandwidth': 'bandwidth',
+            'residual_bandwidth': 'residual_bandwidth',
             'latency': 'latency',
             'packet_loss': 'packet_loss',
-            'availability': 'availability'
+            'availability': 'availability',
+            'state': 'state',
+            'status': 'status'
         }
         self._id = id
         self._name = name
         self._short_name = short_name
         self._ports = ports
-        self._total_bandwidth = total_bandwidth
-        self._available_bandwidth = available_bandwidth
+        self._bandwidth = bandwidth
+        self._residual_bandwidth = residual_bandwidth
         self._latency = latency
         self._packet_loss = packet_loss
         self._availability = availability
+        self._state = state
+        self._status = status
 
     @classmethod
     def from_dict(cls, dikt) -> 'Link':
@@ -172,46 +182,46 @@ class Link(Model):
         self._ports = ports
 
     @property
-    def total_bandwidth(self) -> float:
-        """Gets the total_bandwidth of this Link.
+    def bandwidth(self) -> float:
+        """Gets the bandwidth of this Link.
 
 
-        :return: The total_bandwidth of this Link.
+        :return: The bandwidth of this Link.
         :rtype: float
         """
-        return self._total_bandwidth
+        return self._bandwidth
 
-    @total_bandwidth.setter
-    def total_bandwidth(self, total_bandwidth: float):
-        """Sets the total_bandwidth of this Link.
+    @bandwidth.setter
+    def bandwidth(self, bandwidth: float):
+        """Sets the bandwidth of this Link.
 
 
-        :param total_bandwidth: The total_bandwidth of this Link.
-        :type total_bandwidth: float
+        :param bandwidth: The bandwidth of this Link.
+        :type bandwidth: float
         """
 
-        self._total_bandwidth = total_bandwidth
+        self._bandwidth = bandwidth
 
     @property
-    def available_bandwidth(self) -> float:
-        """Gets the available_bandwidth of this Link.
+    def residual_bandwidth(self) -> float:
+        """Gets the residual_bandwidth of this Link.
 
 
-        :return: The available_bandwidth of this Link.
+        :return: The residual_bandwidth of this Link.
         :rtype: float
         """
-        return self._available_bandwidth
+        return self._residual_bandwidth
 
-    @available_bandwidth.setter
-    def available_bandwidth(self, available_bandwidth: float):
-        """Sets the available_bandwidth of this Link.
+    @residual_bandwidth.setter
+    def residual_bandwidth(self, residual_bandwidth: float):
+        """Sets the residual_bandwidth of this Link.
 
 
-        :param available_bandwidth: The available_bandwidth of this Link.
-        :type available_bandwidth: float
+        :param residual_bandwidth: The residual_bandwidth of this Link.
+        :type residual_bandwidth: float
         """
 
-        self._available_bandwidth = available_bandwidth
+        self._residual_bandwidth = residual_bandwidth
 
     @property
     def latency(self) -> float:
@@ -275,3 +285,45 @@ class Link(Model):
         """
 
         self._availability = availability
+
+    @property
+    def state(self) -> str:
+        """Gets the state of this Link.
+
+
+        :return: The state of this Link.
+        :rtype: str
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state: str):
+        """Sets the state of this Link.
+
+
+        :param state: The state of this Link.
+        :type state: str
+        """
+
+        self._state = state
+
+    @property
+    def status(self) -> str:
+        """Gets the status of this Link.
+
+
+        :return: The status of this Link.
+        :rtype: str
+        """
+        return self._status
+
+    @status.setter
+    def status(self, status: str):
+        """Sets the status of this Link.
+
+
+        :param status: The status of this Link.
+        :type status: str
+        """
+
+        self._status = status

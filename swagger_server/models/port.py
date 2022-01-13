@@ -14,7 +14,7 @@ class Port(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, short_name: str=None, node: str=None, status: str=None):  # noqa: E501
+    def __init__(self, id: str=None, name: str=None, short_name: str=None, node: str=None, state: str=None, status: str=None):  # noqa: E501
         """Port - a model defined in Swagger
 
         :param id: The id of this Port.  # noqa: E501
@@ -25,6 +25,8 @@ class Port(Model):
         :type short_name: str
         :param node: The node of this Port.  # noqa: E501
         :type node: str
+        :param state: The state of this Port.  # noqa: E501
+        :type state: str
         :param status: The status of this Port.  # noqa: E501
         :type status: str
         """
@@ -33,6 +35,7 @@ class Port(Model):
             'name': str,
             'short_name': str,
             'node': str,
+            'state': str,
             'status': str
         }
 
@@ -41,12 +44,14 @@ class Port(Model):
             'name': 'name',
             'short_name': 'short_name',
             'node': 'node',
+            'state': 'state',
             'status': 'status'
         }
         self._id = id
         self._name = name
         self._short_name = short_name
         self._node = node
+        self._state = state
         self._status = status
 
     @classmethod
@@ -149,6 +154,27 @@ class Port(Model):
             raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
 
         self._node = node
+
+    @property
+    def state(self) -> str:
+        """Gets the state of this Port.
+
+
+        :return: The state of this Port.
+        :rtype: str
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state: str):
+        """Sets the state of this Port.
+
+
+        :param state: The state of this Port.
+        :type state: str
+        """
+
+        self._state = state
 
     @property
     def status(self) -> str:
