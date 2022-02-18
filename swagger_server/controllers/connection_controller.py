@@ -9,9 +9,10 @@ from swagger_server.utils.db_utils import *
 # from swagger_server.messaging.message_queue_consumer import *
 from swagger_server.messaging.rpc_queue_producer import *
 
-class Payload(object):
-    def __init__(self, j):
-        self.__dict__ = json.loads(j)
+LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
+              '-35s %(lineno) -5d: %(message)s')
+logger = logging.getLogger(__name__)
+logging.getLogger("pika").setLevel(logging.WARNING)
 
 DB_NAME = os.environ.get('DB_NAME')
 MANIFEST = os.environ.get('MANIFEST')
@@ -22,7 +23,11 @@ db_tuples = [('config_table', "test-config")]
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-# rpc = RpcProducer(5)
+rpc = RpcProducer(5)
+
+class Payload(object):
+    def __init__(self, j):
+        self.__dict__ = json.loads(j)
 
 def delete_connection(connection_id):  # noqa: E501
     """Delete connection order by ID
@@ -69,12 +74,12 @@ def place_connection(body):  # noqa: E501
 
     json_body = json.dumps(body)
 
-    print('Placing connection. Saving to database.')
+    logger.debug('Placing connection. Saving to database.')
     db_instance.add_key_value_pair_to_db('test', json_body)
-    print('Saving to database complete.')
+    logger.debug('Saving to database complete.')
 
-    print("Published Message: {}".format(body))
-    # response = rpc.call(json_body)
-    print(" [.] Got response: " + str(response))
+    logger.debug("Publishing Message to MQ: {}".format(body))
+    response = rpc.call(json_body)
+    logger.debug(" [.] Got response: " + str(response))
 
     return 'do some magic!'
