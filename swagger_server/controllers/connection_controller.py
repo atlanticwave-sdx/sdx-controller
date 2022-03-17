@@ -68,6 +68,7 @@ def place_connection(body):  # noqa: E501
 
     :rtype: Connection
     """
+    print(body)
     if connexion.request.is_json:
         body = connexion.request.get_json()
         # body = Connection.from_dict(connexion.request.get_json())  # noqa: E501
@@ -82,4 +83,4 @@ def place_connection(body):  # noqa: E501
     response = rpc.call(json_body)
     logger.debug(" [.] Got response: " + str(response))
 
-    return 'do some magic!'
+    return str(response)

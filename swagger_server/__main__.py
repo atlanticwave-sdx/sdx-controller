@@ -44,23 +44,27 @@ def start_consumer(thread_queue, db_instance):
                 if is_json(msg):
                     if 'version' in str(msg):
                         msg_json = json.loads(msg)
-                        lc_msg_id = msg_json["id"]
-                        lc_name = msg_json["name"]
-                        lc_msg_version = msg_json["version"]
-                        db_msg_id = str(lc_name) + "-" + str(lc_msg_id) + "-" + str(lc_msg_version)
+                        msg_id = msg_json["id"]
+                        msg_version = msg_json["version"]
+                        db_msg_id = str(msg_id) + "-" + str(msg_version)
                         # print(db_msg_id)
                         db_instance.add_key_value_pair_to_db(db_msg_id, msg)
+                        logger.info('Save to database complete.')
+                        logger.info('message ID:' + str(db_msg_id))
+                        value = db_instance.read_from_db(db_msg_id)
+                        logger.info('got value back:')
+                        logger.info(value)
                     else:
                         logger.info('got message: ' + str(msg))
                 else:
                     db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg) 
 
-                logger.info('Save to database complete.')
-                logger.info('message ID:' + str(MESSAGE_ID))
-                value = db_instance.read_from_db(MESSAGE_ID)
-                logger.info('got value back:')
-                logger.info(value)
-                MESSAGE_ID += 1
+                    logger.info('Save to database complete.')
+                    logger.info('message ID:' + str(MESSAGE_ID))
+                    value = db_instance.read_from_db(MESSAGE_ID)
+                    logger.info('got value back:')
+                    logger.info(value)
+                    MESSAGE_ID += 1
                 
 
 def main():
