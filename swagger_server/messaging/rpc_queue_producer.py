@@ -9,18 +9,20 @@ import logging
 MQ_HOST = os.environ.get('MQ_HOST')
 
 class RpcProducer(object):
-    def __init__(self, timeout):
+    def __init__(self, timeout, exchange_name, routing_key):
         self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=MQ_HOST))
 
         self.channel = self.connection.channel()
         self.timeout = timeout
-        self.exchange_name = ''
+        self.exchange_name = exchange_name
+        self.routing_key = routing_key
 
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
+        # set up callback queue
         result = self.channel.queue_declare(queue='', exclusive=True)
         self.callback_queue = result.method.queue
 
@@ -51,8 +53,8 @@ class RpcProducer(object):
         self.response = None
         self.corr_id = str(uuid.uuid4())
 
-        self.channel.basic_publish(exchange='',
-                                    routing_key='rpc_queue',
+        self.channel.basic_publish(exchange=self.exchange_name,
+                                    routing_key=self.routing_key,
                                     properties=pika.BasicProperties(
                                         reply_to=self.callback_queue,
                                         correlation_id=self.corr_id,

@@ -27,7 +27,7 @@ def start_consumer(thread_queue, db_instance):
     MESSAGE_ID = 0
     HEARTBEAT_ID = 0
     
-    rpc = RpcConsumer(thread_queue)
+    rpc = RpcConsumer(thread_queue, '')
     t1 = threading.Thread(target=rpc.start_consumer, args=())
     t1.start()
 

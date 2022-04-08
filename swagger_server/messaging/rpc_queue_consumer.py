@@ -6,16 +6,21 @@ import logging
 from queue import Queue
 
 MQ_HOST = os.environ.get('MQ_HOST')
+# subscribe to the corresponding queue
+SUB_QUEUE = os.environ.get('SUB_QUEUE')
+# SUB_QUEUE = 'rpc_queue'
 
 class RpcConsumer(object):
-    def __init__(self, thread_queue):
+    def __init__(self, thread_queue, exchange_name):
         self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=MQ_HOST))
 
         self.channel = self.connection.channel()
+        self.exchange_name = exchange_name
 
-        self.channel.queue_declare(queue='rpc_queue')
+        # self.channel.queue_declare(queue='rpc_queue')
+        self.channel.queue_declare(queue=SUB_QUEUE)
         self._thread_queue = thread_queue
 
     def on_request(self,ch, method, props, message_body):
@@ -25,7 +30,7 @@ class RpcConsumer(object):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=MQ_HOST))
         self.channel = self.connection.channel()
         
-        ch.basic_publish(exchange='',
+        ch.basic_publish(exchange=self.exchange_name,
                         routing_key=props.reply_to,
                         properties=pika.BasicProperties(correlation_id = \
                                                             props.correlation_id),
@@ -34,10 +39,10 @@ class RpcConsumer(object):
 
     def start_consumer(self):
         self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(queue='rpc_queue', 
+        self.channel.basic_consume(queue=SUB_QUEUE, 
                                    on_message_callback=self.on_request)
 
-        self.logger.debug(" [MQ] Awaiting RPC requests")
+        self.logger.info(" [MQ] Awaiting requests from queue: " + SUB_QUEUE)
         self.channel.start_consuming() 
 
 
