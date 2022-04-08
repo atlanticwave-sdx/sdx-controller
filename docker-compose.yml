@@ -14,8 +14,8 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    networks:
-      - sdxnet
+    # networks:
+    #   - sdxnet
 
   sdx-controller:
     image: sdx-controller
@@ -31,15 +31,16 @@ services:
       - PUB_TOPIC=connection
       - SUB_QUEUE=sdx_q1
       - SUB_TOPIC=topo
-      - MQ_NAME=hello
+      - SUB_QUEUE=topo
+      - SUB_TOPIC=sdx_q1
       - MQ_HOST=aw-sdx-monitor.renci.org
       - DB_NAME=test-db
       - DB_CONFIG_TABLE_NAME=test-1
       - MANIFEST=README.md
-    networks:
-      - sdxnet
+    # networks:
+    #   - sdxnet
 
-networks:
-  sdxnet:
-    external:
-      name: sdxnet
+# networks:
+#   sdxnet:
+#     external:
+#       name: sdxnet
