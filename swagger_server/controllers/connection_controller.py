@@ -23,7 +23,7 @@ db_tuples = [('config_table', "test-config")]
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-rpc = RpcProducer(5, '', 'connection')
+rpc = RpcProducer(5, 'lc_q1', 'connection')
 
 class Payload(object):
     def __init__(self, j):

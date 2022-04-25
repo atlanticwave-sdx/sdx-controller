@@ -16,14 +16,17 @@ class RpcProducer(object):
 
         self.channel = self.connection.channel()
         self.timeout = timeout
-        self.exchange_name = exchange_name
+        self.exchange_name = ''
         self.routing_key = routing_key
 
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
+        self.channel.exchange_declare(exchange=exchange_name, exchange_type='fanout')
+
         # set up callback queue
         result = self.channel.queue_declare(queue='', exclusive=True)
+
         self.callback_queue = result.method.queue
 
         self.channel.basic_consume(queue=self.callback_queue,
