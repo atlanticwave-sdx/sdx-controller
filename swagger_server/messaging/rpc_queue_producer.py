@@ -16,13 +16,13 @@ class RpcProducer(object):
 
         self.channel = self.connection.channel()
         self.timeout = timeout
-        self.exchange_name = ''
-        self.routing_key = routing_key
+        # self.exchange_name = ''
+        # self.routing_key = routing_key
 
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
-        self.channel.exchange_declare(exchange=exchange_name, exchange_type='fanout')
+        # self.channel.exchange_declare(exchange=exchange_name, exchange_type='fanout')
 
         # set up callback queue
         result = self.channel.queue_declare(queue='', exclusive=True)
@@ -55,7 +55,11 @@ class RpcProducer(object):
 
         self.response = None
         self.corr_id = str(uuid.uuid4())
+        self.exchange_name='connection'
+        self.channel.exchange_declare(exchange='connection', exchange_type='topic')
+        self.routing_key = 'lc1_q1'
 
+        print('publishing message!!')
         self.channel.basic_publish(exchange=self.exchange_name,
                                     routing_key=self.routing_key,
                                     properties=pika.BasicProperties(
