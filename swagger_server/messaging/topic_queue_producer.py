@@ -62,25 +62,19 @@ class TopicQueueProducer(object):
                                       exchange_type='topic')
         
 
-        print('publishing message!!')
         self.channel.basic_publish(exchange=self.exchange_name,
                                     routing_key=self.routing_key,
-                                    properties=pika.BasicProperties(
-                                        reply_to=self.callback_queue,
-                                        correlation_id=self.corr_id,
-                                    ),
                                     body=str(body))
                             
-        timer = 0
-        while self.response is None:
-            time.sleep(1)
-            timer += 1
-            if timer == self.timeout:
-                return "No response from MQ receiver"
-            self.connection.process_data_events()
+        # timer = 0
+        # while self.response is None:
+        #     time.sleep(1)
+        #     timer += 1
+        #     if timer == self.timeout:
+        #         return "No response from MQ receiver"
+        #     self.connection.process_data_events()
 
-        # self.channel.close()
-        return self.response
+        return "Success"
 
 if __name__ == "__main__":
     producer = TopicQueueProducer(5, "connection", "lc1_q1")

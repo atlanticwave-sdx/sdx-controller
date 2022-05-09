@@ -70,7 +70,7 @@ def start_consumer(thread_queue, db_instance):
 def main():
 
     # Sleep 7 seconds waiting for RabbitMQ to be ready
-    time.sleep(7)
+    # time.sleep(7)
     
     logging.basicConfig(level=logging.INFO)
     
