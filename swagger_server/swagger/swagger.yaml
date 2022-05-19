@@ -461,7 +461,13 @@ components:
         name: name
         end_time: 2000-01-23T04:56:07.000+00:00
         id: id
-        egress_port: null
+        egress_port: 
+          node: urn:sdx:port:amlight.net:Novi06
+          name: urn:sdx:port:amlight.net:Novi06:10
+          short_name: "10"
+          id: id
+          state: enabled
+          status: up
         ingress_port:
           node: urn:sdx:port:amlight.net:Novi06
           name: urn:sdx:port:amlight.net:Novi06:9
@@ -471,8 +477,10 @@ components:
           status: up
         complete: false
         status: success
+        time_stamp: 2000-01-23T04:56:07+00:00
+        version: 1
       xml:
-        name: Order
+        name: Connection
     User:
       type: object
       properties:
