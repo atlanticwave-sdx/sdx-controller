@@ -8,7 +8,6 @@ from queue import Queue
 MQ_HOST = os.environ.get('MQ_HOST')
 # subscribe to the corresponding queue
 SUB_QUEUE = os.environ.get('SUB_QUEUE')
-# SUB_QUEUE = 'rpc_queue'
 
 class RpcConsumer(object):
     def __init__(self, thread_queue, exchange_name):
@@ -19,7 +18,6 @@ class RpcConsumer(object):
         self.channel = self.connection.channel()
         self.exchange_name = exchange_name
 
-        # self.channel.queue_declare(queue='rpc_queue')
         self.channel.queue_declare(queue=SUB_QUEUE)
         self._thread_queue = thread_queue
 

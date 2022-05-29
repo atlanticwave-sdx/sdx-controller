@@ -84,45 +84,25 @@ paths:
         - write:topology
         - read:topology
       x-openapi-router-controller: swagger_server.controllers.topology_controller
-  /topology/{version}:
+  /topology/grenml:
     get:
       tags:
       - topology
-      summary: Find topology by version
-      description: Returns a single topology
-      operationId: get_topologyby_version
-      parameters:
-      - name: topologyId
-        in: query
-        description: ID of topology to return
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: integer
-          format: int64
-      - name: version
-        in: path
-        description: version of topology to return
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: integer
-          format: int64
+      summary: Get topology grenml
+      description: Returns a single topology by grenml
+      operationId: get_topologyby_grenml
       responses:
         "200":
-          description: successful operation
+          description: ok
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/topology'
+                type: string
+                x-content-type: text/plain
         "400":
-          description: Invalid version supplied
+          description: Invalid ID supplied
         "404":
           description: Topology not found
-      security:
-      - api_key: []
       x-openapi-router-controller: swagger_server.controllers.topology_controller
   /node:
     get:

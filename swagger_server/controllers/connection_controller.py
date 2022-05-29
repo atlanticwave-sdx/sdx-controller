@@ -19,12 +19,13 @@ MANIFEST = os.environ.get('MANIFEST')
 # Get DB connection and tables set up.
 db_tuples = [('config_table', "test-config")]
 # LC controller topic list
-lc_topics = ['lc1_q1', 'lc2_q1', 'lc3_q1']
+lc_topics = ['lc1_q1', 'lc2_q1']
 
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-producer = TopicQueueProducer(5, 'connection', 'lc1_q1')
+producer1 = TopicQueueProducer(5, 'connection', 'lc1_q1')
+producer2 = TopicQueueProducer(5, 'connection', 'lc2_q1')
 
 class Payload(object):
     def __init__(self, j):
@@ -80,11 +81,16 @@ def place_connection(body):  # noqa: E501
     db_instance.add_key_value_pair_to_db('test', json_body)
     logger.debug('Saving to database complete.')
 
-    # TODO: call PCE to calculate path for each LC
+    # TODO: call PCE to calculate path for each LC here.
 
 
     logger.debug("Publishing Message to MQ: {}".format(body))
-    response = producer.call(json_body)
-    logger.debug(" [.] Got response: " + str(response))
+    response1 = producer1.call('lc1: ' + str(json_body))
+    response2 = producer2.call('lc2: ' + str(json_body))
 
-    return str(response)
+    # print('response1: ')
+    # print(response1)
+    # print('response2: ')
+    # print(response2)
+
+    return str(response1)
