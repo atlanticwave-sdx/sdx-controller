@@ -1,0 +1,267 @@
+{
+  "id": "urn:ogf:network:sdx:topology:zaoxi.net",
+  "name": "ZAOXI-OXP",
+  "time_stamp": "2000-01-23T04:56:07+00:00",
+  "version": 1,
+  "model_version":"1.0.0",
+  "links": [
+    {
+      "availability": 56.37376656633328,
+      "residual_bandwidth": 100000,
+      "id": "urn:ogf:network:sdx:link:zaoxi:B1-B2",
+      "latency": 5,
+      "name": "zaoxi:B1-B2",
+      "packet_loss": 59.621339166831824,
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:2",
+          "name": "Novi01:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B2:2",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "name": "Novi02:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B2",
+          "short_name": "B2:2",
+          "status": "up"
+        }
+      ],
+      "short_name": "Sangano-Capetown",
+      "bandwidth": 100000
+    },
+    {
+      "availability": 56.37376656633328,
+      "residual_bandwidth": 100000,
+      "id": "urn:ogf:network:sdx:link:zaoxi:A1-B1",
+      "latency": 5,
+      "name": "zaoxi:A1-B1",
+      "packet_loss": 59.621339166831824,
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:A1:1",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi100:1",
+          "node": "urn:ogf:network:sdx:node:zaoxi:A1",
+          "short_name": "A1:1",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:3",
+          "name": "Novi01:3",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "short_name": "B1:3",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "status": "up"
+        }
+      ],
+      "short_name": "Karoo-Sangano",
+      "bandwidth": 100000
+    },
+    {
+      "availability": 56.37376656633328,
+      "residual_bandwidth": 100000,
+      "id": "urn:ogf:network:sdx:link:zaoxi:A1-B2",
+      "latency": 5,
+      "name": "zaoxi:A1-B2",
+      "packet_loss": 59.621339166831824,
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:A1:2",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi100:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:A1",
+          "short_name": "A1:2",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B2:3",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "name": "Novi02:3",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B2",
+          "short_name": "B2:3",
+          "status": "up"
+        }
+      ],
+      "short_name": "Karoo-Capetown",
+      "bandwidth": 100000
+    },
+    {
+      "availability": 56.37376656633328,
+      "residual_bandwidth": 100000,
+      "id": "urn:ogf:network:sdx:link:nni:Fortaleza-Sangano",
+      "latency": 10,
+      "name": "nni:Fortaleza-Sangano",
+      "packet_loss": 59.621339166831824,
+      "nni": "True",
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:sax:B3:1",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi02:3",
+          "node": "urn:ogf:network:sdx:node:sax:B3",
+          "short_name": "B3:1",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:1",
+          "name": "Novi01:1",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "short_name": "B1:1",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "status": "up"
+        }
+      ],
+      "short_name": "Fortaleza-Sangano",
+      "bandwidth": 100000
+    }
+  ],
+  "nodes": [
+    {
+      "id": "urn:ogf:network:sdx:node:zaoxi:B1",
+      "location": {
+        "address": "Sangano",
+        "latitude": -9.533459658700743,  
+        "longitude": 13.216709879405311 
+      },
+      "name": "zaoxi:Novi01",
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:1",
+          "name": "Novi01:1",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "short_name": "B1:1",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:2",
+          "name": "Novi01:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "short_name": "B1:2",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B1:3",
+          "name": "Novi01:3",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B1",
+          "short_name": "B1:3",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "status": "up"
+        }
+      ],
+      "short_name": "B1"
+    },
+    {
+      "id": "urn:ogf:network:sdx:node:zaoxi:B2",
+      "location": {
+        "address": "CapeTown",
+        "latitude": -3.73163824920348,  
+        "longitude": -38.52443289673026
+      },
+      "name": "zaoxi:Novi02",
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B2:1",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi02:1",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B2",
+          "short_name": "B2:1",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B2:2",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "name": "Novi02:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B2",
+          "short_name": "B2:2",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:B2:3",
+          "label_range": [
+            "100-200",
+            "10001"
+          ],
+          "name": "Novi02:3",
+          "node": "urn:ogf:network:sdx:node:zaoxi:B2",
+          "short_name": "B2:3",
+          "status": "up"
+        }
+      ],
+      "short_name": "B2"
+    },
+    {
+      "id": "urn:ogf:network:sdx:node:zaoxi:A1",
+      "location": {
+        "address": "Karoo",
+        "latitude": -32.3632301851245, 
+        "longitude": 22.541224555821298
+      },
+      "name": "zaoxi:Novi100",
+      "ports": [
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:A1:1",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi100:1",
+          "node": "urn:ogf:network:sdx:node:zaoxi:A1",
+          "short_name": "A1:1",
+          "status": "up"
+        },
+        {
+          "id": "urn:ogf:network:sdx:port:zaoxi:A1:2",
+          "label_range": [
+            "100-200",
+            "1000"
+          ],
+          "name": "Novi100:2",
+          "node": "urn:ogf:network:sdx:node:zaoxi:A1",
+          "short_name": "A1:2",
+          "status": "up"
+        }
+      ],
+      "short_name": "A1"
+    }
+  ]
+}

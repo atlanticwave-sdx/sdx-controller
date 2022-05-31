@@ -6,23 +6,30 @@ import json
 from swagger_server.models.connection import Connection  # noqa: E501
 from swagger_server import util
 from swagger_server.utils.db_utils import *
-# from swagger_server.messaging.message_queue_consumer import *
-from swagger_server.messaging.rpc_queue_producer import *
+from swagger_server.messaging.topic_queue_producer import *
 
-class Payload(object):
-    def __init__(self, j):
-        self.__dict__ = json.loads(j)
+LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
+              '-35s %(lineno) -5d: %(message)s')
+logger = logging.getLogger(__name__)
+logging.getLogger("pika").setLevel(logging.WARNING)
 
 DB_NAME = os.environ.get('DB_NAME')
 MANIFEST = os.environ.get('MANIFEST')
 
 # Get DB connection and tables set up.
 db_tuples = [('config_table', "test-config")]
+# LC controller topic list
+lc_topics = ['lc1_q1', 'lc2_q1']
 
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
-# rpc = RpcProducer(5)
+producer1 = TopicQueueProducer(5, 'connection', 'lc1_q1')
+producer2 = TopicQueueProducer(5, 'connection', 'lc2_q1')
+
+class Payload(object):
+    def __init__(self, j):
+        self.__dict__ = json.loads(j)
 
 def delete_connection(connection_id):  # noqa: E501
     """Delete connection order by ID
@@ -63,18 +70,27 @@ def place_connection(body):  # noqa: E501
 
     :rtype: Connection
     """
+    print(body)
     if connexion.request.is_json:
         body = connexion.request.get_json()
         # body = Connection.from_dict(connexion.request.get_json())  # noqa: E501
 
     json_body = json.dumps(body)
 
-    print('Placing connection. Saving to database.')
+    logger.debug('Placing connection. Saving to database.')
     db_instance.add_key_value_pair_to_db('test', json_body)
-    print('Saving to database complete.')
+    logger.debug('Saving to database complete.')
 
-    print("Published Message: {}".format(body))
-    # response = rpc.call(json_body)
-    print(" [.] Got response: " + str(response))
+    # TODO: call PCE to calculate path for each LC here.
 
-    return 'do some magic!'
+
+    logger.debug("Publishing Message to MQ: {}".format(body))
+    response1 = producer1.call('lc1: ' + str(json_body))
+    response2 = producer2.call('lc2: ' + str(json_body))
+
+    # print('response1: ')
+    # print(response1)
+    # print('response2: ')
+    # print(response2)
+
+    return str(response1)
