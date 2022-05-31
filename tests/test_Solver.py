@@ -67,8 +67,6 @@ class Test_Solver(unittest.TestCase):
         num_nodes = self.graph.number_of_nodes()
         lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
         result = runMC_Solver()
-
-        result = runMC_Solver()
         print(result)
         breakdown = self.temanager.generate_connection_breakdown(result)
         print(breakdown)
