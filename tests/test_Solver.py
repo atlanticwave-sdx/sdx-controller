@@ -30,16 +30,17 @@ class Test_Solver(unittest.TestCase):
         self.temanager = TEManager(topology_data, connection_data)
         self.graph =  self.temanager.generate_graph_te()
         self.connection=self.temanager.generate_connection_te()
-        print(self.connection[0])
-        #with open('./tests/data/connection.json', 'w') as json_file:
-        #    json.dump(self.temanager.connection.to_dict(), json_file, indent=4)
+        with open('./tests/data/connection.json', 'w') as json_file:
+            json.dump(self.connection, json_file, indent=4)
 
     def test_Computation(self):
         num_nodes = self.graph.number_of_nodes()
         print("num of nodes:"+str(num_nodes))
+        print(self.graph.edges)
+        print(self.connection[0])
         lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
         result = runMC_Solver()
-
+        print(result)
         #self.assertEqual(self.solution, result)
 
 
