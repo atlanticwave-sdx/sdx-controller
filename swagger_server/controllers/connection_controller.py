@@ -8,28 +8,45 @@ from swagger_server import util
 from swagger_server.utils.db_utils import *
 from swagger_server.messaging.topic_queue_producer import *
 
+from datamodel.sdxdatamodel.topologymanager.temanager import TEManager
+from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
+
+from pce.src.LoadBalancing.MC_Solver import runMC_Solver
+from pce.src.LoadBalancing.RandomTopologyGenerator import GetConnection
+from pce.src.LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
+from pce.src.LoadBalancing.RandomTopologyGenerator import lbnxgraphgenerator
+
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 
-DB_NAME = os.environ.get('DB_NAME')
-MANIFEST = os.environ.get('MANIFEST')
-
+DB_NAME = os.environ.get('DB_NAME') + '.sqlite3'
 # Get DB connection and tables set up.
 db_tuples = [('config_table', "test-config")]
-# LC controller topic list
-lc_topics = ['lc1_q1', 'lc2_q1']
 
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 
+MANIFEST = os.environ.get('MANIFEST')
+
+# LC controller topic list
+lc_topics = ['lc1_q1', 'lc2_q1']
+
 producer1 = TopicQueueProducer(5, 'connection', 'lc1_q1')
 producer2 = TopicQueueProducer(5, 'connection', 'lc2_q1')
 
-class Payload(object):
-    def __init__(self, j):
-        self.__dict__ = json.loads(j)
+def is_json(myjson):
+    try:
+        json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
+
+# class Payload(object):
+#     def __init__(self, j):
+#         self.__dict__ = json.loads(j)
 
 def delete_connection(connection_id):  # noqa: E501
     """Delete connection order by ID
@@ -75,18 +92,54 @@ def place_connection(body):  # noqa: E501
         body = connexion.request.get_json()
         # body = Connection.from_dict(connexion.request.get_json())  # noqa: E501
 
-    json_body = json.dumps(body)
+    # connection_data = json.dumps(body)
+    # connection_data = body
+    # print('connection_data = json.load(body)')
 
-    logger.debug('Placing connection. Saving to database.')
-    db_instance.add_key_value_pair_to_db('test', json_body)
-    logger.debug('Saving to database complete.')
+    logger.info('Placing connection. Saving to database.')
+    db_instance.add_key_value_pair_to_db('connection_data', json.dumps(body))
+    logger.info('Saving to database complete.')
+
+    topo_val = db_instance.read_from_db('latest_topo')
+    topo_json = json.loads(topo_val)
 
     # TODO: call PCE to calculate path for each LC here.
+    num_domain_topos = 0
 
+    if db_instance.read_from_db('num_domain_topos') is not None:
+        num_domain_topos = db_instance.read_from_db('num_domain_topos')
+
+    temanager = TEManager(topo_json, body)
+    
+    for i in range(1, int(num_domain_topos) + 1):
+        print(i)
+        curr_topo_str = db_instance.read_from_db('LC-' + str(i))
+        curr_topo_json = json.loads(curr_topo_str)
+        temanager.manager.add_topology(curr_topo_json) 
+        
+    graph =  temanager.generate_graph_te()
+    connection = temanager.generate_connection_te()
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    print(dir_path)
+
+    with open('./tests/data/connection.json', 'w') as json_file:
+        json.dump(connection, json_file, indent=4)
+
+
+    num_nodes = graph.number_of_nodes()
+    lbnxgraphgenerator(num_nodes, 0.4, connection, graph)
+    result = runMC_Solver()
+
+    print(result)
+
+    breakdown = temanager.generate_connection_breakdown(result)
+    print("-------BREAKDOWN:------")
+    print(breakdown)
 
     logger.debug("Publishing Message to MQ: {}".format(body))
-    response1 = producer1.call('lc1: ' + str(json_body))
-    response2 = producer2.call('lc2: ' + str(json_body))
+    response1 = producer1.call('lc1: ' + str(body))
+    # response2 = producer2.call('lc2: ' + str(connection_data))
 
     # print('response1: ')
     # print(response1)

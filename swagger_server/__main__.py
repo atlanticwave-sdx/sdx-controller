@@ -25,11 +25,11 @@ from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConvert
 from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
 
 def is_json(myjson):
-  try:
-    json.loads(myjson)
-  except ValueError as e:
-    return False
-  return True
+    try:
+        json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
 
 def start_consumer(thread_queue, db_instance):
     logger = logging.getLogger(__name__)
@@ -43,6 +43,10 @@ def start_consumer(thread_queue, db_instance):
     t1.start()
 
     manager = TopologyManager()
+    num_domain_topos = 0
+    if db_instance.read_from_db('num_domain_topos') is not None:
+        db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+    latest_topo = {}
 
     while True:
         if not thread_queue.empty():
@@ -64,13 +68,33 @@ def start_consumer(thread_queue, db_instance):
                         db_instance.add_key_value_pair_to_db(db_msg_id, msg)
                         logger.info('Save to database complete.')
                         logger.info('message ID:' + str(db_msg_id))
+
+                        
                         print("adding topo")
                         manager.add_topology(msg_json)
-                        latest_topo = manager.get_topology()
-                        print(latest_topo)
+
+                        if db_instance.read_from_db('num_domain_topos') is None:
+                            num_domain_topos = 1
+                            db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                        else:
+                            num_domain_topos = db_instance.read_from_db('num_domain_topos')
+                            num_domain_topos = int(num_domain_topos) + 1
+                            print(type(num_domain_topos))
+                            db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+
+                        print("adding topo to db:")
+                        db_key = 'LC-' + str(num_domain_topos)
+                        db_instance.add_key_value_pair_to_db(db_key, msg)
+
+                        latest_topo = json.dumps(manager.get_topology().to_dict())
+                        # print(latest_topo)
+                        print('num_domain_topos: ' + str(num_domain_topos))
                         # use 'latest_topo' as PK to save latest topo to db
-                        db_instance.add_key_value_pair_to_db('latest_topo', str(latest_topo))
-                        topo_val = db_instance.read_from_db('latest_topo')
+                        print("is latest_topo json?")
+                        # print(type(latest_topo))
+                        print(is_json(latest_topo))
+                        db_instance.add_key_value_pair_to_db('latest_topo', latest_topo)
+                        # logger.info('Save to database complete.')
                     else:
                         logger.info('got message from MQ: ' + str(msg))
                 else:

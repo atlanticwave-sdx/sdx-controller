@@ -776,6 +776,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/node'
+      required: true
     link:
       description: link object in the Inter-domain topology
       content:
