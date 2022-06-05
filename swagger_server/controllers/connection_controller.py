@@ -32,10 +32,15 @@ db_instance._initialize_db(DB_NAME, db_tuples)
 MANIFEST = os.environ.get('MANIFEST')
 
 # LC controller topic list
-lc_topics = ['lc1_q1', 'lc2_q1']
+# lc_topics = ['lc1_q1', 'lc2_q1', 'lc3_q1']
 
 producer1 = TopicQueueProducer(5, 'connection', 'lc1_q1')
 producer2 = TopicQueueProducer(5, 'connection', 'lc2_q1')
+producer3 = TopicQueueProducer(5, 'connection', 'lc3_q1')
+producers = {}
+producers['lc1_q1'] = producer1
+producers['lc2_q1'] = producer2
+producers['lc3_q1'] = producer3
 
 def is_json(myjson):
     try:
@@ -43,6 +48,14 @@ def is_json(myjson):
     except ValueError as e:
         return False
     return True
+
+def find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
 
 # class Payload(object):
 #     def __init__(self, j):
@@ -110,12 +123,16 @@ def place_connection(body):  # noqa: E501
         num_domain_topos = db_instance.read_from_db('num_domain_topos')
 
     temanager = TEManager(topo_json, body)
-    
+    lc_domain_topo_dict = {}
+
     for i in range(1, int(num_domain_topos) + 1):
         print(i)
         curr_topo_str = db_instance.read_from_db('LC-' + str(i))
         curr_topo_json = json.loads(curr_topo_str)
+        lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json["lc_queue_name"]
         temanager.manager.add_topology(curr_topo_json) 
+
+    print(lc_domain_topo_dict)
         
     graph =  temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
@@ -126,19 +143,23 @@ def place_connection(body):  # noqa: E501
     with open('./tests/data/connection.json', 'w') as json_file:
         json.dump(connection, json_file, indent=4)
 
-
     num_nodes = graph.number_of_nodes()
     lbnxgraphgenerator(num_nodes, 0.4, connection, graph)
     result = runMC_Solver()
 
-    print(result)
+    # print(result)
 
     breakdown = temanager.generate_connection_breakdown(result)
     print("-------BREAKDOWN:------")
-    print(breakdown)
+    print(json.dumps(breakdown))
 
-    logger.debug("Publishing Message to MQ: {}".format(body))
-    response1 = producer1.call('lc1: ' + str(body))
+    for entry in breakdown:
+        domain_name = find_between(entry, "topology:", ".net")
+        producer = producers[lc_domain_topo_dict[domain_name]]
+        producer.call(breakdown[entry])
+
+    # logger.debug("Publishing Message to MQ: {}".format(body))
+    # response1 = producer1.call('lc1: ' + str(body))
     # response2 = producer2.call('lc2: ' + str(connection_data))
 
     # print('response1: ')
@@ -146,4 +167,4 @@ def place_connection(body):  # noqa: E501
     # print('response2: ')
     # print(response2)
 
-    return str(response1)
+    return "Connection published"

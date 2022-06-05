@@ -31,6 +31,14 @@ def is_json(myjson):
         return False
     return True
 
+def find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
 def start_consumer(thread_queue, db_instance):
     logger = logging.getLogger(__name__)
     logging.getLogger("pika").setLevel(logging.WARNING)
@@ -51,25 +59,33 @@ def start_consumer(thread_queue, db_instance):
     while True:
         if not thread_queue.empty():
             msg = thread_queue.get()
-            logger.info("MQ received message:" + str(msg))
+            logger.debug("MQ received message:" + str(msg))
             
             if 'Heart Beat' in str(msg):
                 HEARTBEAT_ID += 1
-                logger.info('Heart beat received. ID: ' + str(HEARTBEAT_ID))
+                logger.debug('Heart beat received. ID: ' + str(HEARTBEAT_ID))
             else:
                 logger.info('Saving to database.')
                 if is_json(msg):
                     if 'version' in str(msg):
+                        logger.info("MQ received message:" + str(msg))
                         msg_json = json.loads(msg)
                         msg_id = msg_json["id"]
                         msg_version = msg_json["version"]
+
+                        lc_queue_name = msg_json["lc_queue_name"]
+                        print("---lc_queue_name:---")
+                        print(lc_queue_name)
+
+                        domain_name = find_between(msg_id, "topology:", ".net")
+                        msg_json["domain_name"] = domain_name
+
                         db_msg_id = str(msg_id) + "-" + str(msg_version)
                         # add message to db
                         db_instance.add_key_value_pair_to_db(db_msg_id, msg)
                         logger.info('Save to database complete.')
                         logger.info('message ID:' + str(db_msg_id))
 
-                        
                         print("adding topo")
                         manager.add_topology(msg_json)
 
@@ -84,27 +100,23 @@ def start_consumer(thread_queue, db_instance):
 
                         print("adding topo to db:")
                         db_key = 'LC-' + str(num_domain_topos)
-                        db_instance.add_key_value_pair_to_db(db_key, msg)
+                        db_instance.add_key_value_pair_to_db(db_key, json.dumps(msg_json))
 
                         latest_topo = json.dumps(manager.get_topology().to_dict())
-                        # print(latest_topo)
                         print('num_domain_topos: ' + str(num_domain_topos))
                         # use 'latest_topo' as PK to save latest topo to db
-                        print("is latest_topo json?")
-                        # print(type(latest_topo))
-                        print(is_json(latest_topo))
                         db_instance.add_key_value_pair_to_db('latest_topo', latest_topo)
-                        # logger.info('Save to database complete.')
+                        logger.info('Save to database complete.')
                     else:
                         logger.info('got message from MQ: ' + str(msg))
                 else:
                     db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg) 
 
-                    logger.info('Save to database complete.')
-                    logger.info('message ID:' + str(MESSAGE_ID))
+                    logger.debug('Save to database complete.')
+                    logger.debug('message ID:' + str(MESSAGE_ID))
                     value = db_instance.read_from_db(MESSAGE_ID)
-                    logger.info('got value from DB:')
-                    logger.info(value)
+                    logger.debug('got value from DB:')
+                    logger.debug(value)
                     MESSAGE_ID += 1
                 
 
