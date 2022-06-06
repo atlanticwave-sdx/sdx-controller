@@ -32,8 +32,6 @@ db_instance._initialize_db(DB_NAME, db_tuples)
 MANIFEST = os.environ.get('MANIFEST')
 
 # LC controller topic list
-# lc_topics = ['lc1_q1', 'lc2_q1', 'lc3_q1']
-
 producer1 = TopicQueueProducer(5, 'connection', 'lc1_q1')
 producer2 = TopicQueueProducer(5, 'connection', 'lc2_q1')
 producer3 = TopicQueueProducer(5, 'connection', 'lc3_q1')
@@ -157,14 +155,5 @@ def place_connection(body):  # noqa: E501
         domain_name = find_between(entry, "topology:", ".net")
         producer = producers[lc_domain_topo_dict[domain_name]]
         producer.call(breakdown[entry])
-
-    # logger.debug("Publishing Message to MQ: {}".format(body))
-    # response1 = producer1.call('lc1: ' + str(body))
-    # response2 = producer2.call('lc2: ' + str(connection_data))
-
-    # print('response1: ')
-    # print(response1)
-    # print('response2: ')
-    # print(response2)
 
     return "Connection published"
