@@ -24,7 +24,8 @@ TOPOLOGY_AMLIGHT = './tests/data/amlight.json'
 TOPOLOGY_SAX = './tests/data/sax.json'
 TOPOLOGY_ZAOXI = './tests/data/zaoxi.json'
 
-topology_file_list_3 = [TOPOLOGY_AMLIGHT,TOPOLOGY_SAX, TOPOLOGY_ZAOXI]
+topology_file_list_3 = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI,TOPOLOGY_SAX]
+topology_file_list_update = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI,TOPOLOGY_SAX]
 
 class Test_Solver(unittest.TestCase):
 
@@ -60,8 +61,47 @@ class Test_Solver(unittest.TestCase):
         except DataModelException as e:
             print(e)
             return False 
+
         self.graph =  self.temanager.generate_graph_te()
         self.connection=self.temanager.generate_connection_te()
+
+        conn = self.temanager.requests_connectivity(self.connection)
+        print("Graph connectivity:" + str(conn))
+        with open('./tests/data/connection.json', 'w') as json_file:
+            json.dump(self.connection, json_file, indent=4)
+        num_nodes = self.graph.number_of_nodes()
+        lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
+        result = runMC_Solver()
+        print(result)
+        breakdown = self.temanager.generate_connection_breakdown(result)
+        print(breakdown)
+
+    def test_computation_update(self):
+        try:
+            for topology_file in topology_file_list_3:
+                with open(topology_file, 'r', encoding='utf-8') as data_file:
+                    data = json.load(data_file)
+                print("Adding Topology:" + topology_file)
+                self.temanager.manager.add_topology(data) 
+        except DataModelException as e:
+            print(e)
+            return False 
+
+        try:
+            for topology_file in topology_file_list_update:
+                with open(topology_file, 'r', encoding='utf-8') as data_file:
+                    data = json.load(data_file)
+                print("Updating Topology:" + topology_file)
+                self.temanager.manager.update_topology(data) 
+        except DataModelException as e:
+            print(e)
+            return False
+
+        self.graph =  self.temanager.generate_graph_te()
+        self.connection=self.temanager.generate_connection_te()
+
+        conn = self.temanager.requests_connectivity(self.connection)
+        print("Graph connectivity:" + str(conn))
         with open('./tests/data/connection.json', 'w') as json_file:
             json.dump(self.connection, json_file, indent=4)
         num_nodes = self.graph.number_of_nodes()
