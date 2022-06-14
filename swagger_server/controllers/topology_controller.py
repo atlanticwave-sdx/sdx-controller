@@ -55,8 +55,6 @@ def get_topologyby_grenml():  # noqa: E501
 
     converter = GrenmlConverter(manager.get_topology())
     converter.read_topology()
-    # print('grenml: ')
-    # print(converter.get_xml_str)
     return converter.get_xml_str()
 
 

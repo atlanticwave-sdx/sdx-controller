@@ -55,6 +55,7 @@ def start_consumer(thread_queue, db_instance):
     if db_instance.read_from_db('num_domain_topos') is not None:
         db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
     latest_topo = {}
+    domain_list = set()
 
     while True:
         if not thread_queue.empty():
@@ -74,8 +75,8 @@ def start_consumer(thread_queue, db_instance):
                         msg_version = msg_json["version"]
 
                         lc_queue_name = msg_json["lc_queue_name"]
-                        print("---lc_queue_name:---")
-                        print(lc_queue_name)
+                        logger.debug("---lc_queue_name:---")
+                        logger.debug(lc_queue_name)
 
                         domain_name = find_between(msg_id, "topology:", ".net")
                         msg_json["domain_name"] = domain_name
@@ -86,24 +87,29 @@ def start_consumer(thread_queue, db_instance):
                         logger.info('Save to database complete.')
                         logger.info('message ID:' + str(db_msg_id))
 
-                        print("adding topo")
-                        manager.add_topology(msg_json)
-
-                        if db_instance.read_from_db('num_domain_topos') is None:
-                            num_domain_topos = 1
-                            db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                        # Update existing topology
+                        if domain_name in domain_list:
+                            logger.info("updating topo")
+                            manager.update_topology(msg_json)
+                        # Add new topology
                         else:
-                            num_domain_topos = db_instance.read_from_db('num_domain_topos')
-                            num_domain_topos = int(num_domain_topos) + 1
-                            print(type(num_domain_topos))
-                            db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                            domain_list.add(domain_name)
+                            logger.info("adding topo")
+                            manager.add_topology(msg_json)
 
-                        print("adding topo to db:")
+                            if db_instance.read_from_db('num_domain_topos') is None:
+                                num_domain_topos = 1
+                                db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                            else:
+                                num_domain_topos = db_instance.read_from_db('num_domain_topos')
+                                num_domain_topos = int(num_domain_topos) + 1
+                                db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+
+                        logger.info("adding topo to db:")
                         db_key = 'LC-' + str(num_domain_topos)
                         db_instance.add_key_value_pair_to_db(db_key, json.dumps(msg_json))
 
                         latest_topo = json.dumps(manager.get_topology().to_dict())
-                        print('num_domain_topos: ' + str(num_domain_topos))
                         # use 'latest_topo' as PK to save latest topo to db
                         db_instance.add_key_value_pair_to_db('latest_topo', latest_topo)
                         logger.info('Save to database complete.')
