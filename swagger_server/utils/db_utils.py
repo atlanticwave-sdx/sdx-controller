@@ -11,6 +11,7 @@ class DbUtils(object):
         # self.table_name
         self.config_table = DB_CONFIG_TABLE_NAME
         self.logger = logging.getLogger(__name__)
+        # self.logger.setLevel(logging.DEBUG)
     
     def _initialize_db(self, db_filename, db_tables_tuples,
                        print_table_on_load=False):
@@ -25,6 +26,7 @@ class DbUtils(object):
 
         # Load the tables, create table if table does not.
         for (name, table) in db_tables_tuples:
+            self.logger.debug("DB name: {}, table name: {}".format(name, table))
             if table in self.db: #https://github.com/pudo/dataset/issues/281
                 self.logger.debug("Trying to load {} from DB".format(name))
                 t = self.db.load_table(table)
@@ -47,6 +49,7 @@ class DbUtils(object):
         # Returns the manifest filename if it exists or None if it does not.
         d = self.config_table.find_one(key=key)
         if d == None:
+            self.logger.debug("Did not find entry.")
             return None
         value = d['value']
         self.logger.debug("DB return value: " + str(value))

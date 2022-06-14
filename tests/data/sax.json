@@ -2,7 +2,7 @@
   "id": "urn:ogf:network:sdx:topology:sax.net",
   "name": "SAX-OXP",
   "time_stamp": "2000-01-23T04:56:07+00:00",
-  "version": 1,
+  "version": 1.0,
   "model_version":"1.0.0",
   "links": [
     {
@@ -179,6 +179,7 @@
       "availability": 56.37376656633328,
       "residual_bandwidth": 100000,
       "id": "urn:ogf:network:sdx:link:nni:Miami-Sanpaolo",
+      "nni": "True",
       "latency": 10,
       "name": "nni:Miami-Sanpaolo",
       "packet_loss": 59.621339166831824,
