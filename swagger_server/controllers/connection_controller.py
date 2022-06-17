@@ -140,6 +140,6 @@ def place_connection(body):  # noqa: E501
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
         producer = producers[lc_domain_topo_dict[domain_name]]
-        producer.call(breakdown[entry])
+        producer.call(json.dumps(breakdown[entry]))
 
     return "Connection published"
