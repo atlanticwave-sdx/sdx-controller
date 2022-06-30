@@ -17,7 +17,7 @@ def create_user(body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = User.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def create_users_with_array_input(body):  # noqa: E501
@@ -32,7 +32,7 @@ def create_users_with_array_input(body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = [User.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def create_users_with_list_input(body):  # noqa: E501
@@ -47,7 +47,7 @@ def create_users_with_list_input(body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = [User.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def delete_user(username):  # noqa: E501
@@ -60,7 +60,7 @@ def delete_user(username):  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_user_by_name(username):  # noqa: E501
@@ -73,7 +73,7 @@ def get_user_by_name(username):  # noqa: E501
 
     :rtype: User
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def login_user(username, password):  # noqa: E501
@@ -88,7 +88,7 @@ def login_user(username, password):  # noqa: E501
 
     :rtype: str
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def logout_user():  # noqa: E501
@@ -99,7 +99,7 @@ def logout_user():  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def update_user(body, username):  # noqa: E501
@@ -116,4 +116,4 @@ def update_user(body, username):  # noqa: E501
     """
     if connexion.request.is_json:
         body = User.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"

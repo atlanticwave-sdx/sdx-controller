@@ -23,11 +23,10 @@ setup(
     keywords=["Swagger", "SDX-Controller"],
     install_requires=REQUIRES,
     packages=find_packages(),
-    package_data={'': ['swagger/swagger.yaml']},
+    package_data={"": ["swagger/swagger.yaml"]},
     include_package_data=True,
-    entry_points={
-        'console_scripts': ['swagger_server=swagger_server.__main__:main']},
+    entry_points={"console_scripts": ["swagger_server=swagger_server.__main__:main"]},
     long_description="""\
     You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). 
-    """
+    """,
 )

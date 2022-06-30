@@ -18,10 +18,10 @@ class TestConnectionController(BaseTestCase):
         Delete connection order by ID
         """
         response = self.client.open(
-            '/SDX-Controller/1.0.0/connection/{connectionId}'.format(connection_id=2),
-            method='DELETE')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/SDX-Controller/1.0.0/connection/{connectionId}".format(connection_id=2),
+            method="DELETE",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_getconnection_by_id(self):
         """Test case for getconnection_by_id
@@ -29,10 +29,10 @@ class TestConnectionController(BaseTestCase):
         Find connection by ID
         """
         response = self.client.open(
-            '/SDX-Controller/1.0.0/connection/{connectionId}'.format(connection_id=10),
-            method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/SDX-Controller/1.0.0/connection/{connectionId}".format(connection_id=10),
+            method="GET",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_place_connection(self):
         """Test case for place_connection
@@ -41,14 +41,15 @@ class TestConnectionController(BaseTestCase):
         """
         body = Connection()
         response = self.client.open(
-            '/SDX-Controller/1.0.0/conection',
-            method='POST',
+            "/SDX-Controller/1.0.0/conection",
+            method="POST",
             data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            content_type="application/json",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import unittest
+
     unittest.main()

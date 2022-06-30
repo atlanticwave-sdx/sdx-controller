@@ -14,7 +14,18 @@ class User(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, username: str=None, first_name: str=None, last_name: str=None, email: str=None, password: str=None, phone: str=None, user_status: int=None):  # noqa: E501
+
+    def __init__(
+        self,
+        id: int = None,
+        username: str = None,
+        first_name: str = None,
+        last_name: str = None,
+        email: str = None,
+        password: str = None,
+        phone: str = None,
+        user_status: int = None,
+    ):  # noqa: E501
         """User - a model defined in Swagger
 
         :param id: The id of this User.  # noqa: E501
@@ -35,25 +46,25 @@ class User(Model):
         :type user_status: int
         """
         self.swagger_types = {
-            'id': int,
-            'username': str,
-            'first_name': str,
-            'last_name': str,
-            'email': str,
-            'password': str,
-            'phone': str,
-            'user_status': int
+            "id": int,
+            "username": str,
+            "first_name": str,
+            "last_name": str,
+            "email": str,
+            "password": str,
+            "phone": str,
+            "user_status": int,
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'username': 'username',
-            'first_name': 'firstName',
-            'last_name': 'lastName',
-            'email': 'email',
-            'password': 'password',
-            'phone': 'phone',
-            'user_status': 'userStatus'
+            "id": "id",
+            "username": "username",
+            "first_name": "firstName",
+            "last_name": "lastName",
+            "email": "email",
+            "password": "password",
+            "phone": "phone",
+            "user_status": "userStatus",
         }
         self._id = id
         self._username = username
@@ -65,7 +76,7 @@ class User(Model):
         self._user_status = user_status
 
     @classmethod
-    def from_dict(cls, dikt) -> 'User':
+    def from_dict(cls, dikt) -> "User":
         """Returns the dict as a model
 
         :param dikt: A dict.

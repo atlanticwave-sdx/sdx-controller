@@ -14,7 +14,16 @@ class Port(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, short_name: str=None, node: str=None, state: str=None, status: str=None):  # noqa: E501
+
+    def __init__(
+        self,
+        id: str = None,
+        name: str = None,
+        short_name: str = None,
+        node: str = None,
+        state: str = None,
+        status: str = None,
+    ):  # noqa: E501
         """Port - a model defined in Swagger
 
         :param id: The id of this Port.  # noqa: E501
@@ -31,21 +40,21 @@ class Port(Model):
         :type status: str
         """
         self.swagger_types = {
-            'id': str,
-            'name': str,
-            'short_name': str,
-            'node': str,
-            'state': str,
-            'status': str
+            "id": str,
+            "name": str,
+            "short_name": str,
+            "node": str,
+            "state": str,
+            "status": str,
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'name': 'name',
-            'short_name': 'short_name',
-            'node': 'node',
-            'state': 'state',
-            'status': 'status'
+            "id": "id",
+            "name": "name",
+            "short_name": "short_name",
+            "node": "node",
+            "state": "state",
+            "status": "status",
         }
         self._id = id
         self._name = name
@@ -55,7 +64,7 @@ class Port(Model):
         self._status = status
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Port':
+    def from_dict(cls, dikt) -> "Port":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -107,7 +116,9 @@ class Port(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `name`, must not be `None`"
+            )  # noqa: E501
 
         self._name = name
 
@@ -151,7 +162,9 @@ class Port(Model):
         :type node: str
         """
         if node is None:
-            raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `node`, must not be `None`"
+            )  # noqa: E501
 
         self._node = node
 
@@ -195,6 +208,8 @@ class Port(Model):
         :type status: str
         """
         if status is None:
-            raise ValueError("Invalid value for `status`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `status`, must not be `None`"
+            )  # noqa: E501
 
         self._status = status

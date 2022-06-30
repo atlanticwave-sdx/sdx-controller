@@ -16,7 +16,15 @@ class Node(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, short_name: str=None, ports: List[Port]=None, location: Location=None):  # noqa: E501
+
+    def __init__(
+        self,
+        id: str = None,
+        name: str = None,
+        short_name: str = None,
+        ports: List[Port] = None,
+        location: Location = None,
+    ):  # noqa: E501
         """Node - a model defined in Swagger
 
         :param id: The id of this Node.  # noqa: E501
@@ -31,19 +39,19 @@ class Node(Model):
         :type location: Location
         """
         self.swagger_types = {
-            'id': str,
-            'name': str,
-            'short_name': str,
-            'ports': List[Port],
-            'location': Location
+            "id": str,
+            "name": str,
+            "short_name": str,
+            "ports": List[Port],
+            "location": Location,
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'name': 'name',
-            'short_name': 'short_name',
-            'ports': 'ports',
-            'location': 'location'
+            "id": "id",
+            "name": "name",
+            "short_name": "short_name",
+            "ports": "ports",
+            "location": "location",
         }
         self._id = id
         self._name = name
@@ -52,7 +60,7 @@ class Node(Model):
         self._location = location
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Node':
+    def from_dict(cls, dikt) -> "Node":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -104,7 +112,9 @@ class Node(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `name`, must not be `None`"
+            )  # noqa: E501
 
         self._name = name
 
@@ -148,7 +158,9 @@ class Node(Model):
         :type ports: List[Port]
         """
         if ports is None:
-            raise ValueError("Invalid value for `ports`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `ports`, must not be `None`"
+            )  # noqa: E501
 
         self._ports = ports
 
@@ -171,6 +183,8 @@ class Node(Model):
         :type location: Location
         """
         if location is None:
-            raise ValueError("Invalid value for `location`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `location`, must not be `None`"
+            )  # noqa: E501
 
         self._location = location

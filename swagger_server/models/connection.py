@@ -15,7 +15,19 @@ class Connection(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, ingress_port: Port=None, egress_port: Port=None, quantity: int=None, start_time: datetime=None, end_time: datetime=None, status: str=None, complete: bool=False):  # noqa: E501
+
+    def __init__(
+        self,
+        id: str = None,
+        name: str = None,
+        ingress_port: Port = None,
+        egress_port: Port = None,
+        quantity: int = None,
+        start_time: datetime = None,
+        end_time: datetime = None,
+        status: str = None,
+        complete: bool = False,
+    ):  # noqa: E501
         """Connection - a model defined in Swagger
 
         :param id: The id of this Connection.  # noqa: E501
@@ -38,27 +50,27 @@ class Connection(Model):
         :type complete: bool
         """
         self.swagger_types = {
-            'id': str,
-            'name': str,
-            'ingress_port': Port,
-            'egress_port': Port,
-            'quantity': int,
-            'start_time': datetime,
-            'end_time': datetime,
-            'status': str,
-            'complete': bool
+            "id": str,
+            "name": str,
+            "ingress_port": Port,
+            "egress_port": Port,
+            "quantity": int,
+            "start_time": datetime,
+            "end_time": datetime,
+            "status": str,
+            "complete": bool,
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'name': 'name',
-            'ingress_port': 'ingress_port',
-            'egress_port': 'egress_port',
-            'quantity': 'quantity',
-            'start_time': 'start_time',
-            'end_time': 'end_time',
-            'status': 'status',
-            'complete': 'complete'
+            "id": "id",
+            "name": "name",
+            "ingress_port": "ingress_port",
+            "egress_port": "egress_port",
+            "quantity": "quantity",
+            "start_time": "start_time",
+            "end_time": "end_time",
+            "status": "status",
+            "complete": "complete",
         }
         self._id = id
         self._name = name
@@ -71,7 +83,7 @@ class Connection(Model):
         self._complete = complete
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Connection':
+    def from_dict(cls, dikt) -> "Connection":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -123,7 +135,9 @@ class Connection(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `name`, must not be `None`"
+            )  # noqa: E501
 
         self._name = name
 
@@ -146,7 +160,9 @@ class Connection(Model):
         :type ingress_port: Port
         """
         if ingress_port is None:
-            raise ValueError("Invalid value for `ingress_port`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `ingress_port`, must not be `None`"
+            )  # noqa: E501
 
         self._ingress_port = ingress_port
 
@@ -169,7 +185,9 @@ class Connection(Model):
         :type egress_port: Port
         """
         if egress_port is None:
-            raise ValueError("Invalid value for `egress_port`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `egress_port`, must not be `None`"
+            )  # noqa: E501
 
         self._egress_port = egress_port
 
@@ -259,8 +277,9 @@ class Connection(Model):
         allowed_values = ["success", "fail", "scheduled", "provisioining"]  # noqa: E501
         if status not in allowed_values:
             raise ValueError(
-                "Invalid value for `status` ({0}), must be one of {1}"
-                .format(status, allowed_values)
+                "Invalid value for `status` ({0}), must be one of {1}".format(
+                    status, allowed_values
+                )
             )
 
         self._status = status

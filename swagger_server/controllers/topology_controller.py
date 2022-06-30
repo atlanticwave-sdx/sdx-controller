@@ -10,12 +10,13 @@ from swagger_server import util
 from sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
 from sdxdatamodel.topologymanager.manager import TopologyManager
 
-DB_NAME = os.environ.get('DB_NAME') + '.sqlite3'
+DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
 # Get DB connection and tables set up.
-db_tuples = [('config_table', "test-config")]
+db_tuples = [("config_table", "test-config")]
 db_instance = DbUtils()
 db_instance._initialize_db(DB_NAME, db_tuples)
 manager = TopologyManager()
+
 
 def get_topology():  # noqa: E501
     """get an existing topology
@@ -25,7 +26,7 @@ def get_topology():  # noqa: E501
 
     :rtype: str
     """
-    topo_val = db_instance.read_from_db('latest_topo')
+    topo_val = db_instance.read_from_db("latest_topo")
     return topo_val
 
 
@@ -44,14 +45,13 @@ def get_topologyby_grenml():  # noqa: E501
 
     num_domain_topos = 0
 
-    if db_instance.read_from_db('num_domain_topos') is not None:
-        num_domain_topos = db_instance.read_from_db('num_domain_topos')
+    if db_instance.read_from_db("num_domain_topos") is not None:
+        num_domain_topos = db_instance.read_from_db("num_domain_topos")
 
     for i in range(1, int(num_domain_topos) + 1):
-        print(i)
-        curr_topo_str = db_instance.read_from_db('LC-' + str(i))
+        curr_topo_str = db_instance.read_from_db("LC-" + str(i))
         curr_topo_json = json.loads(curr_topo_str)
-        manager.add_topology(curr_topo_json) 
+        manager.add_topology(curr_topo_json)
 
     converter = GrenmlConverter(manager.get_topology())
     converter.read_topology()
@@ -68,5 +68,4 @@ def topology_version(topology_id):  # noqa: E501
 
     :rtype: Topology
     """
-    return 'do some magic!'
-
+    return "do some magic!"

@@ -12,4 +12,4 @@ def get_node():  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+    return "do some magic!"

@@ -15,7 +15,21 @@ class Link(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, short_name: str=None, ports: List[Port]=None, bandwidth: float=None, residual_bandwidth: float=None, latency: float=None, packet_loss: float=None, availability: float=None, state: str=None, status: str=None):  # noqa: E501
+
+    def __init__(
+        self,
+        id: str = None,
+        name: str = None,
+        short_name: str = None,
+        ports: List[Port] = None,
+        bandwidth: float = None,
+        residual_bandwidth: float = None,
+        latency: float = None,
+        packet_loss: float = None,
+        availability: float = None,
+        state: str = None,
+        status: str = None,
+    ):  # noqa: E501
         """Link - a model defined in Swagger
 
         :param id: The id of this Link.  # noqa: E501
@@ -42,31 +56,31 @@ class Link(Model):
         :type status: str
         """
         self.swagger_types = {
-            'id': str,
-            'name': str,
-            'short_name': str,
-            'ports': List[Port],
-            'bandwidth': float,
-            'residual_bandwidth': float,
-            'latency': float,
-            'packet_loss': float,
-            'availability': float,
-            'state': str,
-            'status': str
+            "id": str,
+            "name": str,
+            "short_name": str,
+            "ports": List[Port],
+            "bandwidth": float,
+            "residual_bandwidth": float,
+            "latency": float,
+            "packet_loss": float,
+            "availability": float,
+            "state": str,
+            "status": str,
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'name': 'name',
-            'short_name': 'short_name',
-            'ports': 'ports',
-            'bandwidth': 'bandwidth',
-            'residual_bandwidth': 'residual_bandwidth',
-            'latency': 'latency',
-            'packet_loss': 'packet_loss',
-            'availability': 'availability',
-            'state': 'state',
-            'status': 'status'
+            "id": "id",
+            "name": "name",
+            "short_name": "short_name",
+            "ports": "ports",
+            "bandwidth": "bandwidth",
+            "residual_bandwidth": "residual_bandwidth",
+            "latency": "latency",
+            "packet_loss": "packet_loss",
+            "availability": "availability",
+            "state": "state",
+            "status": "status",
         }
         self._id = id
         self._name = name
@@ -81,7 +95,7 @@ class Link(Model):
         self._status = status
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Link':
+    def from_dict(cls, dikt) -> "Link":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -133,7 +147,9 @@ class Link(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `name`, must not be `None`"
+            )  # noqa: E501
 
         self._name = name
 
@@ -177,7 +193,9 @@ class Link(Model):
         :type ports: List[Port]
         """
         if ports is None:
-            raise ValueError("Invalid value for `ports`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `ports`, must not be `None`"
+            )  # noqa: E501
 
         self._ports = ports
 

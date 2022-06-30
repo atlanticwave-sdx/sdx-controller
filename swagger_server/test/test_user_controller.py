@@ -19,12 +19,12 @@ class TestUserController(BaseTestCase):
         """
         body = User()
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user',
-            method='POST',
+            "/SDX-Controller/1.0.0/user",
+            method="POST",
             data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            content_type="application/json",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_create_users_with_array_input(self):
         """Test case for create_users_with_array_input
@@ -33,12 +33,12 @@ class TestUserController(BaseTestCase):
         """
         body = [User()]
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/createWithArray',
-            method='POST',
+            "/SDX-Controller/1.0.0/user/createWithArray",
+            method="POST",
             data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            content_type="application/json",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_create_users_with_list_input(self):
         """Test case for create_users_with_list_input
@@ -47,12 +47,12 @@ class TestUserController(BaseTestCase):
         """
         body = [User()]
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/createWithList',
-            method='POST',
+            "/SDX-Controller/1.0.0/user/createWithList",
+            method="POST",
             data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            content_type="application/json",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_delete_user(self):
         """Test case for delete_user
@@ -60,10 +60,10 @@ class TestUserController(BaseTestCase):
         Delete user
         """
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/{username}'.format(username='username_example'),
-            method='DELETE')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/SDX-Controller/1.0.0/user/{username}".format(username="username_example"),
+            method="DELETE",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_get_user_by_name(self):
         """Test case for get_user_by_name
@@ -71,35 +71,32 @@ class TestUserController(BaseTestCase):
         Get user by user name
         """
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/{username}'.format(username='username_example'),
-            method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/SDX-Controller/1.0.0/user/{username}".format(username="username_example"),
+            method="GET",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_login_user(self):
         """Test case for login_user
 
         Logs user into the system
         """
-        query_string = [('username', 'username_example'),
-                        ('password', 'password_example')]
+        query_string = [
+            ("username", "username_example"),
+            ("password", "password_example"),
+        ]
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/login',
-            method='GET',
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/SDX-Controller/1.0.0/user/login", method="GET", query_string=query_string
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_logout_user(self):
         """Test case for logout_user
 
         Logs out current logged in user session
         """
-        response = self.client.open(
-            '/SDX-Controller/1.0.0/user/logout',
-            method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open("/SDX-Controller/1.0.0/user/logout", method="GET")
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
     def test_update_user(self):
         """Test case for update_user
@@ -108,14 +105,15 @@ class TestUserController(BaseTestCase):
         """
         body = User()
         response = self.client.open(
-            '/SDX-Controller/1.0.0/user/{username}'.format(username='username_example'),
-            method='PUT',
+            "/SDX-Controller/1.0.0/user/{username}".format(username="username_example"),
+            method="PUT",
             data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            content_type="application/json",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import unittest
+
     unittest.main()

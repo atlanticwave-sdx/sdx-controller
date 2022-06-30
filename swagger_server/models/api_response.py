@@ -14,7 +14,10 @@ class ApiResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, code: int=None, type: str=None, message: str=None):  # noqa: E501
+
+    def __init__(
+        self, code: int = None, type: str = None, message: str = None
+    ):  # noqa: E501
         """ApiResponse - a model defined in Swagger
 
         :param code: The code of this ApiResponse.  # noqa: E501
@@ -24,23 +27,15 @@ class ApiResponse(Model):
         :param message: The message of this ApiResponse.  # noqa: E501
         :type message: str
         """
-        self.swagger_types = {
-            'code': int,
-            'type': str,
-            'message': str
-        }
+        self.swagger_types = {"code": int, "type": str, "message": str}
 
-        self.attribute_map = {
-            'code': 'code',
-            'type': 'type',
-            'message': 'message'
-        }
+        self.attribute_map = {"code": "code", "type": "type", "message": "message"}
         self._code = code
         self._type = type
         self._message = message
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ApiResponse':
+    def from_dict(cls, dikt) -> "ApiResponse":
         """Returns the dict as a model
 
         :param dikt: A dict.

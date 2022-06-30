@@ -12,6 +12,7 @@ import time
 import threading
 import logging
 import json
+
 # make sure to install datamodel:
 # https://github.com/atlanticwave-sdx/datamodel
 from datamodel.sdxdatamodel import parsing
@@ -24,6 +25,7 @@ from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
 from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
 from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
 
+
 def is_json(myjson):
     try:
         json.loads(myjson)
@@ -31,13 +33,15 @@ def is_json(myjson):
         return False
     return True
 
-def find_between( s, first, last ):
+
+def find_between(s, first, last):
     try:
-        start = s.index( first ) + len( first )
-        end = s.index( last, start )
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
         return s[start:end]
     except ValueError:
         return ""
+
 
 def start_consumer(thread_queue, db_instance):
     logger = logging.getLogger(__name__)
@@ -45,15 +49,15 @@ def start_consumer(thread_queue, db_instance):
 
     MESSAGE_ID = 0
     HEARTBEAT_ID = 0
-    
-    rpc = RpcConsumer(thread_queue, '')
+
+    rpc = RpcConsumer(thread_queue, "")
     t1 = threading.Thread(target=rpc.start_consumer, args=())
     t1.start()
 
     manager = TopologyManager()
     num_domain_topos = 0
-    if db_instance.read_from_db('num_domain_topos') is not None:
-        db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+    if db_instance.read_from_db("num_domain_topos") is not None:
+        db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
     latest_topo = {}
     domain_list = set()
 
@@ -61,14 +65,14 @@ def start_consumer(thread_queue, db_instance):
         if not thread_queue.empty():
             msg = thread_queue.get()
             logger.debug("MQ received message:" + str(msg))
-            
-            if 'Heart Beat' in str(msg):
+
+            if "Heart Beat" in str(msg):
                 HEARTBEAT_ID += 1
-                logger.debug('Heart beat received. ID: ' + str(HEARTBEAT_ID))
+                logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
             else:
-                logger.info('Saving to database.')
+                logger.info("Saving to database.")
                 if is_json(msg):
-                    if 'version' in str(msg):
+                    if "version" in str(msg):
                         logger.info("MQ received message:" + str(msg))
                         msg_json = json.loads(msg)
                         msg_id = msg_json["id"]
@@ -84,8 +88,8 @@ def start_consumer(thread_queue, db_instance):
                         db_msg_id = str(msg_id) + "-" + str(msg_version)
                         # add message to db
                         db_instance.add_key_value_pair_to_db(db_msg_id, msg)
-                        logger.info('Save to database complete.')
-                        logger.info('message ID:' + str(db_msg_id))
+                        logger.info("Save to database complete.")
+                        logger.info("message ID:" + str(db_msg_id))
 
                         # Update existing topology
                         if domain_name in domain_list:
@@ -97,62 +101,73 @@ def start_consumer(thread_queue, db_instance):
                             logger.info("adding topo")
                             manager.add_topology(msg_json)
 
-                            if db_instance.read_from_db('num_domain_topos') is None:
+                            if db_instance.read_from_db("num_domain_topos") is None:
                                 num_domain_topos = 1
-                                db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                                db_instance.add_key_value_pair_to_db(
+                                    "num_domain_topos", num_domain_topos
+                                )
                             else:
-                                num_domain_topos = db_instance.read_from_db('num_domain_topos')
+                                num_domain_topos = db_instance.read_from_db(
+                                    "num_domain_topos"
+                                )
                                 num_domain_topos = int(num_domain_topos) + 1
-                                db_instance.add_key_value_pair_to_db('num_domain_topos', num_domain_topos)
+                                db_instance.add_key_value_pair_to_db(
+                                    "num_domain_topos", num_domain_topos
+                                )
 
                         logger.info("adding topo to db:")
-                        db_key = 'LC-' + str(num_domain_topos)
-                        db_instance.add_key_value_pair_to_db(db_key, json.dumps(msg_json))
+                        db_key = "LC-" + str(num_domain_topos)
+                        db_instance.add_key_value_pair_to_db(
+                            db_key, json.dumps(msg_json)
+                        )
 
                         latest_topo = json.dumps(manager.get_topology().to_dict())
                         # use 'latest_topo' as PK to save latest topo to db
-                        db_instance.add_key_value_pair_to_db('latest_topo', latest_topo)
-                        logger.info('Save to database complete.')
+                        db_instance.add_key_value_pair_to_db("latest_topo", latest_topo)
+                        logger.info("Save to database complete.")
                     else:
-                        logger.info('got message from MQ: ' + str(msg))
+                        logger.info("got message from MQ: " + str(msg))
                 else:
-                    db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg) 
+                    db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)
 
-                    logger.debug('Save to database complete.')
-                    logger.debug('message ID:' + str(MESSAGE_ID))
+                    logger.debug("Save to database complete.")
+                    logger.debug("message ID:" + str(MESSAGE_ID))
                     value = db_instance.read_from_db(MESSAGE_ID)
-                    logger.debug('got value from DB:')
+                    logger.debug("got value from DB:")
                     logger.debug(value)
                     MESSAGE_ID += 1
-                
+
 
 def main():
 
     # Sleep 7 seconds waiting for RabbitMQ to be ready
     # time.sleep(7)
-    
+
     logging.basicConfig(level=logging.INFO)
-    
+
     # Run swagger service
-    app = connexion.App(__name__, specification_dir='./swagger/')
+    app = connexion.App(__name__, specification_dir="./swagger/")
     app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('swagger.yaml', arguments={'title': 'SDX-Controller'}, pythonic_params=True)
-    
+    app.add_api(
+        "swagger.yaml", arguments={"title": "SDX-Controller"}, pythonic_params=True
+    )
+
     # Run swagger in a thread
     threading.Thread(target=lambda: app.run(port=8080)).start()
     # app.run(port=8080)
 
-    DB_NAME = os.environ.get('DB_NAME') + '.sqlite3'
-    MANIFEST = os.environ.get('MANIFEST')
+    DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
+    MANIFEST = os.environ.get("MANIFEST")
 
     # Get DB connection and tables set up.
-    db_tuples = [('config_table', "test-config")]
+    db_tuples = [("config_table", "test-config")]
 
     db_instance = DbUtils()
     db_instance._initialize_db(DB_NAME, db_tuples)
     # amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
     thread_queue = Queue()
-    start_consumer(thread_queue, db_instance)        
+    start_consumer(thread_queue, db_instance)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

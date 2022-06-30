@@ -10,10 +10,13 @@ from pika.exchange_type import ExchangeType
 import threading
 from queue import Queue
 
-LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
-              '-35s %(lineno) -5d: %(message)s')
+LOG_FORMAT = (
+    "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
+    "-35s %(lineno) -5d: %(message)s"
+)
 LOGGER = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
+
 
 class ExampleConsumer(object):
     """
@@ -28,10 +31,11 @@ class ExampleConsumer(object):
     If the channel is closed, it will indicate a problem with one of the
     commands that were issued and that should surface in the output as well.
     """
-    EXCHANGE = 'message'
+
+    EXCHANGE = "message"
     EXCHANGE_TYPE = ExchangeType.topic
-    QUEUE = 'text'
-    ROUTING_KEY = 'example.text'
+    QUEUE = "text"
+    ROUTING_KEY = "example.text"
 
     def __init__(self, amqp_url, thread_queue):
         """
@@ -62,12 +66,13 @@ class ExampleConsumer(object):
 
         :rtype: pika.SelectConnection
         """
-        LOGGER.info('Connecting to %s', self._url)
+        LOGGER.info("Connecting to %s", self._url)
         return pika.SelectConnection(
             parameters=pika.URLParameters(self._url),
             on_open_callback=self.on_connection_open,
             on_open_error_callback=self.on_connection_open_error,
-            on_close_callback=self.on_connection_closed)
+            on_close_callback=self.on_connection_closed,
+        )
 
     def close_connection(self):
         """
@@ -75,7 +80,7 @@ class ExampleConsumer(object):
         """
         self._consuming = False
         if self._connection.is_closing or self._connection.is_closed:
-            LOGGER.info('Connection is closing or already closed')
+            LOGGER.info("Connection is closing or already closed")
         else:
             # LOGGER.info('Closing connection')
             self._connection.close()
@@ -88,7 +93,7 @@ class ExampleConsumer(object):
 
         :param pika.SelectConnection _unused_connection: The connection
         """
-        LOGGER.info('Connection opened')
+        LOGGER.info("Connection opened")
         self.open_channel()
 
     def on_connection_open_error(self, _unused_connection, err):
@@ -134,7 +139,7 @@ class ExampleConsumer(object):
         command. When RabbitMQ responds that the channel is open, the
         on_channel_open callback will be invoked by pika.
         """
-        LOGGER.info('Creating a new channel')
+        LOGGER.info("Creating a new channel")
         self._connection.channel(on_open_callback=self.on_channel_open)
 
     def on_channel_open(self, channel):
@@ -184,12 +189,10 @@ class ExampleConsumer(object):
         # LOGGER.info('Declaring exchange: %s', exchange_name)
         # Note: using functools.partial is not required, it is demonstrating
         # how arbitrary data can be passed to the callback when it is called
-        cb = functools.partial(
-            self.on_exchange_declareok, userdata=exchange_name)
+        cb = functools.partial(self.on_exchange_declareok, userdata=exchange_name)
         self._channel.exchange_declare(
-            exchange=exchange_name,
-            exchange_type=self.EXCHANGE_TYPE,
-            callback=cb)
+            exchange=exchange_name, exchange_type=self.EXCHANGE_TYPE, callback=cb
+        )
 
     def on_exchange_declareok(self, _unused_frame, userdata):
         """
@@ -230,10 +233,8 @@ class ExampleConsumer(object):
         #             self.ROUTING_KEY)
         cb = functools.partial(self.on_bindok, userdata=queue_name)
         self._channel.queue_bind(
-            queue_name,
-            self.EXCHANGE,
-            routing_key=self.ROUTING_KEY,
-            callback=cb)
+            queue_name, self.EXCHANGE, routing_key=self.ROUTING_KEY, callback=cb
+        )
 
     def on_bindok(self, _unused_frame, userdata):
         """
@@ -254,7 +255,8 @@ class ExampleConsumer(object):
         with different prefetch values to achieve desired performance.
         """
         self._channel.basic_qos(
-            prefetch_count=self._prefetch_count, callback=self.on_basic_qos_ok)
+            prefetch_count=self._prefetch_count, callback=self.on_basic_qos_ok
+        )
 
     def on_basic_qos_ok(self, _unused_frame):
         """
@@ -279,8 +281,7 @@ class ExampleConsumer(object):
         """
         # LOGGER.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
-        self._consumer_tag = self._channel.basic_consume(
-            self.QUEUE, self.on_message)
+        self._consumer_tag = self._channel.basic_consume(self.QUEUE, self.on_message)
         self.was_consuming = True
         self._consuming = True
 
@@ -321,8 +322,12 @@ class ExampleConsumer(object):
         """
         # LOGGER.info('Received message # %s from %s: %s',
         #             basic_deliver.delivery_tag, properties.app_id, body)
-        print('Received message # %s from %s: %s',
-                    basic_deliver.delivery_tag, properties.app_id, body)
+        print(
+            "Received message # %s from %s: %s",
+            basic_deliver.delivery_tag,
+            properties.app_id,
+            body,
+        )
         self._thread_queue.put(body)
         self.acknowledge_message(basic_deliver.delivery_tag)
 
@@ -343,8 +348,7 @@ class ExampleConsumer(object):
         """
         if self._channel:
             # LOGGER.info('Sending a Basic.Cancel RPC command to RabbitMQ')
-            cb = functools.partial(
-                self.on_cancelok, userdata=self._consumer_tag)
+            cb = functools.partial(self.on_cancelok, userdata=self._consumer_tag)
             self._channel.basic_cancel(self._consumer_tag, cb)
 
     def on_cancelok(self, _unused_frame, userdata):
@@ -392,13 +396,13 @@ class ExampleConsumer(object):
         """
         if not self._closing:
             self._closing = True
-            LOGGER.info('Stopping')
+            LOGGER.info("Stopping")
             if self._consuming:
                 self.stop_consuming()
                 self._connection.ioloop.start()
             else:
                 self._connection.ioloop.stop()
-            LOGGER.info('Stopped')
+            LOGGER.info("Stopped")
 
 
 class AsyncConsumer(object):
@@ -444,9 +448,10 @@ def print_test(num):
     time.sleep(5)
     print("Done")
 
+
 def main():
     # logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-    amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
+    amqp_url = "amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F"
 
     thread_queue = Queue()
     consumer = AsyncConsumer(amqp_url, thread_queue)
@@ -455,7 +460,7 @@ def main():
     # t2 = threading.Thread(target=print_test, args=(10,))
     # t2.start()
     t1.start()
-    
+
     while True:
         if not thread_queue.empty():
             # print("-----TEST-----")
@@ -464,8 +469,6 @@ def main():
     # consumer.run()
     # print("-----TEST-----")
 
-    
-    
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

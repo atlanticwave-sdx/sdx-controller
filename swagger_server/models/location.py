@@ -14,7 +14,10 @@ class Location(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, address: str=None, latitude: float=None, longitude: float=None):  # noqa: E501
+
+    def __init__(
+        self, address: str = None, latitude: float = None, longitude: float = None
+    ):  # noqa: E501
         """Location - a model defined in Swagger
 
         :param address: The address of this Location.  # noqa: E501
@@ -24,23 +27,19 @@ class Location(Model):
         :param longitude: The longitude of this Location.  # noqa: E501
         :type longitude: float
         """
-        self.swagger_types = {
-            'address': str,
-            'latitude': float,
-            'longitude': float
-        }
+        self.swagger_types = {"address": str, "latitude": float, "longitude": float}
 
         self.attribute_map = {
-            'address': 'address',
-            'latitude': 'latitude',
-            'longitude': 'longitude'
+            "address": "address",
+            "latitude": "latitude",
+            "longitude": "longitude",
         }
         self._address = address
         self._latitude = latitude
         self._longitude = longitude
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Location':
+    def from_dict(cls, dikt) -> "Location":
         """Returns the dict as a model
 
         :param dikt: A dict.

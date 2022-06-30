@@ -16,13 +16,11 @@ class TestLinkController(BaseTestCase):
 
         get an existing link
         """
-        response = self.client.open(
-            '/SDX-Controller/1.0.0/link',
-            method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open("/SDX-Controller/1.0.0/link", method="GET")
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import unittest
+
     unittest.main()
