@@ -84,8 +84,6 @@ def getconnection_by_id(connection_id):  # noqa: E501
     :rtype: Connection
     """
     value = db_instance.read_from_db(connection_id)
-    logger.info("get value back:")
-    logger.info(value)
     return value
 
 
