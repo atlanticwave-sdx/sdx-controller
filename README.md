@@ -8,7 +8,7 @@ is an example of building a swagger-enabled Flask server.
 This example uses the [Connexion](https://github.com/zalando/connexion) library on top of Flask.
 
 ## Requirements
-Python 3.5.2+
+Python 3.9.6+
 
 ## Prerequisite: run the RabbitMQ server
 The communication between SDX controller and Local controller rely on RabbitMQ. RabbitMQ can either run on the SDX controller, or run on a separate node. The easiest way to run RabbitMQ is using docker:
