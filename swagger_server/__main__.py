@@ -110,42 +110,45 @@ def start_consumer(thread_queue, db_instance):
 
     manager = TopologyManager()
     num_domain_topos = 0
+
     if db_instance.read_from_db("num_domain_topos") is not None:
         db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
+
     latest_topo = {}
     domain_list = set()
 
     while True:
-        if not thread_queue.empty():
-            msg = thread_queue.get()
-            logger.debug("MQ received message:" + str(msg))
+        if thread_queue.empty():
+            continue
 
-            if "Heart Beat" in str(msg):
-                HEARTBEAT_ID += 1
-                logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
-            else:
-                logger.info("Saving to database.")
-                if is_json(msg):
-                    if "version" in str(msg):
-                        process_lc_json_msg(
-                            msg,
-                            db_instance,
-                            latest_topo,
-                            domain_list,
-                            manager,
-                            num_domain_topos,
-                        )
-                    else:
-                        logger.info("got message from MQ: " + str(msg))
+        msg = thread_queue.get()
+        logger.debug("MQ received message:" + str(msg))
+
+        if "Heart Beat" in str(msg):
+            HEARTBEAT_ID += 1
+            logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
+        else:
+            logger.info("Saving to database.")
+            if is_json(msg):
+                if "version" in str(msg):
+                    process_lc_json_msg(
+                        msg,
+                        db_instance,
+                        latest_topo,
+                        domain_list,
+                        manager,
+                        num_domain_topos,
+                    )
                 else:
-                    db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)
-
-                    logger.debug("Save to database complete.")
-                    logger.debug("message ID:" + str(MESSAGE_ID))
-                    value = db_instance.read_from_db(MESSAGE_ID)
-                    logger.debug("got value from DB:")
-                    logger.debug(value)
-                    MESSAGE_ID += 1
+                    logger.info("got message from MQ: " + str(msg))
+            else:
+                db_instance.add_key_value_pair_to_db(MESSAGE_ID, msg)
+                logger.debug("Save to database complete.")
+                logger.debug("message ID:" + str(MESSAGE_ID))
+                value = db_instance.read_from_db(MESSAGE_ID)
+                logger.debug("got value from DB:")
+                logger.debug(value)
+                MESSAGE_ID += 1
 
 
 def main():
@@ -169,7 +172,6 @@ def main():
 
     db_instance = DbUtils()
     db_instance._initialize_db(DB_NAME, db_tuples)
-    # amqp_url = 'amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F'
     thread_queue = Queue()
     start_consumer(thread_queue, db_instance)
 
