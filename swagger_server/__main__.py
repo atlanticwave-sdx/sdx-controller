@@ -15,15 +15,11 @@ import json
 
 # make sure to install datamodel:
 # https://github.com/atlanticwave-sdx/datamodel
-from datamodel.sdxdatamodel import parsing
-from datamodel.sdxdatamodel import topologymanager
-
-from datamodel.sdxdatamodel import validation
-from datamodel.sdxdatamodel.validation.topologyvalidator import TopologyValidator
-from datamodel.sdxdatamodel.parsing.topologyhandler import TopologyHandler
-from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
-from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
-from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
+from sdxdatamodel.validation.topologyvalidator import TopologyValidator
+from sdxdatamodel.parsing.topologyhandler import TopologyHandler
+from sdxdatamodel.topologymanager.manager import TopologyManager
+from sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
+from sdxdatamodel.parsing.exceptions import DataModelException
 
 
 logger = logging.getLogger(__name__)
