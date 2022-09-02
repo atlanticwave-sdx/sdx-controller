@@ -5,4 +5,5 @@ setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
 networkx == 2.8.6
+grenml == 0.2.1
 git+https://github.com/atlanticwave-sdx/datamodel
