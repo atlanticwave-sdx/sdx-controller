@@ -4,3 +4,4 @@ python_dateutil == 2.6.0
 setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
+git+https://github.com/atlanticwave-sdx/datamodel
