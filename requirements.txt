@@ -8,3 +8,7 @@ networkx == 2.8.6
 grenml == 0.2.1
 git+https://github.com/atlanticwave-sdx/datamodel
 git+https://github.com/atlanticwave-sdx/pce
+
+# TODO: ortools should be a pce dependency, not sdx-controller
+# dependency.  See https://github.com/atlanticwave-sdx/pce/issues/45
+ortools == 9.4.1874
