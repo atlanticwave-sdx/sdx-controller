@@ -7,3 +7,4 @@ dataset
 networkx == 2.8.6
 grenml == 0.2.1
 git+https://github.com/atlanticwave-sdx/datamodel
+git+https://github.com/atlanticwave-sdx/pce
