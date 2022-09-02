@@ -8,6 +8,8 @@ from sdxdatamodel.parsing import *
 from sdxdatamodel.topologymanager.temanager import TEManager
 from sdxdatamodel.parsing.exceptions import DataModelException
 
+# TODO: `LoadBalancing` is from pce, and pce should have a top-level
+# module. See https://github.com/atlanticwave-sdx/pce/issues/44
 from LoadBalancing.MC_Solver import runMC_Solver
 from LoadBalancing.RandomTopologyGenerator import GetConnection
 from LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
