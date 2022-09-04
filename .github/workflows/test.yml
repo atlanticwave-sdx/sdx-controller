@@ -75,5 +75,8 @@ jobs:
           SDX_NAME: 'sdx-test-controller'
           MQ_NAME: 'hello'
           MQ_HOST: 'localhost'
+          SUB_QUEUE: 'test-queue'
+          SUB_TOPIC: 'test-topic'
+          SUB_EXCHANGE: 'test-exchange'
           DB_NAME: 'test-db'
           DB_CONFIG_TABLE_NAME: 'test-1'
