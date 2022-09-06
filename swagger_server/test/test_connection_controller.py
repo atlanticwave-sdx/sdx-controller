@@ -32,7 +32,11 @@ class TestConnectionController(BaseTestCase):
             "/SDX-Controller/1.0.0/connection/{connection_id}".format(connection_id=10),
             method="GET",
         )
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+
+        # The connection_id we've supplied above should not exist.
+        # TODO: test for existing connection_id.  See
+        # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
+        self.assertStatus(response, 204)
 
     def test_place_connection(self):
         """Test case for place_connection
