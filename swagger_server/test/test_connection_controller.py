@@ -45,7 +45,6 @@ class TestConnectionController(BaseTestCase):
 
         Place an connection request from the SDX-Controller
         """
-        # body = Connection()
         ingress_port = Port(
             id="ingress_port_id",
             name="ingress_port_name",
