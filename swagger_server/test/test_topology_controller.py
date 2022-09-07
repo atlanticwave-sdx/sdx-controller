@@ -35,7 +35,8 @@ class TestTopologyController(BaseTestCase):
             method="GET",
             query_string=query_string,
         )
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+        # No topology exists; we should get a 404.
+        self.assertStatus(response, 404)
 
     def test_topology_version(self):
         """Test case for topology_version
