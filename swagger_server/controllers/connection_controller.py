@@ -99,24 +99,28 @@ def place_connection(body):  # noqa: E501
 
     :rtype: Connection
     """
-    logger.info("Placing connection:")
-    logger.info(body)
+    connection_data = body
+
     if connexion.request.is_json:
-        body = connexion.request.get_json()
+        connection_data = connexion.request.get_json()
+
+    logger.info("Placing connection:".format(connection_data))
+    print("Placing connection:".format(connection_data))
+    print(connection_data)
 
     logger.info("Placing connection. Saving to database.")
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
     topo_val = db_instance.read_from_db("latest_topo")
-    topo_json = json.loads(topo_val)
+    topology_data = json.loads(topo_val)
 
     num_domain_topos = 0
 
     if db_instance.read_from_db("num_domain_topos") is not None:
         num_domain_topos = db_instance.read_from_db("num_domain_topos")
 
-    temanager = TEManager(topo_json, body)
+    temanager = TEManager(topology_data, connection_data)
     lc_domain_topo_dict = {}
 
     for i in range(1, int(num_domain_topos) + 1):
