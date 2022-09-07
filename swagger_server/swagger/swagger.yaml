@@ -62,7 +62,7 @@ paths:
       description: Topology version
       operationId: topology_version
       parameters:
-      - name: topologyId
+      - name: topology_id
         in: query
         description: topology id
         required: true
