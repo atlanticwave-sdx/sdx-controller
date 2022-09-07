@@ -7,6 +7,7 @@ import datetime
 from flask import json
 
 from swagger_server.models.connection import Connection  # noqa: E501
+from swagger_server.models.node import Node
 from swagger_server.models.port import Port
 from swagger_server.test import BaseTestCase
 
@@ -45,18 +46,28 @@ class TestConnectionController(BaseTestCase):
 
         Place an connection request from the SDX-Controller
         """
+        ingress_node = Node(
+            id="ingress_node_id",
+            name="ingress_node_name",
+        )
+
         ingress_port = Port(
             id="ingress_port_id",
             name="ingress_port_name",
-            node="ingress_node",
+            node=ingress_node.name,
             status="unknown",
             state="unknown",
+        )
+
+        egress_node = Node(
+            id="egress_node_id",
+            name="egress_node_name",
         )
 
         egress_port = Port(
             id="egress_port_id",
             name="egress_port_name",
-            node="egress_node",
+            node=egress_node.name,
             status="unknown",
             state="unknown",
         )
