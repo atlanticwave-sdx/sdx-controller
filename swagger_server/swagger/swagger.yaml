@@ -79,10 +79,10 @@ paths:
                 $ref: '#/components/schemas/topology'
         "400":
           description: Invalid id value
-      security:
-      - topology_auth:
-        - write:topology
-        - read:topology
+      # security:
+      # - topology_auth:
+      #   - write:topology
+      #   - read:topology
       x-openapi-router-controller: swagger_server.controllers.topology_controller
   /topology/grenml:
     get:
