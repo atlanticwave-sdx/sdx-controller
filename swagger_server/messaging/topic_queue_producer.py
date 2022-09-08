@@ -78,7 +78,7 @@ class TopicQueueProducer(object):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
 
     producer = TopicQueueProducer(5, "connection", "lc1_q1")
     body = "test body"
@@ -86,9 +86,10 @@ if __name__ == "__main__":
     response = producer.call(body)
     print(" [.] Got response: " + str(response))
 
-    # To test that keep-alive thread indeed keeps things alive, use a
-    # longer sleep here.
-    time.sleep(30*5)
+    def sigint_handler(signum, stack_frame):
+        """Handle SIGINT."""
+        print("Received signal {}, Stoping producer's keep-alive thread".format(signum))
+        producer.stop_keep_alive()
 
-    print("Stoping producer's keep-alive thread")
-    producer.stop_keep_alive()
+    import signal
+    signal.signal(signal.SIGINT, sigint_handler)
