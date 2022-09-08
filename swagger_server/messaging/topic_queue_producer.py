@@ -10,6 +10,8 @@ MQ_HOST = os.environ.get("MQ_HOST")
 
 
 class TopicQueueProducer(object):
+    """Publish messages on a message queue."""
+
     def __init__(self, timeout, exchange_name, routing_key):
         self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
