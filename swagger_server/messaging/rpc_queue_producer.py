@@ -97,5 +97,10 @@ if __name__ == "__main__":
     print("Published Message: {}".format(body))
     response = rpc.call(body)
     print(" [.] Got response: " + str(response))
+
+    # To test that keep-alive thread indeed keeps things alive, use a
+    # longer sleep here.
+    # time.sleep(30*5)
+
     print("Stopping keep-alive thread.")
     rpc.stop_keep_alive()
