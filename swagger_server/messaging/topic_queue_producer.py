@@ -25,6 +25,9 @@ class TopicQueueProducer(object):
         self.exchange_name = exchange_name
         self.routing_key = routing_key
 
+        # An event to stop the thread we start.
+        self.exit_event = threading.Event()
+
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
@@ -40,11 +43,17 @@ class TopicQueueProducer(object):
         )
 
     def keep_live(self):
+        """Publish heart beat messages periodically on the MQ."""
         while True:
-            time.sleep(30)
+            if self.exit_event.wait(30):
+                break
             msg = "[MQ]: Heart Beat"
             self.logger.debug("Sending heart beat msg.")
             self.call(msg)
+
+    def stop_keep_alive(self):
+        """Ask the keep-alive thread to stop."""
+        self.exit_event.set()
 
     def on_response(self, ch, method, props, body):
         if self.corr_id == props.correlation_id:
@@ -72,8 +81,17 @@ class TopicQueueProducer(object):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     producer = TopicQueueProducer(5, "connection", "lc1_q1")
     body = "test body"
     print("Published Message: {}".format(body))
     response = producer.call(body)
     print(" [.] Got response: " + str(response))
+
+    # To test that keep-alive thread indeed keeps things alive, use a
+    # longer sleep here.
+    time.sleep(30*5)
+
+    print("Stoping producer's keep-alive thread")
+    producer.stop_keep_alive()
