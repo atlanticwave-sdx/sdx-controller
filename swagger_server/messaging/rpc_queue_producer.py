@@ -40,11 +40,8 @@ class RpcProducer(object):
         )
 
     def keep_live(self):
-        while True:
-            if self.exit_event.wait(30):
-                break
+        while not self.exit_event.wait(30):
             msg = "[MQ]: Heart Beat"
-            print(msg)
             self.logger.debug("Sending heart beat msg.")
             self.call(msg)
 
