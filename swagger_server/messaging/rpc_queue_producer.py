@@ -24,6 +24,9 @@ class RpcProducer(object):
         # self.exchange_name = ''
         # self.routing_key = routing_key
 
+        # An event to stop the thread we start.
+        self.exit_event = threading.Event()
+        
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
@@ -42,10 +45,16 @@ class RpcProducer(object):
 
     def keep_live(self):
         while True:
-            time.sleep(30)
+            if self.exit_event.wait(30):
+                break
             msg = "[MQ]: Heart Beat"
+            print(msg)
             self.logger.debug("Sending heart beat msg.")
             self.call(msg)
+
+    def stop_keep_alive(self):
+        """Flag the keep alive thread to stop."""
+        self.exit_event.set()
 
     def on_response(self, ch, method, props, body):
         if self.corr_id == props.correlation_id:
@@ -88,3 +97,5 @@ if __name__ == "__main__":
     print("Published Message: {}".format(body))
     response = rpc.call(body)
     print(" [.] Got response: " + str(response))
+    print("Stopping keep-alive thread.")
+    rpc.stop_keep_alive()
