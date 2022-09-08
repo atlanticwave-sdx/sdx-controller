@@ -22,7 +22,7 @@ class RpcProducer(object):
 
         # An event to stop the thread we start.
         self.exit_event = threading.Event()
-        
+
         t1 = threading.Thread(target=self.keep_live, args=())
         t1.start()
 
