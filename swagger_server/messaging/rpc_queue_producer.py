@@ -8,10 +8,6 @@ import logging
 
 MQ_HOST = os.environ.get("MQ_HOST")
 
-# hardcode for testing
-MQ_HOST = "aw-sdx-monitor.renci.org"
-
-
 class RpcProducer(object):
     def __init__(self, timeout, exchange_name, routing_key):
         self.logger = logging.getLogger(__name__)
