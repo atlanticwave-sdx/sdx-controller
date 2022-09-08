@@ -35,15 +35,6 @@ db_instance._initialize_db(DB_NAME, db_tuples)
 
 MANIFEST = os.environ.get("MANIFEST")
 
-# LC controller topic list
-producer1 = TopicQueueProducer(5, "connection", "lc1_q1")
-producer2 = TopicQueueProducer(5, "connection", "lc2_q1")
-producer3 = TopicQueueProducer(5, "connection", "lc3_q1")
-producers = {}
-producers["lc1_q1"] = producer1
-producers["lc2_q1"] = producer2
-producers["lc3_q1"] = producer3
-
 
 def is_json(myjson):
     try:
@@ -170,7 +161,12 @@ def place_connection(body):  # noqa: E501
 
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
-        producer = producers[lc_domain_topo_dict[domain_name]]
+        producer = TopicQueueProducer(
+            timeout=5,
+            exchange_name="connection",
+            routing_key=domain_name
+        )
         producer.call(json.dumps(breakdown[entry]))
+        producer.stop_keep_alive()
 
     return "Connection published"
