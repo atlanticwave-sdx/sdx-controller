@@ -172,21 +172,36 @@ class BAPMPublisher(object):
 
     def run(self):
         """Run the example code by connecting and then starting the IOLoop."""
-        while not self._stopping:
-            self._connection = None
-            self._deliveries = []
-            self._acked = 0
-            self._nacked = 0
-            self._message_number = 0
+        self._connection = None
+        self._deliveries = []
+        self._acked = 0
+        self._nacked = 0
+        self._message_number = 0
 
-            try:
-                self._connection = self.connect()
+        try:
+            self._connection = self.connect()
+            self._connection.ioloop.start()
+        except KeyboardInterrupt:
+            self.stop()
+            if self._connection is not None and not self._connection.is_closed:
+                # Finish closing
                 self._connection.ioloop.start()
-            except KeyboardInterrupt:
-                self.stop()
-                if self._connection is not None and not self._connection.is_closed:
-                    # Finish closing
-                    self._connection.ioloop.start()
+
+        # while not self._stopping:
+        #     self._connection = None
+        #     self._deliveries = []
+        #     self._acked = 0
+        #     self._nacked = 0
+        #     self._message_number = 0
+
+        #     try:
+        #         self._connection = self.connect()
+        #         self._connection.ioloop.start()
+        #     except KeyboardInterrupt:
+        #         self.stop()
+        #         if self._connection is not None and not self._connection.is_closed:
+        #             # Finish closing
+        #             self._connection.ioloop.start()
 
         LOGGER.info("Stopped")
 

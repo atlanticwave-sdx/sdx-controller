@@ -21,3 +21,8 @@ services:
       - DB_NAME=test-db
       - DB_CONFIG_TABLE_NAME=test-1
       - MANIFEST=README.md
+
+  bapm-server:
+    image: bapm-server
+    tty: true
+    build: ./bapm_server
