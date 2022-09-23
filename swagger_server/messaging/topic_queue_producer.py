@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-import pika
-import uuid
-import os
-import time
-import threading
 import logging
+import os
+import threading
+import time
+import uuid
+
+import pika
 
 MQ_HOST = os.environ.get("MQ_HOST")
 

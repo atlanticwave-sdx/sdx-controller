@@ -4,11 +4,12 @@
 
 import functools
 import logging
+import threading
 import time
+from queue import Queue
+
 import pika
 from pika.exchange_type import ExchangeType
-import threading
-from queue import Queue
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
