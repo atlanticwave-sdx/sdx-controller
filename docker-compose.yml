@@ -24,5 +24,6 @@ services:
 
   bapm-server:
     image: bapm-server
+    network_mode: "host"
     tty: true
     build: ./bapm_server
