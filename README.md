@@ -52,13 +52,10 @@ To run the server on a Docker container, execute the following from the root dir
 
 ```bash
 # building the image
-docker build -t swagger_server .
+docker build -t sdx-controller .
 
 # starting up a container
-docker run -p 8080:8080 swagger_server
-
-# or start with docker-compose
-docker-compose up
+docker run -p 8080:8080 sdx-controller
 ```
 
 To run the SDX Controller server and BAPM server, Docker is required. 
@@ -66,7 +63,7 @@ Execute the following from the root directory:
 
 ```bash
 # building SDX Controller image
-docker build -t swagger_server .
+docker build -t sdx-controller .
 
 # build BAPM server image
 cd bapm_server
