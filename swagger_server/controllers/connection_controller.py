@@ -124,14 +124,50 @@ def place_connection(body):  # noqa: E501
     print("topo_val: {}".format(topo_val))    
 
     if topo_val is None:
-        topo_val = json.dumps(
-            { "id": None,
-              "name": None,
-              "version": None,
-              "time_stamp": None,
-              "nodes": ["ingress_node_id", "ingress_port_id"],
-              "links": [],
-             })
+        ingress_node = {
+            "id": "ingress_node_id",
+            "name": "ingress_node_name",
+            "short_name": "ingress_node_short_name",
+            "ports": [{
+                "id": "ingress_node_port_id",
+                "name": "ingress_node_port_name",
+                "short_name": "ingress_node_port_short_name",
+                "node": "ingress_node_name",
+                "state": "unknown",
+                "status": "unknown",
+            }],
+            "location": {
+                "address": "unknown",
+                "latitude": "unknown",
+                "longitude": "unknown",
+            },
+        }
+        egress_node = {
+            "id": "egress_node_id",
+            "name": "egress_node_name",
+            "short_name": "egress_node_short_name",
+            "ports": [{
+                "id": "egress_node_port_id",
+                "name": "egress_node_port_name",
+                "short_name": "egress_node_port_short_name",
+                "node": "egress_node_name",
+                "state": "unknown",
+                "status": "unknown",
+            }],
+            "location": {
+                "address": "unknown",
+                "latitude": "unknown",
+                "longitude": "unknown",
+            },
+        }
+        topo_val = json.dumps({
+            "id": None,
+            "name": None,
+            "version": None,
+            "time_stamp": None,
+            "nodes": [ingress_node, egress_node],
+            "links": [],
+        })
         print("Made a workaround topo_val: {}".format(topo_val))
     
     topology_data = json.loads(topo_val)
@@ -141,6 +177,9 @@ def place_connection(body):  # noqa: E501
     if db_instance.read_from_db("num_domain_topos") is not None:
         num_domain_topos = db_instance.read_from_db("num_domain_topos")
 
+    print(f"TEManager: topology_data: {topology_data}")
+    print(f"TEManager: connection_data: {connection_data}")
+        
     temanager = TEManager(topology_data, connection_data)
     lc_domain_topo_dict = {}
 
