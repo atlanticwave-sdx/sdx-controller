@@ -5,7 +5,7 @@ from queue import Queue
 import json
 
 from swagger_server.utils.db_utils import *
-from swagger_server.models.topology import Topology  # noqa: E501
+from sdxdatamodel.models.topology import Topology  # noqa: E501
 from swagger_server import util
 from sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
 from sdxdatamodel.topologymanager.manager import TopologyManager

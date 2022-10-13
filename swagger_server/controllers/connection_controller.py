@@ -3,7 +3,7 @@ import six
 import os
 import json
 
-from swagger_server.models.connection import Connection  # noqa: E501
+from sdxdatamodel.models.connection import Connection  # noqa: E501
 from swagger_server import util
 from swagger_server.utils.db_utils import *
 from swagger_server.messaging.topic_queue_producer import *

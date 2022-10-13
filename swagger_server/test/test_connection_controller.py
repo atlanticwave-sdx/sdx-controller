@@ -6,9 +6,10 @@ import datetime
 
 from flask import json
 
-from swagger_server.models.connection import Connection  # noqa: E501
-from swagger_server.models.node import Node
-from swagger_server.models.port import Port
+from sdxdatamodel.models.connection import Connection
+from sdxdatamodel.models.location import Location
+from sdxdatamodel.models.node import Node
+from sdxdatamodel.models.port import Port
 from swagger_server.test import BaseTestCase
 
 
