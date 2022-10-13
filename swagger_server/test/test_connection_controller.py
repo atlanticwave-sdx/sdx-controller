@@ -47,30 +47,64 @@ class TestConnectionController(BaseTestCase):
 
         Place an connection request from the SDX-Controller
         """
-        ingress_node = Node(
-            id="ingress_node_id",
-            name="ingress_node_name",
+        location = Location(
+            address="Unknown",
+            latitude=0.0,
+            longitude=0.0,
         )
+
+        # # location validator expects JSON
+        # location = {
+        #     "address": "Unknown",
+        #     "latitude": "latitude",
+        #     "longitude": "longitude",
+        # }
 
         ingress_port = Port(
             id="ingress_port_id",
             name="ingress_port_name",
-            node=ingress_node.name,
+            node="ingress_node_name",
             status="unknown",
-            state="unknown",
+            # state="unknown",
         )
 
-        egress_node = Node(
-            id="egress_node_id",
-            name="egress_node_name",
+        # # Port validator expects JSON
+        # ingress_port = {
+        #     "id": "ingress_port_id",
+        #     "name": "ingress_port_name",
+        #     "node": "ingress_node_name",
+        #     "status": "unknown",
+        # }
+
+        ingress_node = Node(
+            id="ingress_node_id",
+            name="ingress_node_name",
+            location=location,
+            ports=[ingress_port],
         )
 
         egress_port = Port(
             id="egress_port_id",
             name="egress_port_name",
-            node=egress_node.name,
+            node="egress_node_name",
             status="unknown",
-            state="unknown",
+            # state="unknown",
+        )
+
+        # Port validator expects JSON?
+        # egress_port = {
+        #     "id": "egress_port_id",
+        #     "name": "egress_port_name",
+        #     "node": "egress_node_name",
+        #     "status": "unknown",
+        #     # "state": "unknown",
+        # }
+
+        egress_node = Node(
+            id="egress_node_id",
+            name="egress_node_name",
+            location=location,
+            ports=[egress_port],
         )
 
         connection = Connection(
