@@ -6,7 +6,8 @@ pika >= 1.2.0
 dataset
 networkx == 2.8.6
 grenml == 0.2.1
-git+https://github.com/atlanticwave-sdx/datamodel@main
+# git+https://github.com/atlanticwave-sdx/datamodel@main
+git+https://github.com/atlanticwave-sdx/datamodel@61.connection-validation
 git+https://github.com/atlanticwave-sdx/pce@main
 
 # TODO: ortools should be a pce dependency, not sdx-controller

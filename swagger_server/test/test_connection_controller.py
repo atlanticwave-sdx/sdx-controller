@@ -7,8 +7,8 @@ import datetime
 from flask import json
 
 from sdxdatamodel.models.connection import Connection
-from sdxdatamodel.models.location import Location
-from sdxdatamodel.models.node import Node
+# from sdxdatamodel.models.location import Location
+# from sdxdatamodel.models.node import Node
 from sdxdatamodel.models.port import Port
 from swagger_server.test import BaseTestCase
 
@@ -47,11 +47,11 @@ class TestConnectionController(BaseTestCase):
 
         Place an connection request from the SDX-Controller
         """
-        location = Location(
-            address="Unknown",
-            latitude=0.0,
-            longitude=0.0,
-        )
+        # location = Location(
+        #     address="Unknown",
+        #     latitude=0.0,
+        #     longitude=0.0,
+        # )
 
         # # location validator expects JSON
         # location = {
@@ -60,13 +60,13 @@ class TestConnectionController(BaseTestCase):
         #     "longitude": "longitude",
         # }
 
-        ingress_port = Port(
-            id="ingress_port_id",
-            name="ingress_port_name",
-            node="ingress_node_name",
-            status="unknown",
-            # state="unknown",
-        )
+        # ingress_port = Port(
+        #     id="ingress_port_id",
+        #     name="ingress_port_name",
+        #     # node="ingress_node_name",
+        #     # status="unknown",
+        #     # state="unknown",
+        # )
 
         # # Port validator expects JSON
         # ingress_port = {
@@ -76,20 +76,34 @@ class TestConnectionController(BaseTestCase):
         #     "status": "unknown",
         # }
 
-        ingress_node = Node(
-            id="ingress_node_id",
-            name="ingress_node_name",
-            location=location,
-            ports=[ingress_port],
-        )
+        ingress_port = {
+            "id": "ingress_port_id",
+            "name": "ingress_port_name",
+            "node": "ingress_node_name",
+            "status": "unknown",
+        }
 
-        egress_port = Port(
-            id="egress_port_id",
-            name="egress_port_name",
-            node="egress_node_name",
-            status="unknown",
-            # state="unknown",
-        )
+        # ingress_node = Node(
+        #     id="ingress_node_id",
+        #     name="ingress_node_name",
+        #     location=location,
+        #     ports=[ingress_port],
+        # )
+
+        # egress_port = Port(
+        #     id="egress_port_id",
+        #     name="egress_port_name",
+        #     # node="egress_node_name",
+        #     # status="unknown",
+        #     # state="unknown",
+        # )
+
+        egress_port = {
+            "id": "egress_port_id",
+            "name": "egress_port_name",
+            "node": "egress_node_name",
+            "status": "unknown",            
+        }
 
         # Port validator expects JSON?
         # egress_port = {
@@ -100,29 +114,49 @@ class TestConnectionController(BaseTestCase):
         #     # "state": "unknown",
         # }
 
-        egress_node = Node(
-            id="egress_node_id",
-            name="egress_node_name",
-            location=location,
-            ports=[egress_port],
-        )
+        # egress_node = Node(
+        #     id="egress_node_id",
+        #     name="egress_node_name",
+        #     location=location,
+        #     ports=[egress_port],
+        # )
 
-        connection = Connection(
-            id="test_place_connection_id",
-            name="test_place_connection_name",
-            ingress_port=ingress_port,
-            egress_port=egress_port,
-            quantity=0,
-            start_time=datetime.datetime.fromtimestamp(0),
-            end_time=datetime.datetime.fromtimestamp(0),
-            status="fail",
-            complete=False,
-        )
+        # connection = Connection(
+        #     id="test_place_connection_id",
+        #     name="test_place_connection_name",
+        #     ingress_port=ingress_port,
+        #     egress_port=egress_port,
+        #     quantity=0,
+        #     start_time=datetime.datetime.fromtimestamp(0),
+        #     end_time=datetime.datetime.fromtimestamp(0),
+        #     status="fail",
+        #     complete=False,
+        # )
 
+        # payload = json.dumps(connection)
+
+        connection = {
+            "id": "test_place_connection_id",
+            "name": "test_place_connection_name",
+            "ingress_port": ingress_port,
+            "egress_port": egress_port,
+            "quantity": 1,
+            # "start_time": stdatetime.datetime.fromtimestamp(0),
+            # "end_time": datetime.datetime.fromtimestamp(0),
+            "status": "scheduled",
+            # "complete": False,
+        }
+
+        # payload = connection
+        print(connection)
+        
+        payload = json.dumps(connection)
+        print(f"payload: {payload}")
+        
         response = self.client.open(
             "/SDX-Controller/1.0.0/conection",
             method="POST",
-            data=json.dumps(connection),
+            data=payload,
             content_type="application/json",
         )
         self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
