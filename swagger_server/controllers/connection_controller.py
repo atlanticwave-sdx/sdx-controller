@@ -125,7 +125,7 @@ def place_connection(body):  # noqa: E501
 
     if topo_val is None:
         ingress_port = {
-            "id": "ingress_node_port_id",
+            "id": "ingress_port_id",
             "name": "ingress_node_port_name",
             "short_name": "ingress_node_port_short_name",
             "node": "ingress_node_name",
@@ -144,7 +144,7 @@ def place_connection(body):  # noqa: E501
             },
         }
         egress_port = {
-            "id": "egress_node_port_id",
+            "id": "egress_port_id",
             "name": "egress_node_port_name",
             "short_name": "egress_node_port_short_name",
             "node": "egress_node_name",
