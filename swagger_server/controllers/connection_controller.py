@@ -167,12 +167,14 @@ def place_connection(body):  # noqa: E501
                 "id": "ingress_link_id",
                 "name": "ingress_link_name",
                 "short_name": "ingress_link_short_name",
+                "residual_bandwidth": 1000.0,
                 "ports": [ ingress_port, ingress_port ],
             },
             {
                 "id": "egress_link_id",
                 "name": "egress_link_name",
-                "short_name": "egress_link_short_name",                
+                "short_name": "egress_link_short_name",
+                "residual_bandwidth": 1000.0,
                 "ports": [ egress_port, egress_port ],
             },
         ]
