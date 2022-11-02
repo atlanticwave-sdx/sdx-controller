@@ -13,8 +13,8 @@ from sdxdatamodel.models.port import Port
 from swagger_server.test import BaseTestCase
 
 
-class TestConnectionController(BaseTestCase):
-    """ConnectionController integration test stubs"""
+class TestConnectionControllerBasic(BaseTestCase):
+    """Some basic tests for ConnectionController."""
 
     def test_delete_connection(self):
         """Test case for delete_connection
@@ -41,6 +41,24 @@ class TestConnectionController(BaseTestCase):
         # TODO: test for existing connection_id.  See
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
         self.assertStatus(response, 204)
+
+
+class TestPlaceConnectionFailures(BaseTestCase):
+    """
+    Additional tests for ConnectionController.
+
+    In order to place a connection successfully, we'll need to do some
+    setup.  There are several places placing a connection can go
+    wrong, both during setup and during connection placement.  We
+    should be testing all of that as much as possible.  Hence this
+    separate class with a different setup step.
+    """
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass   
 
     def test_place_connection(self):
         """Test case for place_connection
