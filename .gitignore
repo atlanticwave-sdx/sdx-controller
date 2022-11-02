@@ -138,3 +138,8 @@ env*
 
 # Patches
 *.patch
+
+# When running tests, pce modifies these files.
+tests/data/LB_linklist.json
+tests/data/connection.json
+tests/data/latency_list.json
