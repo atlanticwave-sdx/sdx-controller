@@ -58,7 +58,7 @@ class TestPlaceConnectionFailures(BaseTestCase):
         pass
 
     def tearDown(self):
-        pass   
+        pass
 
     def test_place_connection(self):
         """Test case for place_connection
@@ -120,7 +120,7 @@ class TestPlaceConnectionFailures(BaseTestCase):
             "id": "egress_port_id",
             "name": "egress_port_name",
             "node": "egress_node_name",
-            "status": "unknown",            
+            "status": "unknown",
         }
 
         # Port validator expects JSON?
@@ -167,10 +167,10 @@ class TestPlaceConnectionFailures(BaseTestCase):
 
         # payload = connection
         print(connection)
-        
+
         payload = json.dumps(connection)
         print(f"payload: {payload}")
-        
+
         response = self.client.open(
             "/SDX-Controller/1.0.0/conection",
             method="POST",
