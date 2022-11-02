@@ -123,73 +123,10 @@ def place_connection(body):  # noqa: E501
     # https://github.com/atlanticwave-sdx/sdx-controller/issues/36
     print("topo_val: {}".format(topo_val))    
 
+    # TODO: raise a more useful/expressive error.
     if topo_val is None:
-        ingress_port = {
-            "id": "ingress_port_id",
-            "name": "ingress_node_port_name",
-            "short_name": "ingress_node_port_short_name",
-            "node": "ingress_node_name",
-            "state": "unknown",
-            "status": "unknown",
-        }
-        ingress_node = {
-            "id": "ingress_node_id",
-            "name": "ingress_node_name",
-            "short_name": "ingress_node_short_name",
-            "ports": [ ingress_port ],
-            "location": {
-                "address": "unknown",
-                "latitude": "unknown",
-                "longitude": "unknown",
-            },
-        }
-        egress_port = {
-            "id": "egress_port_id",
-            "name": "egress_node_port_name",
-            "short_name": "egress_node_port_short_name",
-            "node": "egress_node_name",
-            "state": "unknown",
-            "status": "unknown",
-        }
-        egress_node = {
-            "id": "egress_node_id",
-            "name": "egress_node_name",
-            "short_name": "egress_node_short_name",
-            "ports": [ egress_port ],
-            "location": {
-                "address": "unknown",
-                "latitude": "unknown",
-                "longitude": "unknown",
-            },
-        }
-        links = [
-            {
-                "id": "ingress_link_id",
-                "name": "ingress_link_name",
-                "short_name": "ingress_link_short_name",
-                "residual_bandwidth": 1000.0,
-                "ports": [ ingress_port, ingress_port ],
-            },
-            {
-                "id": "egress_link_id",
-                "name": "egress_link_name",
-                "short_name": "egress_link_short_name",
-                "residual_bandwidth": 1000.0,
-                "ports": [ egress_port, egress_port ],
-            },
-        ]
-        topology = {
-            "id": "test_topo_id",
-            "name": "test_topo_name",
-            "version": "test_topo_version",
-            "time_stamp": None,
-            "nodes": [ingress_node, egress_node],
-            "links": links,
-        }        
+        raise Exception("Could not find a topology in the DB")
         
-        topo_val = json.dumps(topology)
-        print("Made a workaround topo_val: {}".format(topo_val))
-    
     topology_data = json.loads(topo_val)
 
     num_domain_topos = 0
