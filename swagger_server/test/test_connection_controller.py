@@ -142,20 +142,20 @@ class TestPlaceConnection(BaseTestCase):
 
         db_tuples = [("config_table", "test-config")]
         
-        db = DbUtils()
-        db._initialize_db(db_name, db_tuples)
+        self.db = DbUtils()
+        self.db._initialize_db(db_name, db_tuples)
 
         # TODO: ideally db shouldn't have any topology at this point;
         # but it possibly can.
-        topo_val = db.read_from_db("latest_topo")
+        topo_val = self.db.read_from_db("latest_topo")
         if topo_val is None:
-            self._add_topology_to_db(db)
+            self._add_topology_to_db()
             
     def tearDown(self):
-        # TODO: Clear DB.
-        pass
+        # Remove the stuff we inserted into the db.
+        self.db.delete_config_table()
 
-    def _add_topology_to_db(self, db):
+    def _add_topology_to_db(self):
         """Add a topology value to DB."""
         ingress_port = {
             "id": "ingress_port_id",
@@ -228,7 +228,7 @@ class TestPlaceConnection(BaseTestCase):
         topo_val = json.dumps(topology)
         print("Made a workaround topo_val: {}".format(topo_val))
 
-        db.add_key_value_pair_to_db("latest_topo", topo_val)
+        self.db.add_key_value_pair_to_db("latest_topo", topo_val)
 
 
     def test_place_connection(self):
