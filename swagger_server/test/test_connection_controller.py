@@ -43,8 +43,88 @@ class TestConnectionControllerBasic(BaseTestCase):
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
         self.assertStatus(response, 204)
 
+ 
+class TestPlaceConnectionFailure(BaseTestCase):
 
-class TestPlaceConnectionFailures(BaseTestCase):
+    def setUp(self):
+        # No default topology should be present in the database, and
+        # this should cause a failure.
+        pass
+
+    # Some data to represent ingress port
+    ingress_port = {
+        "id": "ingress_port_id",
+        "name": "ingress_port_name",
+        "node": "ingress_node_name",
+        "status": "unknown",
+    }
+
+    # Some data to represent egress port
+    egress_port = {
+        "id": "egress_port_id",
+        "name": "egress_port_name",
+        "node": "egress_node_name",
+        "status": "unknown",
+    }
+
+    def test_place_connection_no_ingress_port(self):
+        # Omit ingress_port from the connection request
+        connection = {
+            "id": "test_place_connection_id",
+            "name": "test_place_connection_name",
+            "egress_port": self.egress_port,
+            "status": "scheduled",
+        }
+ 
+        response = self.client.open(
+            "/SDX-Controller/1.0.0/conection",
+            method="POST",
+            data=json.dumps(connection),
+            content_type="application/json",
+        )
+
+        # Expect 400 bad request
+        self.assertStatus(response, 400)
+
+    def test_place_connection_no_engress_port(self):
+        # Omit egress_port from the connection request
+        connection = {
+            "id": "test_place_connection_id",
+            "name": "test_place_connection_name",
+            "ingress_port": self.ingress_port,
+            "status": "scheduled",
+        }
+ 
+        response = self.client.open(
+            "/SDX-Controller/1.0.0/conection",
+            method="POST",
+            data=json.dumps(connection),
+            content_type="application/json",
+        )
+
+        # Expect 400 bad request
+        self.assertStatus(response, 400)
+
+    def test_place_connection_no_topology(self):
+        connection = {
+            "id": "test_place_connection_id",
+            "name": "test_place_connection_name",
+            "ingress_port": self.ingress_port,
+            "egress_port": self.egress_port,
+            "status": "scheduled",
+        }
+
+        response = self.client.open(
+            "/SDX-Controller/1.0.0/conection",
+            method="POST",
+            data=json.dumps(connection),
+            content_type="application/json",
+        )
+        
+        self.assertStatus(response, 500)
+    
+        
+class TestPlaceConnection(BaseTestCase):
     """
     Additional tests for ConnectionController.
 
