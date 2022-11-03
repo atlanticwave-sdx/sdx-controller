@@ -69,13 +69,13 @@ class TestPlaceConnectionFailures(BaseTestCase):
         # but it possibly can.
         topo_val = db.read_from_db("latest_topo")
         if topo_val is None:
-            self.add_topology_to_db(db)
+            self._add_topology_to_db(db)
             
     def tearDown(self):
         # TODO: Clear DB.
         pass
 
-    def add_topology_to_db(self, db):
+    def _add_topology_to_db(self, db):
         """Add a topology value to DB."""
         ingress_port = {
             "id": "ingress_port_id",
