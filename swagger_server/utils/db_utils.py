@@ -65,3 +65,12 @@ class DbUtils(object):
             # Update entry if already exists.
             self.logger.debug("Updating DB entry {}:{}.".format(key, value))
             self.config_table.update({"key": key, "value": value}, ["key"])
+
+    def delete_config_table(self) -> bool:
+        """
+        Delete the table we created from the database.
+
+        This would be especially useful when tearing down a test scaffold.
+        """
+        if self.config_table:
+            return self.config_table.delete()
