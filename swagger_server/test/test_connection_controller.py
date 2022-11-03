@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import datetime
 import os
+import unittest
 
 from flask import json
 from sdxdatamodel.models.connection import Connection
@@ -231,6 +232,7 @@ class TestPlaceConnection(BaseTestCase):
         self.db.add_key_value_pair_to_db("latest_topo", topo_val)
 
 
+    @unittest.skip("This test is currently incomplete; will fail")
     def test_place_connection(self):
         """Test case for place_connection
 
