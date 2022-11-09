@@ -11,10 +11,10 @@ from swagger_server.messaging.topic_queue_producer import *
 from sdxdatamodel.topologymanager.temanager import TEManager
 from sdxdatamodel.parsing.exceptions import DataModelException
 
-from pce.src.LoadBalancing.MC_Solver import runMC_Solver
-from pce.src.LoadBalancing.RandomTopologyGenerator import GetConnection
-from pce.src.LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
-from pce.src.LoadBalancing.RandomTopologyGenerator import lbnxgraphgenerator
+from LoadBalancing.MC_Solver import runMC_Solver
+from LoadBalancing.RandomTopologyGenerator import GetConnection
+from LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
+from LoadBalancing.RandomTopologyGenerator import lbnxgraphgenerator
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
