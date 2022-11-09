@@ -60,12 +60,12 @@ jobs:
         run: |
           # Stop the build if there are Python syntax errors or
           # undefined names.
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. Black's default
           # is is 88 chars wide.
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+          python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
       - name: Test with tox
         run: |
-          tox
+          python -m tox
         timeout-minutes: 3
