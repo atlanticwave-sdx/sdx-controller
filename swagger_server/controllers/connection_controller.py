@@ -8,8 +8,8 @@ from swagger_server import util
 from swagger_server.utils.db_utils import *
 from swagger_server.messaging.topic_queue_producer import *
 
-from datamodel.sdxdatamodel.topologymanager.temanager import TEManager
-from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
+from sdxdatamodel.topologymanager.temanager import TEManager
+from sdxdatamodel.parsing.exceptions import DataModelException
 
 from pce.src.LoadBalancing.MC_Solver import runMC_Solver
 from pce.src.LoadBalancing.RandomTopologyGenerator import GetConnection
