@@ -62,7 +62,7 @@ paths:
       description: Topology version
       operationId: topology_version
       parameters:
-      - name: topologyId
+      - name: topology_id
         in: query
         description: topology id
         required: true
@@ -79,10 +79,10 @@ paths:
                 $ref: '#/components/schemas/topology'
         "400":
           description: Invalid id value
-      security:
-      - topology_auth:
-        - write:topology
-        - read:topology
+      # security:
+      # - topology_auth:
+      #   - write:topology
+      #   - read:topology
       x-openapi-router-controller: swagger_server.controllers.topology_controller
   /topology/grenml:
     get:
@@ -157,7 +157,7 @@ paths:
         "400":
           description: Invalid Connection
       x-openapi-router-controller: swagger_server.controllers.connection_controller
-  /connection/{connectionId}:
+  /connection/{connection_id}:
     get:
       tags:
       - connection
@@ -165,7 +165,7 @@ paths:
       description: connection details
       operationId: getconnection_by_id
       parameters:
-      - name: connectionId
+      - name: connection_id
         in: path
         description: ID of connection that needs to be fetched
         required: true
@@ -198,7 +198,7 @@ paths:
       description: delete a connection
       operationId: delete_connection
       parameters:
-      - name: connectionId
+      - name: connection_id
         in: path
         description: ID of the connection that needs to be deleted
         required: true

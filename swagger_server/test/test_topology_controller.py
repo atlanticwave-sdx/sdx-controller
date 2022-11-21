@@ -18,7 +18,11 @@ class TestTopologyController(BaseTestCase):
         get an existing topology
         """
         response = self.client.open("/SDX-Controller/1.0.0/topology", method="GET")
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+        # There's nothing corresponding to `latest_topo` in DB at this
+        # point, so we get a 204 No Content response.  We should
+        # probably get a 404 Not Found response though.  See
+        # https://github.com/atlanticwave-sdx/sdx-controller/issues/37
+        self.assertStatus(response, 204)
 
     def test_get_topologyby_version(self):
         """Test case for get_topologyby_version
@@ -31,7 +35,8 @@ class TestTopologyController(BaseTestCase):
             method="GET",
             query_string=query_string,
         )
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+        # No topology exists; we should get a 404.
+        self.assertStatus(response, 404)
 
     def test_topology_version(self):
         """Test case for topology_version
