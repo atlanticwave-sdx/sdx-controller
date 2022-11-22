@@ -12,6 +12,7 @@ from pce.src.LoadBalancing.RandomTopologyGenerator import (GetConnection,
 
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
+from swagger_server.utils.db_utils import *
 
 from sdxdatamodel.topologymanager.temanager import TEManager
 from sdxdatamodel.parsing.exceptions import DataModelException
