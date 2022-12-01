@@ -3,18 +3,15 @@ import os
 
 import connexion
 import six
-
+from LoadBalancing.MC_Solver import runMC_Solver
+from LoadBalancing.RandomTopologyGenerator import (GetConnection,
+                                                   GetNetworkToplogy,
+                                                   lbnxgraphgenerator)
+from sdxdatamodel.parsing.exceptions import DataModelException
+from sdxdatamodel.topologymanager.temanager import TEManager
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
 from swagger_server.utils.db_utils import *
-
-from sdxdatamodel.topologymanager.temanager import TEManager
-from sdxdatamodel.parsing.exceptions import DataModelException
-
-from LoadBalancing.MC_Solver import runMC_Solver
-from LoadBalancing.RandomTopologyGenerator import GetConnection
-from LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
-from LoadBalancing.RandomTopologyGenerator import lbnxgraphgenerator
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
