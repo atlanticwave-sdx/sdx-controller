@@ -10,9 +10,9 @@ from elasticsearch import Elasticsearch
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
-ES_HOST = "localhost"
-ES_PORT = 9200
-MQ_HOST = "amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F"
+ES_HOST = os.environ.get("ES_HOST")
+ES_PORT = os.environ.get("ES_PORT")
+MQ_HOST = os.environ.get("BAPM_MQ_HOST")
 
 
 def is_json(myjson):

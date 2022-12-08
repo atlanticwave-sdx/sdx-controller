@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# pylint: disable=C0111,C0103,R0205
+# Asynchronous MQ publisher, from pika, for testing purposes
 
 import functools
 import json

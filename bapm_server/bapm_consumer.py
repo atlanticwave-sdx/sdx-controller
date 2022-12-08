@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-# pylint: disable=C0111,C0103,R0205
 # Asynchronous MQ consumer, from pika
 
 import functools
 import logging
 import threading
 import time
+import os
 from queue import Queue
 
 import pika
@@ -24,10 +23,10 @@ class BAPMConsumer(object):
     BAPM consumer
     """
 
-    EXCHANGE = "measurement"
     EXCHANGE_TYPE = ExchangeType.topic
-    QUEUE = "sdx_q_measurement"
-    ROUTING_KEY = "measurement.bapm"
+    EXCHANGE = os.environ.get("BAPM_EXCHANGE")
+    QUEUE = os.environ.get("BAPM_QUEUE")
+    ROUTING_KEY = os.environ.get("BAPM_ROUTING_KEY")
 
     def __init__(self, amqp_url, thread_queue):
         self.should_reconnect = False
