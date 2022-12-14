@@ -1,6 +1,7 @@
-import pika
 import ast
 import os
+
+import pika
 
 MQ_HOST = os.environ.get("MQ_HOST")
 

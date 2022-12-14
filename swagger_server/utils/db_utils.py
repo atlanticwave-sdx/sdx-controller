@@ -1,8 +1,8 @@
-import dataset
-import _pickle as pickle
-import dataset
 import logging
 import os
+
+import _pickle as pickle
+import dataset
 
 DB_CONFIG_TABLE_NAME = os.environ.get("DB_CONFIG_TABLE_NAME")
 

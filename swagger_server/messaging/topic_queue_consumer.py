@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import pika
+import logging
 import os
 import threading
-import logging
 from queue import Queue
+
+import pika
 
 MQ_HOST = os.environ.get("MQ_HOST")
 # subscribe to the corresponding queue
