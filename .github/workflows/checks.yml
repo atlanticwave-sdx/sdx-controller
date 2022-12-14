@@ -38,3 +38,8 @@ jobs:
       - name: Run "isort --check"
         run: |
           python -m isort --check --profile black --verbose .
+
+      - name: Lint sdx-controller Dockerfile
+        uses: hadolint/hadolint-action@v2.1.0
+        with:
+          dockerfile: Dockerfile
