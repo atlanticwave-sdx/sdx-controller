@@ -8,6 +8,7 @@ import logging
 
 MQ_HOST = os.environ.get("MQ_HOST")
 
+
 class RpcProducer(object):
     def __init__(self, timeout, exchange_name, routing_key):
         self.logger = logging.getLogger(__name__)

@@ -135,9 +135,7 @@ def place_connection(body):  # noqa: E501
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
         producer = TopicQueueProducer(
-            timeout=5,
-            exchange_name="connection",
-            routing_key=domain_name
+            timeout=5, exchange_name="connection", routing_key=domain_name
         )
         producer.call(json.dumps(breakdown[entry]))
         producer.stop_keep_alive()

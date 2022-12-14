@@ -91,4 +91,5 @@ if __name__ == "__main__":
         producer.stop_keep_alive()
 
     import signal
+
     signal.signal(signal.SIGINT, sigint_handler)
