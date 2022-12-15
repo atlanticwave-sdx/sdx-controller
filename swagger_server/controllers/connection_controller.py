@@ -9,8 +9,8 @@ from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
     GetNetworkToplogy,
     lbnxgraphgenerator,
 )
-from sdxdatamodel.parsing.exceptions import DataModelException
-from sdxdatamodel.topologymanager.temanager import TEManager
+from sdx.datamodel.parsing.exceptions import DataModelException
+from sdx.datamodel.topologymanager.temanager import TEManager
 
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
