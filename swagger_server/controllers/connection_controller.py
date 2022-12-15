@@ -3,14 +3,14 @@ import os
 
 import connexion
 import six
+from sdx.datamodel.parsing.exceptions import DataModelException
+from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
 from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
     GetConnection,
     GetNetworkToplogy,
     lbnxgraphgenerator,
 )
-from sdx.datamodel.parsing.exceptions import DataModelException
-from sdx.datamodel.topologymanager.temanager import TEManager
 
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *

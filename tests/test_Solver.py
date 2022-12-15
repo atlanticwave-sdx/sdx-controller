@@ -3,15 +3,15 @@ import unittest
 
 import networkx as nx
 from networkx import Graph, MultiGraph
+from sdx.datamodel.parsing import *
+from sdx.datamodel.parsing.exceptions import DataModelException
+from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
 from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
     GetConnection,
     GetNetworkToplogy,
     lbnxgraphgenerator,
 )
-from sdx.datamodel.parsing import *
-from sdx.datamodel.parsing.exceptions import DataModelException
-from sdx.datamodel.topologymanager.temanager import TEManager
 
 # Topology = GetNetworkToplogy(25,0.4)
 # Connection = GetConnection('./tests/data/test_connection.json')

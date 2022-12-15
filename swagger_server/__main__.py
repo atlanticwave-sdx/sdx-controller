@@ -8,7 +8,6 @@ import time
 from optparse import OptionParser
 
 import connexion
-
 from sdx.datamodel import parsing, topologymanager, validation
 from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.parsing.topologyhandler import TopologyHandler
