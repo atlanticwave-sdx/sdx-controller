@@ -2,11 +2,13 @@ import json
 import unittest
 
 import networkx as nx
-from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
-from sdx.pce.LoadBalancing.RandomTopologyGenerator import (GetConnection,
-                                                   GetNetworkToplogy,
-                                                   lbnxgraphgenerator)
 from networkx import Graph, MultiGraph
+from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
+from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
+    GetConnection,
+    GetNetworkToplogy,
+    lbnxgraphgenerator,
+)
 from sdxdatamodel.parsing import *
 from sdxdatamodel.parsing.exceptions import DataModelException
 from sdxdatamodel.topologymanager.temanager import TEManager

@@ -11,6 +11,7 @@ from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
 )
 from sdxdatamodel.parsing.exceptions import DataModelException
 from sdxdatamodel.topologymanager.temanager import TEManager
+
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
 from swagger_server.utils.db_utils import *
