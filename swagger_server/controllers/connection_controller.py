@@ -3,8 +3,8 @@ import os
 
 import connexion
 import six
-from LoadBalancing.MC_Solver import runMC_Solver
-from LoadBalancing.RandomTopologyGenerator import (GetConnection,
+from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
+from sdx.pce.LoadBalancing.RandomTopologyGenerator import (GetConnection,
                                                    GetNetworkToplogy,
                                                    lbnxgraphgenerator)
 from sdxdatamodel.parsing.exceptions import DataModelException
