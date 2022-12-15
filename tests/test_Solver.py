@@ -3,11 +3,9 @@ import unittest
 
 import networkx as nx
 from LoadBalancing.MC_Solver import runMC_Solver
-from LoadBalancing.RandomTopologyGenerator import (
-    GetConnection,
-    GetNetworkToplogy,
-    lbnxgraphgenerator,
-)
+from LoadBalancing.RandomTopologyGenerator import (GetConnection,
+                                                   GetNetworkToplogy,
+                                                   lbnxgraphgenerator)
 from networkx import Graph, MultiGraph
 from sdxdatamodel.parsing import *
 from sdxdatamodel.parsing.exceptions import DataModelException
