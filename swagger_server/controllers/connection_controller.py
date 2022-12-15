@@ -4,9 +4,11 @@ import os
 import connexion
 import six
 from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
-from sdx.pce.LoadBalancing.RandomTopologyGenerator import (GetConnection,
-                                                   GetNetworkToplogy,
-                                                   lbnxgraphgenerator)
+from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
+    GetConnection,
+    GetNetworkToplogy,
+    lbnxgraphgenerator,
+)
 from sdxdatamodel.parsing.exceptions import DataModelException
 from sdxdatamodel.topologymanager.temanager import TEManager
 from swagger_server import util
@@ -132,9 +134,7 @@ def place_connection(body):  # noqa: E501
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
         producer = TopicQueueProducer(
-            timeout=5,
-            exchange_name="connection",
-            routing_key=domain_name
+            timeout=5, exchange_name="connection", routing_key=domain_name
         )
         producer.call(json.dumps(breakdown[entry]))
         producer.stop_keep_alive()

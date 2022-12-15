@@ -8,16 +8,15 @@ import time
 from optparse import OptionParser
 
 import connexion
+
 # make sure to install datamodel:
 # https://github.com/atlanticwave-sdx/datamodel
 from datamodel.sdxdatamodel import parsing, topologymanager, validation
 from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
 from datamodel.sdxdatamodel.parsing.topologyhandler import TopologyHandler
-from datamodel.sdxdatamodel.topologymanager.grenmlconverter import \
-    GrenmlConverter
+from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
 from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
-from datamodel.sdxdatamodel.validation.topologyvalidator import \
-    TopologyValidator
+from datamodel.sdxdatamodel.validation.topologyvalidator import TopologyValidator
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import *
