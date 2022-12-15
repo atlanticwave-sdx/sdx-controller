@@ -1,7 +1,7 @@
 import datetime
+import typing
 
 import six
-import typing
 
 
 def _deserialize(data, klass):

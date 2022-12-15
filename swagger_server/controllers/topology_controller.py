@@ -1,14 +1,15 @@
-import connexion
-import six
+import json
 import os
 from queue import Queue
-import json
 
-from swagger_server.utils.db_utils import *
-from swagger_server.models.topology import Topology  # noqa: E501
-from swagger_server import util
+import connexion
+import six
 from sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
 from sdxdatamodel.topologymanager.manager import TopologyManager
+
+from swagger_server import util
+from swagger_server.models.topology import Topology  # noqa: E501
+from swagger_server.utils.db_utils import *
 
 DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
 # Get DB connection and tables set up.

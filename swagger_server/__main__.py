@@ -1,30 +1,27 @@
 #!/usr/bin/env python3
 
+import argparse
+import json
+import logging
+import threading
+import time
+from optparse import OptionParser
+
 import connexion
+# make sure to install datamodel:
+# https://github.com/atlanticwave-sdx/datamodel
+from datamodel.sdxdatamodel import parsing, topologymanager, validation
+from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
+from datamodel.sdxdatamodel.parsing.topologyhandler import TopologyHandler
+from datamodel.sdxdatamodel.topologymanager.grenmlconverter import \
+    GrenmlConverter
+from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
+from datamodel.sdxdatamodel.validation.topologyvalidator import \
+    TopologyValidator
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import *
 from swagger_server.utils.db_utils import *
-
-from optparse import OptionParser
-import argparse
-import time
-import threading
-import logging
-import json
-
-# make sure to install datamodel:
-# https://github.com/atlanticwave-sdx/datamodel
-from datamodel.sdxdatamodel import parsing
-from datamodel.sdxdatamodel import topologymanager
-
-from datamodel.sdxdatamodel import validation
-from datamodel.sdxdatamodel.validation.topologyvalidator import TopologyValidator
-from datamodel.sdxdatamodel.parsing.topologyhandler import TopologyHandler
-from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
-from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
-from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
-
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
