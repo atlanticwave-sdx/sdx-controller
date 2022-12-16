@@ -1,20 +1,20 @@
+import json
+import os
+
 import connexion
 import six
-import os
-import json
+from sdx.datamodel.parsing.exceptions import DataModelException
+from sdx.datamodel.topologymanager.temanager import TEManager
+from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
+from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
+    GetConnection,
+    GetNetworkToplogy,
+    lbnxgraphgenerator,
+)
 
-from swagger_server.models.connection import Connection  # noqa: E501
 from swagger_server import util
-from swagger_server.utils.db_utils import *
 from swagger_server.messaging.topic_queue_producer import *
-
-from sdxdatamodel.topologymanager.temanager import TEManager
-from sdxdatamodel.parsing.exceptions import DataModelException
-
-from LoadBalancing.MC_Solver import runMC_Solver
-from LoadBalancing.RandomTopologyGenerator import GetConnection
-from LoadBalancing.RandomTopologyGenerator import GetNetworkToplogy
-from LoadBalancing.RandomTopologyGenerator import lbnxgraphgenerator
+from swagger_server.utils.db_utils import *
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
@@ -135,9 +135,7 @@ def place_connection(body):  # noqa: E501
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
         producer = TopicQueueProducer(
-            timeout=5,
-            exchange_name="connection",
-            routing_key=domain_name
+            timeout=5, exchange_name="connection", routing_key=domain_name
         )
         producer.call(json.dumps(breakdown[entry]))
         producer.stop_keep_alive()

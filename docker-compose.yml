@@ -21,3 +21,16 @@ services:
       - DB_NAME=test-db
       - DB_CONFIG_TABLE_NAME=test-1
       - MANIFEST=README.md
+
+  bapm-server:
+    image: bapm-server
+    network_mode: "host"
+    tty: true
+    build: ./bapm_server
+    environment:
+      - ES_HOST=localhost
+      - ES_PORT=9200
+      - BAPM_MQ_HOST=amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F
+      - BAPM_EXCHANGE=measurement
+      - BAPM_QUEUE=sdx_q_measurement
+      - BAPM_ROUTING_KEY=measurement.bapm
