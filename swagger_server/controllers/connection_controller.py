@@ -3,7 +3,6 @@ import os
 
 import connexion
 import six
-
 from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver

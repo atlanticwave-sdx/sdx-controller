@@ -2,7 +2,6 @@ import json
 import unittest
 
 import networkx as nx
-
 from networkx import Graph, MultiGraph
 from sdx.datamodel.parsing import *
 from sdx.datamodel.parsing.exceptions import DataModelException
