@@ -2,9 +2,9 @@
 
 import functools
 import logging
+import os
 import threading
 import time
-import os
 from queue import Queue
 
 import pika
