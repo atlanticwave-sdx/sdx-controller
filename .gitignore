@@ -128,6 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# SQLite files
+# SQLite files.
 *.sqlite3
 *.sqlite3-journal
+/*.sqlite3-shm
+/*.sqlite3-wal
+
