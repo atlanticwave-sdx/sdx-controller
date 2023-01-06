@@ -5,12 +5,7 @@ import connexion
 import six
 from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
-from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
-from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
-    GetConnection,
-    GetNetworkToplogy,
-    lbnxgraphgenerator,
-)
+from sdx.pce.load_balancing.te_solver import TESolver
 
 from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
@@ -124,9 +119,7 @@ def place_connection(body):  # noqa: E501
     with open("./tests/data/connection.json", "w") as json_file:
         json.dump(connection, json_file, indent=4)
 
-    num_nodes = graph.number_of_nodes()
-    lbnxgraphgenerator(num_nodes, 0.4, connection, graph)
-    result = runMC_Solver()
+    result = TESolver(graph, connection).solve()
 
     breakdown = temanager.generate_connection_breakdown(result)
     logger.debug("-------BREAKDOWN:------")
