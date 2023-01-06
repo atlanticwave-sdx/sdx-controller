@@ -1,12 +1,13 @@
 import json
+import logging
 import os
 
 import connexion
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 
-from swagger_server.messaging.topic_queue_producer import *
-from swagger_server.utils.db_utils import *
+from swagger_server.messaging.topic_queue_producer import TopicQueueProducer
+from swagger_server.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
