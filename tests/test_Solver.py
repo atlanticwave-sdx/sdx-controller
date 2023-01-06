@@ -6,12 +6,8 @@ from networkx import Graph, MultiGraph
 from sdx.datamodel.parsing import *
 from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
-from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
-from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
-    GetConnection,
-    GetNetworkToplogy,
-    lbnxgraphgenerator,
-)
+from sdx.pce.load_balancing.te_solver import TESolver
+from sdx.pce.utils.random_connection_generator import RandomConnectionGenerator
 
 # Topology = GetNetworkToplogy(25,0.4)
 # Connection = GetConnection('./tests/data/test_connection.json')
@@ -46,8 +42,8 @@ class Test_Solver(unittest.TestCase):
         print("num of nodes:" + str(num_nodes))
         print(self.graph.edges)
         print(self.connection[0])
-        lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
-        result = runMC_Solver()
+
+        result = TESolver(self.graph, self.connection).solve()
         print(result)
         # self.assertEqual(self.solution, result)
 
@@ -70,8 +66,9 @@ class Test_Solver(unittest.TestCase):
         with open("./tests/data/connection.json", "w") as json_file:
             json.dump(self.connection, json_file, indent=4)
         num_nodes = self.graph.number_of_nodes()
-        lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
-        result = runMC_Solver()
+
+        result = TESolver(self.graph, self.connection).solve()
+
         print(result)
         breakdown = self.temanager.generate_connection_breakdown(result)
         print(breakdown)
@@ -105,8 +102,9 @@ class Test_Solver(unittest.TestCase):
         with open("./tests/data/connection.json", "w") as json_file:
             json.dump(self.connection, json_file, indent=4)
         num_nodes = self.graph.number_of_nodes()
-        lbnxgraphgenerator(num_nodes, 0.4, self.connection, self.graph)
-        result = runMC_Solver()
+
+        result = TESolver(self.graph, self.connection).solve()
+
         print(result)
         breakdown = self.temanager.generate_connection_breakdown(result)
         print(breakdown)
