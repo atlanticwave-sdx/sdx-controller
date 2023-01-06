@@ -114,11 +114,6 @@ def place_connection(body):  # noqa: E501
     graph = temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    with open("./tests/data/connection.json", "w") as json_file:
-        json.dump(connection, json_file, indent=4)
-
     result = TESolver(graph, connection).solve()
 
     breakdown = temanager.generate_connection_breakdown(result)
