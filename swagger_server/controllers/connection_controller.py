@@ -30,7 +30,7 @@ MANIFEST = os.environ.get("MANIFEST")
 def is_json(myjson):
     try:
         json.loads(myjson)
-    except ValueError as e:
+    except ValueError:
         return False
     return True
 
