@@ -2,12 +2,9 @@ import json
 import os
 
 import connexion
-import six
-from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 
-from swagger_server import util
 from swagger_server.messaging.topic_queue_producer import *
 from swagger_server.utils.db_utils import *
 
