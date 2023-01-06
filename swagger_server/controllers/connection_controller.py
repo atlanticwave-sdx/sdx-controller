@@ -46,12 +46,12 @@ def find_between(s, first, last):
         return ""
 
 
-def delete_connection(connection_id):  # noqa: E501
-    """Delete connection order by ID
+def delete_connection(connection_id):
+    """
+    Delete connection order by ID.
 
-    delete a connection # noqa: E501
-
-    :param connection_id: ID of the connection that needs to be deleted
+    :param connection_id: ID of the connection that needs to be
+        deleted
     :type connection_id: int
 
     :rtype: None
@@ -59,10 +59,9 @@ def delete_connection(connection_id):  # noqa: E501
     return "do some magic!"
 
 
-def getconnection_by_id(connection_id):  # noqa: E501
-    """Find connection by ID
-
-    connection details # noqa: E501
+def getconnection_by_id(connection_id):
+    """
+    Find connection by ID.
 
     :param connection_id: ID of connection that needs to be fetched
     :type connection_id: int
@@ -73,10 +72,9 @@ def getconnection_by_id(connection_id):  # noqa: E501
     return value
 
 
-def place_connection(body):  # noqa: E501
-    """Place an connection request from the SDX-Controller
-
-     # noqa: E501
+def place_connection(body):
+    """
+    Place an connection request from the SDX-Controller.
 
     :param body: order placed for creating a connection
     :type body: dict | bytes
