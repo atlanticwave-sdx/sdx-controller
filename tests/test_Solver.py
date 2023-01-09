@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 
 import networkx as nx
@@ -13,12 +14,14 @@ from sdx.pce.utils.random_connection_generator import RandomConnectionGenerator
 # Connection = GetConnection('./tests/data/test_connection.json')
 # Solution = './tests/data/test_MC_solution.json'
 
-TOPOLOGY = "./tests/data/sdx.json"
-CONNECTION = "./tests/data/test_request.json"
+TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
-TOPOLOGY_AMLIGHT = "./tests/data/amlight.json"
-TOPOLOGY_SAX = "./tests/data/sax.json"
-TOPOLOGY_ZAOXI = "./tests/data/zaoxi.json"
+TOPOLOGY = os.path.join(TEST_DATA_DIR, "sdx.json")
+CONNECTION = os.path.join(TEST_DATA_DIR, "test_request.json")
+
+TOPOLOGY_AMLIGHT = os.path.join(TEST_DATA_DIR, "amlight.json")
+TOPOLOGY_SAX = os.path.join(TEST_DATA_DIR, "sax.json")
+TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
 
 topology_file_list_3 = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 topology_file_list_update = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
