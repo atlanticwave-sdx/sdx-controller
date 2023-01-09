@@ -34,8 +34,6 @@ class Test_Solver(unittest.TestCase):
         self.temanager = TEManager(topology_data, connection_data)
         self.graph = self.temanager.generate_graph_te()
         self.connection = self.temanager.generate_connection_te()
-        with open("./tests/data/connection.json", "w") as json_file:
-            json.dump(self.connection, json_file, indent=4)
 
     def test_computation(self):
         num_nodes = self.graph.number_of_nodes()
@@ -63,8 +61,6 @@ class Test_Solver(unittest.TestCase):
 
         conn = self.temanager.requests_connectivity(self.connection)
         print("Graph connectivity:" + str(conn))
-        with open("./tests/data/connection.json", "w") as json_file:
-            json.dump(self.connection, json_file, indent=4)
         num_nodes = self.graph.number_of_nodes()
 
         result = TESolver(self.graph, self.connection).solve()
@@ -99,8 +95,6 @@ class Test_Solver(unittest.TestCase):
 
         conn = self.temanager.requests_connectivity(self.connection)
         print("Graph connectivity:" + str(conn))
-        with open("./tests/data/connection.json", "w") as json_file:
-            json.dump(self.connection, json_file, indent=4)
         num_nodes = self.graph.number_of_nodes()
 
         result = TESolver(self.graph, self.connection).solve()
