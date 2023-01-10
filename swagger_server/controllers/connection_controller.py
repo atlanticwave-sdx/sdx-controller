@@ -110,9 +110,10 @@ def place_connection(body):
     graph = temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
 
-    result = TESolver(graph, connection).solve()
+    path, value = TESolver(graph, connection).solve()
+    logger.debug(f"TESolver result: path: {path}, value: {value}")
 
-    breakdown = temanager.generate_connection_breakdown(result)
+    breakdown = temanager.generate_connection_breakdown(path)
     logger.debug("-------BREAKDOWN:------")
     logger.debug(json.dumps(breakdown))
 
