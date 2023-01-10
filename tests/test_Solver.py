@@ -79,7 +79,7 @@ class Test_Solver(unittest.TestCase):
     def test_computation_update(self):
         try:
             for topology_file in TOPOLOGY_FILE_LIST:
-                print("Adding Topology:" + topology_file)                
+                print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
                     self.temanager.manager.add_topology(data)
@@ -89,7 +89,7 @@ class Test_Solver(unittest.TestCase):
 
         try:
             for topology_file in TOPOLOGY_FILE_LIST_UPDATE:
-                print("Updating Topology:" + topology_file)                
+                print(f"Updating Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
                     self.temanager.manager.update_topology(data)
@@ -101,7 +101,7 @@ class Test_Solver(unittest.TestCase):
         self.connection = self.temanager.generate_connection_te()
 
         conn = self.temanager.requests_connectivity(self.connection)
-        print("Graph connectivity:" + str(conn))
+        print(f"Graph connectivity: {conn}")
         num_nodes = self.graph.number_of_nodes()
 
         result = TESolver(self.graph, self.connection).solve()
