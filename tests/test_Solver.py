@@ -54,7 +54,7 @@ class Test_Solver(unittest.TestCase):
             for topology_file in topology_file_list_3:
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                print("Adding Topology:" + topology_file)
+                print(f"Adding Topology: {topology_file}")
                 self.temanager.manager.add_topology(data)
         except DataModelException as e:
             print(e)
@@ -64,14 +64,17 @@ class Test_Solver(unittest.TestCase):
         self.connection = self.temanager.generate_connection_te()
 
         conn = self.temanager.requests_connectivity(self.connection)
-        print("Graph connectivity:" + str(conn))
+        print(f"Graph connectivity: {conn}")
         num_nodes = self.graph.number_of_nodes()
 
-        result = TESolver(self.graph, self.connection).solve()
+        path, value = TESolver(self.graph, self.connection).solve()
+        print(f"TESolver result: path: {path}, value: {value}")
 
-        print(result)
-        breakdown = self.temanager.generate_connection_breakdown(result)
-        print(breakdown)
+        self.assertNotEqual(path, None, "No path was computed")
+
+        # TODO: what do we break down here?
+        breakdown = self.temanager.generate_connection_breakdown(path)
+        print(f"Breakdown: {breakdown}")
 
     def test_computation_update(self):
         try:
