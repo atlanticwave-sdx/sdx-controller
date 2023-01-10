@@ -39,14 +39,15 @@ class Test_Solver(unittest.TestCase):
         self.connection = self.temanager.generate_connection_te()
 
     def test_computation(self):
-        num_nodes = self.graph.number_of_nodes()
-        print("num of nodes:" + str(num_nodes))
-        print(self.graph.edges)
-        print(self.connection[0])
+        print(f"Number of nodes: {self.graph.number_of_nodes()}")
+        print(f"Graph edges: {self.graph.edges}")
+        print(f"Connection[0]: {self.connection[0]}")
 
-        result = TESolver(self.graph, self.connection).solve()
-        print(result)
-        # self.assertEqual(self.solution, result)
+        path, value = TESolver(self.graph, self.connection).solve()
+        print(f"TESolver result: path: {path}, value: {value}")
+        
+        self.assertEqual(value, 5.0)
+        # self.assertIsInstance(path, numpy.ndarray)
 
     def test_computation_breakdown(self):
         try:
