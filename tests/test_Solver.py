@@ -102,7 +102,6 @@ class Test_Solver(unittest.TestCase):
 
         conn = self.temanager.requests_connectivity(self.connection)
         print(f"Graph connectivity: {conn}")
-        num_nodes = self.graph.number_of_nodes()
 
         result = TESolver(self.graph, self.connection).solve()
 
