@@ -52,10 +52,10 @@ class Test_Solver(unittest.TestCase):
     def test_computation_breakdown(self):
         try:
             for topology_file in topology_file_list_3:
+                print(f"Adding Topology: {topology_file}")                
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                print(f"Adding Topology: {topology_file}")
-                self.temanager.manager.add_topology(data)
+                    self.temanager.manager.add_topology(data)
         except DataModelException as e:
             print(e)
             return False
