@@ -2,7 +2,6 @@
 import logging
 import os
 import threading
-import time
 import uuid
 
 import pika
