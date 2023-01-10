@@ -23,8 +23,8 @@ TOPOLOGY_AMLIGHT = os.path.join(TEST_DATA_DIR, "amlight.json")
 TOPOLOGY_SAX = os.path.join(TEST_DATA_DIR, "sax.json")
 TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
 
-topology_file_list_3 = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
-topology_file_list_update = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
+TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
+TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 
 
 class Test_Solver(unittest.TestCase):
@@ -51,7 +51,7 @@ class Test_Solver(unittest.TestCase):
 
     def test_computation_breakdown(self):
         try:
-            for topology_file in topology_file_list_3:
+            for topology_file in TOPOLOGY_FILE_LIST:
                 print(f"Adding Topology: {topology_file}")                
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
@@ -78,7 +78,7 @@ class Test_Solver(unittest.TestCase):
 
     def test_computation_update(self):
         try:
-            for topology_file in topology_file_list_3:
+            for topology_file in TOPOLOGY_FILE_LIST:
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
                 print("Adding Topology:" + topology_file)
@@ -88,7 +88,7 @@ class Test_Solver(unittest.TestCase):
             return False
 
         try:
-            for topology_file in topology_file_list_update:
+            for topology_file in TOPOLOGY_FILE_LIST_UPDATE:
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
                 print("Updating Topology:" + topology_file)
