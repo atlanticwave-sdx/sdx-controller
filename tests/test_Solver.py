@@ -79,20 +79,20 @@ class Test_Solver(unittest.TestCase):
     def test_computation_update(self):
         try:
             for topology_file in TOPOLOGY_FILE_LIST:
+                print("Adding Topology:" + topology_file)                
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                print("Adding Topology:" + topology_file)
-                self.temanager.manager.add_topology(data)
+                    self.temanager.manager.add_topology(data)
         except DataModelException as e:
             print(e)
             return False
 
         try:
             for topology_file in TOPOLOGY_FILE_LIST_UPDATE:
+                print("Updating Topology:" + topology_file)                
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                print("Updating Topology:" + topology_file)
-                self.temanager.manager.update_topology(data)
+                    self.temanager.manager.update_topology(data)
         except DataModelException as e:
             print(e)
             return False
