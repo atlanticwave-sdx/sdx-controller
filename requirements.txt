@@ -6,4 +6,4 @@ pika >= 1.2.0
 dataset
 
 git+https://github.com/atlanticwave-sdx/pce@1.0.0a
-git+https://github.com/atlanticwave-sdx/datamodel@main
+git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a
