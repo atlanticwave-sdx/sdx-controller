@@ -18,15 +18,12 @@ RUN pip3 install "connexion[swagger-ui]"
 
 RUN git clone https://github.com/atlanticwave-sdx/datamodel.git
 WORKDIR /usr/src/app/datamodel
-RUN git checkout develop && git pull
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py install
+RUN pip3 install .
 
 WORKDIR /usr/src/app/
 RUN git clone https://github.com/atlanticwave-sdx/pce.git
 WORKDIR /usr/src/app/pce
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py install
+RUN pip3 install .
 
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app/datamodel"
 ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app/pce"
@@ -38,5 +35,3 @@ EXPOSE 8080
 
 ENTRYPOINT ["python3"]
 CMD ["-m", "swagger_server"]
-
-# CMD ["/bin/bash"]
