@@ -45,14 +45,14 @@ class Test_Solver(unittest.TestCase):
 
         path, value = TESolver(self.graph, self.connection).solve()
         print(f"TESolver result: path: {path}, value: {value}")
-        
+
         self.assertEqual(value, 5.0)
         # self.assertIsInstance(path, numpy.ndarray)
 
     def test_computation_breakdown(self):
         try:
             for topology_file in TOPOLOGY_FILE_LIST:
-                print(f"Adding Topology: {topology_file}")                
+                print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
                     self.temanager.manager.add_topology(data)
@@ -103,11 +103,14 @@ class Test_Solver(unittest.TestCase):
         conn = self.temanager.requests_connectivity(self.connection)
         print(f"Graph connectivity: {conn}")
 
-        result = TESolver(self.graph, self.connection).solve()
+        path, value = TESolver(self.graph, self.connection).solve()
+        print(f"TESolver result: path: {path}, value: {value}")
 
-        print(result)
-        breakdown = self.temanager.generate_connection_breakdown(result)
-        print(breakdown)
+        self.assertNotEqual(path, None, "No path was computed")
+
+        # TODO: determine correct input to breakdown method.
+        breakdown = self.temanager.generate_connection_breakdown(path)
+        print(f"Breakdown: {breakdown}")
 
 
 if __name__ == "__main__":
