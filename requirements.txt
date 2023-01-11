@@ -5,7 +5,7 @@ setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
 
-git+https://github.com/atlanticwave-sdx/pce@main
+git+https://github.com/atlanticwave-sdx/pce@1.0.0a
 
 # ortools should be a dependency of pce:
 # https://github.com/atlanticwave-sdx/pce/issues/45
