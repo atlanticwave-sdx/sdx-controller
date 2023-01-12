@@ -49,6 +49,10 @@ class Test_Solver(unittest.TestCase):
         self.assertEqual(value, 5.0)
         # self.assertIsInstance(path, numpy.ndarray)
 
+        result = [path, value]
+        breakdown = self.temanager.generate_connection_breakdown(result)
+        print(f"Breakdown: {breakdown}")
+
     def test_computation_breakdown(self):
         try:
             for topology_file in TOPOLOGY_FILE_LIST:
