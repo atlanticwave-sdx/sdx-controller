@@ -4,7 +4,7 @@ import unittest
 
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
-from sdx.pce.models import ConnectionRequest, TrafficMatrix, ConnectionSolution
+from sdx.pce.models import ConnectionRequest, ConnectionSolution, TrafficMatrix
 
 # Topology = GetNetworkToplogy(25,0.4)
 # Connection = GetConnection('./tests/data/test_connection.json')
@@ -22,26 +22,30 @@ TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
 TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 
+
 def make_traffic_matrix(requests: list) -> TrafficMatrix:
     """
     Take the old-style list of lists and make a traffic matrix.
     """
     assert isinstance(requests, list)
-    
+
     new_requests: list(ConnectionRequest) = []
 
     for request in requests:
         assert isinstance(request, list)
         assert len(request) == 4
 
-        new_requests.append(ConnectionRequest(
-            source = request[0],
-            destination = request[1],
-            required_bandwidth = request[2],
-            required_latency = request[3]
-        ))
+        new_requests.append(
+            ConnectionRequest(
+                source=request[0],
+                destination=request[1],
+                required_bandwidth=request[2],
+                required_latency=request[3],
+            )
+        )
 
     return TrafficMatrix(connection_requests=new_requests)
+
 
 class Test_Solver(unittest.TestCase):
     def setUp(self):
