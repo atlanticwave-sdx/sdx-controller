@@ -2,13 +2,8 @@ import json
 import os
 import unittest
 
-import networkx as nx
-from networkx import Graph, MultiGraph
-from sdx.datamodel.parsing import *
-from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
-from sdx.pce.utils.random_connection_generator import RandomConnectionGenerator
 from sdx.pce.models import ConnectionRequest, TrafficMatrix, ConnectionSolution
 
 # Topology = GetNetworkToplogy(25,0.4)
