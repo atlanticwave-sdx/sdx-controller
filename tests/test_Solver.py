@@ -27,21 +27,26 @@ TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
 TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 
-def make_traffic_matrix(conn: list) -> TrafficMatrix:
+def make_traffic_matrix(requests: list) -> TrafficMatrix:
     """
-    Take the old-style arrays and make a traffic matrix.
+    Take the old-style list of lists and make a traffic matrix.
     """
-    assert isinstance(conn, list)
-    assert len(conn) == 4
+    assert isinstance(requests, list)
+    
+    new_requests: list(ConnectionRequest) = []
 
-    req = ConnectionRequest(
-        source = conn[0],
-        destination = conn[1],
-        required_bandwidth = conn[2],
-        required_latency = conn[3]
-    )
+    for request in requests:
+        assert isinstance(request, list)
+        assert len(request) == 4
 
-    return TrafficMatrix(connection_requests=[req])
+        new_requests.append(ConnectionRequest(
+            source = request[0],
+            destination = request[1],
+            required_bandwidth = request[2],
+            required_latency = request[3]
+        ))
+
+    return TrafficMatrix(connection_requests=new_requests)
 
 class Test_Solver(unittest.TestCase):
     def setUp(self):
@@ -59,7 +64,7 @@ class Test_Solver(unittest.TestCase):
         print(f"Graph edges: {self.graph.edges}")
         print(f"Connection[0]: {self.connection[0]}")
 
-        tm = make_traffic_matrix(self.connection[0])
+        tm = make_traffic_matrix(self.connection)
         print(f"TM: {tm}")
 
         path, value = TESolver(self.graph, tm).solve()
