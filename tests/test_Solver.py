@@ -9,6 +9,7 @@ from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 from sdx.pce.utils.random_connection_generator import RandomConnectionGenerator
+from sdx.pce.models import ConnectionRequest, TrafficMatrix, ConnectionSolution
 
 # Topology = GetNetworkToplogy(25,0.4)
 # Connection = GetConnection('./tests/data/test_connection.json')
@@ -26,6 +27,21 @@ TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
 TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 
+def make_traffic_matrix(conn: list) -> TrafficMatrix:
+    """
+    Take the old-style arrays and make a traffic matrix.
+    """
+    assert isinstance(conn, list)
+    assert len(conn) == 4
+
+    req = ConnectionRequest(
+        source = conn[0],
+        destination = conn[1],
+        required_bandwidth = conn[2],
+        required_latency = conn[3]
+    )
+
+    return TrafficMatrix(connection_requests=[req])
 
 class Test_Solver(unittest.TestCase):
     def setUp(self):
@@ -43,16 +59,16 @@ class Test_Solver(unittest.TestCase):
         print(f"Graph edges: {self.graph.edges}")
         print(f"Connection[0]: {self.connection[0]}")
 
-        result = TESolver(self.graph, self.connection).solve()
-        print(f"TESolver result: {result}")
+        tm = make_traffic_matrix(self.connection[0])
+        print(f"TM: {tm}")
 
-        # path, value = result
-        # print(f"TESolver result: path: {path}, value: {value}")
-        # self.assertEqual(value, 5.0)
-        # self.assertIsInstance(path, numpy.ndarray)
+        path, value = TESolver(self.graph, tm).solve()
+        print(f"TESolver result: path: {path}, value: {value}")
+        self.assertIsInstance(path, ConnectionSolution)
+        self.assertEqual(value, 5.0)
 
-        breakdown = self.temanager.generate_connection_breakdown(result)
-        print(f"Breakdown: {breakdown}")
+        # breakdown = self.temanager.generate_connection_breakdown(result)
+        # print(f"Breakdown: {breakdown}")
 
     def test_computation_breakdown(self):
         try:
