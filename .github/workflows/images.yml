@@ -1,3 +1,6 @@
+# A workflow to build and publish sdx-controllera container images.
+# See https://docs.docker.com/build/ci/github-actions/.
+
 name: Container images
 
 on:
