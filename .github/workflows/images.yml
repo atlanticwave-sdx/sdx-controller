@@ -7,11 +7,10 @@ on:
   push:
     branches:
       - "main"
-  # TODO: building *and* publishing container images on pull requests
-  # should be here only temporarily, while testing, because it
-  # probably makes more sense to publish images built off only merged
-  # code?
-  pull_request:
+    # Triggering the build/publish of container images on pull
+    # requests should be here only for testing, keep "pull_request"
+    # disabled.
+    # pull_request:
 
 jobs:
   build:
