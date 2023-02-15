@@ -33,6 +33,7 @@ jobs:
           # list of Docker images to use as base name for tags
           images: |
             awsdx/sdx-controller
+            awsdx/bapm-server
             # ghcr.io/username/app
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -69,7 +70,10 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: awsdx/sdx-controller:latest
+          tags: |
+            awsdx/sdx-controller:latest
+            ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       # See https://github.com/docker/build-push-action
       - name: Build and push
