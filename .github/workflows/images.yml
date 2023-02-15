@@ -24,6 +24,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Collect metadata for container image tags
+      # See https://github.com/docker/metadata-action
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            awsdx/sdx-controller
+            # ghcr.io/username/app
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=pep440,pattern={{version}}
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
       # Secrets used here are set under "repository secrets" at
       # https://github.com/atlanticwave-sdx/sdx-controller/settings/secrets/actions,
       #
