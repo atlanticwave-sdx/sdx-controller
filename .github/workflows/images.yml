@@ -72,7 +72,7 @@ jobs:
           push: true
           tags: |
             awsdx/sdx-controller:latest
-            ${{ steps.meta.outputs.tags }}
+            awsdx/sdx-controller:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
 
       # See https://github.com/docker/build-push-action
@@ -84,5 +84,5 @@ jobs:
           push: true
           tags: |
             awsdx/bapm-server:latest
-            ${{ steps.meta.outputs.tags }}
+            awsdx/bapm-server:${{ github.sha }}            
           labels: ${{ steps.meta.outputs.labels }}
