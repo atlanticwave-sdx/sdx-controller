@@ -80,4 +80,5 @@ jobs:
           push: true
           tags: |
             awsdx/bapm-server:latest
-            awsdx/bapm-server:${{ github.sha }}
+            ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
