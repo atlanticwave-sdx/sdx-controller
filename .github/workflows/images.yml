@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - "main"
+    tags:
+      - "*"
   # Triggering the build/publish of container images on pull
   # requests should be here only for testing, keep "pull_request"
   # disabled.
@@ -55,4 +57,6 @@ jobs:
           context: ./bapm_server
           file: ./bapm_server/Dockerfile
           push: true
-          tags: awsdx/bapm-server:latest
+          tags: |
+            awsdx/bapm-server:latest
+            awsdx/bapm-server:${{ github.sha }}
