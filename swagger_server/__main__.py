@@ -80,7 +80,9 @@ def process_lc_json_msg(
             num_domain_topos = 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
         else:
-            num_domain_topos = db_instance.read_from_db("num_domain_topos")
+            num_domain_topos = db_instance.read_from_db("num_domain_topos")[
+                "num_domain_topos"
+            ]
             num_domain_topos = int(num_domain_topos) + 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
 
@@ -161,10 +163,9 @@ def main():
     MANIFEST = os.environ.get("MANIFEST")
 
     # Get DB connection and tables set up.
-    db_tuples = [("config_table", "test-config")]
-
     db_instance = DbUtils()
-    db_instance._initialize_db(DB_NAME, db_tuples)
+    db_instance._initialize_db()
+
     thread_queue = Queue()
     start_consumer(thread_queue, db_instance)
 
