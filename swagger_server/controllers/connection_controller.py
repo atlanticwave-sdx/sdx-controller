@@ -71,7 +71,7 @@ def getconnection_by_id(connection_id):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db(connection_id)
+    value = db_instance.read_from_db(f"{connection_id}")
     return value
 
 
