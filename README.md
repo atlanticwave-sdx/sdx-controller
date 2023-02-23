@@ -25,6 +25,16 @@ sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:la
 
 Then in `env` and `docker-compose.yml` files, change `MQ_HOST` host to the corresponding IP address or hostname of the RabbitMQ server
 
+You also will need a MongoDB server:
+
+```console
+$ docker run -it --rm --name mongo \
+    -p 27017:27017 \
+    -e MONGO_INITDB_ROOT_USERNAME=guest \
+    -e MONGO_INITDB_ROOT_PASSWORD=guest \
+    mongo:3.7
+```
+
 ## Run with Python
 The SDX controller server is a swagger-enabled Flask server based on the [swagger-codegen](https://github.com/swagger-api/swagger-codegen) project.
 To run the SDX controller server, please execute the following from the project root directory:
