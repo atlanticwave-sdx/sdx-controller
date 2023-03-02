@@ -13,11 +13,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: passw
       MONGODB_DATA_DIR: /data/db
     volumes:
-      # seeding scripts
-      # - ./mongo-entrypoint:/docker-entrypoint-initdb.d
       # named volumes
-      - /home/cwang/mongodb:/data/db
-      # - /home/cwang/mongoconfig:/data/configdb
+      - ~/mongodb:/data/db
 
   sdx-controller:
     image: sdx-controller

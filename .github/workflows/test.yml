@@ -35,9 +35,8 @@ jobs:
           - 27017:27017
         env:
           # MONGO_INITDB_DATABASE: test
-          MONGO_INITDB_ROOT_USERNAME: sdx
-          MONGO_INITDB_ROOT_PASSWORD: passw
-          MONGODB_DATA_DIR: /data/db
+          MONGO_INITDB_ROOT_USERNAME: guest
+          MONGO_INITDB_ROOT_PASSWORD: guest
 
     strategy:
       fail-fast: false
