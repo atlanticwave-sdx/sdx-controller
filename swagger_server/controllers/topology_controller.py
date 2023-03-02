@@ -13,7 +13,7 @@ from swagger_server.utils.db_utils import *
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
-db_instance._initialize_db()
+db_instance.initialize_db()
 manager = TopologyManager()
 
 

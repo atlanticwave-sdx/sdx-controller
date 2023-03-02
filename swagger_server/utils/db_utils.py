@@ -16,7 +16,7 @@ class DbUtils(object):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
 
-    def _initialize_db(self):
+    def initialize_db(self):
         self.logger.debug("Trying to load {} from DB".format(self.db_name))
 
         if self.db_name not in self.mongo_client.list_database_names():

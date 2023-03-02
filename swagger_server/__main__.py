@@ -164,7 +164,7 @@ def main():
 
     # Get DB connection and tables set up.
     db_instance = DbUtils()
-    db_instance._initialize_db()
+    db_instance.initialize_db()
 
     thread_queue = Queue()
     start_consumer(thread_queue, db_instance)
