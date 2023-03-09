@@ -34,7 +34,6 @@ jobs:
         ports:
           - 27017:27017
         env:
-          # MONGO_INITDB_DATABASE: test
           MONGO_INITDB_ROOT_USERNAME: guest
           MONGO_INITDB_ROOT_PASSWORD: guest
 
