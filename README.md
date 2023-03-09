@@ -123,7 +123,6 @@ And now run [tox]:
 $ tox
 ```
 
-If you want to run just one test,
 
 <!-- References -->
 
