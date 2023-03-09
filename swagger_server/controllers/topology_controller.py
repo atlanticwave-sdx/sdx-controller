@@ -11,11 +11,9 @@ from swagger_server import util
 from swagger_server.models.topology import Topology  # noqa: E501
 from swagger_server.utils.db_utils import *
 
-DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
 # Get DB connection and tables set up.
-db_tuples = [("config_table", "test-config")]
 db_instance = DbUtils()
-db_instance._initialize_db(DB_NAME, db_tuples)
+db_instance.initialize_db()
 manager = TopologyManager()
 
 
