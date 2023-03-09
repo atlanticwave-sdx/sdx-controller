@@ -28,6 +28,14 @@ jobs:
         ports:
           - 5672:5672
           - 15672:15672
+          
+      mongodb:
+        image: mongo:3.7
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: guest
+          MONGO_INITDB_ROOT_PASSWORD: guest
 
     strategy:
       fail-fast: false
