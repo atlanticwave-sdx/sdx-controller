@@ -22,29 +22,29 @@ class DbUtils(object):
         self.logger.setLevel(logging.DEBUG)
 
     def initialize_db(self):
-        self.logger.debug("Trying to load {} from DB".format(self.db_name))
+        self.logger.debug(f"Trying to load {self.db_name} from DB")
 
         if self.db_name not in self.mongo_client.list_database_names():
             self.logger.debug(
-                "No existing {} from DB, creating table".format(self.db_name)
+                f"No existing {self.db_name} from DB, creating table"
             )
             self.sdxdb = self.mongo_client[self.db_name]
-            self.logger.debug("DB {} initialized".format(self.db_name))
+            self.logger.debug(f"DB {self.db_name} initialized")
 
         self.sdxdb = self.mongo_client[self.db_name]
         config_col = self.sdxdb[self.config_table_name]
-        self.logger.debug("DB {} initialized".format(self.db_name))
+        self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, key, value):
         obj = self.read_from_db(key)
         if obj is None:
-            self.logger.debug("Adding key value pair {}:{} to DB.".format(key, value))
+            self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
             return self.sdxdb[self.db_name][self.config_table_name].insert_one(
                 {key: value}
             )
 
         query = {"_id": obj["_id"]}
-        self.logger.debug("Updating DB entry {}:{}.".format(key, value))
+        self.logger.debug(f"Updating DB entry {key}:{value}.")
         result = self.sdxdb[self.db_name][self.config_table_name].replace_one(
             query, {key: value}
         )
