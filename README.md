@@ -109,6 +109,9 @@ Local controller sends domain information to SDX controller:
 
 ## Testing
 
+The test suite expects MongoDB and RabbitMQ, which can be launched
+with Docker (or Podman), as shown in the earlier examples.
+
 Some environment variables are expected to be set for the tests to
 work as expected. Edit `env.local` according to your environment, and
 make sure the env vars are present in your shell:
