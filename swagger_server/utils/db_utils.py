@@ -3,16 +3,21 @@ import os
 
 import pymongo
 
-DB_NAME = os.environ.get("DB_NAME")
-DB_CONFIG_TABLE_NAME = os.environ.get("DB_CONFIG_TABLE_NAME")
-MONGODB_CONNSTRING = os.environ.get("MONGODB_CONNSTRING")
-
-
 class DbUtils(object):
     def __init__(self):
-        self.db_name = DB_NAME
-        self.config_table_name = DB_CONFIG_TABLE_NAME
-        self.mongo_client = pymongo.MongoClient(MONGODB_CONNSTRING)
+        self.db_name = os.environ.get("DB_NAME")
+        if self.db_name is None:
+            raise Exception("Please set DB_NAME environment variable")
+
+        self.config_table_name = os.environ.get("DB_CONFIG_TABLE_NAME")
+        if self.config_table_name is None:
+            raise Exception("Please set DB_CONFIG_TABLE_NAME environment variable")
+
+        mongo_connstring = os.environ.get("MONGODB_CONNSTRING")
+        if mongo_connstring is None:
+            raise Exception("Please set MONGP_CONNSTRING environment variable")
+        self.mongo_client = pymongo.MongoClient(mongo_connstring)
+
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
 
