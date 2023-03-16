@@ -8,15 +8,15 @@ class DbUtils(object):
     def __init__(self):
         self.db_name = os.environ.get("DB_NAME")
         if self.db_name is None:
-            raise Exception("Please set DB_NAME environment variable")
+            raise Exception("DB_NAME environment variable is not set")
 
         self.config_table_name = os.environ.get("DB_CONFIG_TABLE_NAME")
         if self.config_table_name is None:
-            raise Exception("Please set DB_CONFIG_TABLE_NAME environment variable")
+            raise Exception("DB_CONFIG_TABLE_NAME environ variable is not set")
 
         mongo_connstring = os.environ.get("MONGODB_CONNSTRING")
         if mongo_connstring is None:
-            raise Exception("Please set MONGP_CONNSTRING environment variable")
+            raise Exception("MONGODB_CONNSTRING environment variable is not set")
         self.mongo_client = pymongo.MongoClient(mongo_connstring)
 
         self.logger = logging.getLogger(__name__)
