@@ -3,6 +3,7 @@ import os
 
 import pymongo
 
+
 class DbUtils(object):
     def __init__(self):
         self.db_name = os.environ.get("DB_NAME")
@@ -25,9 +26,7 @@ class DbUtils(object):
         self.logger.debug(f"Trying to load {self.db_name} from DB")
 
         if self.db_name not in self.mongo_client.list_database_names():
-            self.logger.debug(
-                f"No existing {self.db_name} from DB, creating table"
-            )
+            self.logger.debug(f"No existing {self.db_name} from DB, creating table")
             self.sdxdb = self.mongo_client[self.db_name]
             self.logger.debug(f"DB {self.db_name} initialized")
 
