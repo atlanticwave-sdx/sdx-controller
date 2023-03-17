@@ -106,3 +106,27 @@ SDX controller breaks down the topology and sends connectivity information to lo
 
 Local controller sends domain information to SDX controller:
 ![Local controller to SDX controller](https://user-images.githubusercontent.com/29924060/139588283-2ea32803-92e3-4812-9e8a-3d829549ae40.jpg)
+
+## Testing
+
+The test suite expects MongoDB and RabbitMQ, which can be launched
+with Docker (or Podman), as shown in the earlier examples.
+
+Some environment variables are expected to be set for the tests to
+work as expected. Edit `env.local` according to your environment, and
+make sure the env vars are present in your shell:
+
+```console
+$ source env.local
+```
+
+And now run [tox]:
+
+```console
+$ tox
+```
+
+
+<!-- References -->
+
+[tox]: https://tox.wiki/en/latest/
