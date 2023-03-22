@@ -33,10 +33,10 @@ class SolverTests(unittest.TestCase):
 
         self.temanager = TEManager(topology_data, connection_data)
 
-    def test_computation(self):
+    def test_computation_breakdown(self):
         graph = self.temanager.generate_graph_te()
         connection_request = self.temanager.generate_connection_te()
-        
+
         print(f"Number of nodes: {graph.number_of_nodes()}")
         print(f"Graph edges: {graph.edges}")
         print(f"Traffic Matrix: {connection_request}")
@@ -51,7 +51,7 @@ class SolverTests(unittest.TestCase):
         print(f"Breakdown: {breakdown}")
         self.assertIsNotNone(breakdown)
 
-    def test_computation_breakdown(self):
+    def test_computation_breakdown_many_topologies(self):
         for topology_file in self.TOPOLOGY_FILE_LIST:
             print(f"Adding Topology: {topology_file}")
             with open(topology_file, "r", encoding="utf-8") as data_file:
@@ -60,7 +60,7 @@ class SolverTests(unittest.TestCase):
 
         graph = self.temanager.generate_graph_te()
         print(f"Graph: {graph}")
-        
+
         connection_request = self.temanager.generate_connection_te()
         print(f"Connection Request: {connection_request}")
 
@@ -104,11 +104,12 @@ class SolverTests(unittest.TestCase):
         # The reality, for now, is that TE Solver has not been able to
         # compute a path.
         self.assertIsNone(solution.connection_map, "No path was computed")
-        self.assertEqual(solution.cost, 0)        
+        self.assertEqual(solution.cost, 0)
 
         breakdown = self.temanager.generate_connection_breakdown_tm(solution)
         print(f"Breakdown: {breakdown}")
         self.assertIsNone(breakdown)
+
 
 if __name__ == "__main__":
     unittest.main()
