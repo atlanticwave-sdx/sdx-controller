@@ -7,10 +7,6 @@ from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 from sdx.pce.models import ConnectionRequest, ConnectionSolution, TrafficMatrix
 
-# Topology = GetNetworkToplogy(25,0.4)
-# Connection = GetConnection('./tests/data/test_connection.json')
-# Solution = './tests/data/test_MC_solution.json'
-
 
 class SolverTests(unittest.TestCase):
     """
