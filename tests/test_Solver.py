@@ -32,15 +32,16 @@ class SolverTests(unittest.TestCase):
             connection_data = json.load(c)
 
         self.temanager = TEManager(topology_data, connection_data)
-        self.graph = self.temanager.generate_graph_te()
-        self.connection_request = self.temanager.generate_connection_te()
 
     def test_computation(self):
-        print(f"Number of nodes: {self.graph.number_of_nodes()}")
-        print(f"Graph edges: {self.graph.edges}")
-        print(f"Traffic Matrix: {self.connection_request}")
+        graph = self.temanager.generate_graph_te()
+        connection_request = self.temanager.generate_connection_te()
+        
+        print(f"Number of nodes: {graph.number_of_nodes()}")
+        print(f"Graph edges: {graph.edges}")
+        print(f"Traffic Matrix: {connection_request}")
 
-        solution = TESolver(self.graph, self.connection_request).solve()
+        solution = TESolver(graph, connection_request).solve()
         print(f"TESolver result: {solution}")
 
         self.assertIsInstance(solution, ConnectionSolution)
@@ -57,14 +58,16 @@ class SolverTests(unittest.TestCase):
                 data = json.load(data_file)
                 self.temanager.topology_manager.add_topology(data)
 
-        self.graph = self.temanager.generate_graph_te()
-        self.connection_request = self.temanager.generate_connection_te()
+        graph = self.temanager.generate_graph_te()
+        print(f"Graph: {graph}")
+        
+        connection_request = self.temanager.generate_connection_te()
+        print(f"Connection Request: {connection_request}")
 
-        conn = self.temanager.requests_connectivity(self.connection_request)
+        conn = self.temanager.requests_connectivity(connection_request)
         print(f"Graph connectivity: {conn}")
-        num_nodes = self.graph.number_of_nodes()
 
-        solution = TESolver(self.graph, self.connection_request).solve()
+        solution = TESolver(graph, connection_request).solve()
         print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
@@ -72,9 +75,9 @@ class SolverTests(unittest.TestCase):
         self.assertIsNone(solution.connection_map, "No path was computed")
         self.assertEqual(solution.cost, 0)
 
-        # # TODO: what do we break down here?
-        # breakdown = self.temanager.generate_connection_breakdown(path)
-        # print(f"Breakdown: {breakdown}")
+        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        print(f"Breakdown: {breakdown}")
+        self.assertIsNone(breakdown)
 
     def test_computation_update(self):
         for topology_file in self.TOPOLOGY_FILE_LIST:
@@ -89,23 +92,23 @@ class SolverTests(unittest.TestCase):
                 data = json.load(data_file)
                 self.temanager.topology_manager.update_topology(data)
 
-        self.graph = self.temanager.generate_graph_te()
-        self.connection_request = self.temanager.generate_connection_te()
+        graph = self.temanager.generate_graph_te()
+        connection_request = self.temanager.generate_connection_te()
 
-        conn = self.temanager.requests_connectivity(self.connection_request)
+        conn = self.temanager.requests_connectivity(connection_request)
         print(f"Graph connectivity: {conn}")
 
-        solution = TESolver(self.graph, self.connection_request).solve()
+        solution = TESolver(graph, connection_request).solve()
         print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
         # compute a path.
         self.assertIsNone(solution.connection_map, "No path was computed")
+        self.assertEqual(solution.cost, 0)        
 
-        # # TODO: determine correct input to breakdown method.
-        # breakdown = self.temanager.generate_connection_breakdown(path)
-        # print(f"Breakdown: {breakdown}")
-
+        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        print(f"Breakdown: {breakdown}")
+        self.assertIsNone(breakdown)
 
 if __name__ == "__main__":
     unittest.main()
