@@ -5,5 +5,5 @@ setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
 
-git+https://github.com/atlanticwave-sdx/pce@92.fix-solver-output
+pce @ git+https://github.com/atlanticwave-sdx/pce@97.refactor-connection-breakdown
 git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a
