@@ -1,5 +1,5 @@
 import json
-import os
+import pathlib
 import unittest
 
 from sdx.datamodel.parsing.exceptions import DataModelException
@@ -11,27 +11,28 @@ from sdx.pce.models import ConnectionRequest, ConnectionSolution, TrafficMatrix
 # Connection = GetConnection('./tests/data/test_connection.json')
 # Solution = './tests/data/test_MC_solution.json'
 
-TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-
-TOPOLOGY = os.path.join(TEST_DATA_DIR, "sdx.json")
-CONNECTION = os.path.join(TEST_DATA_DIR, "test_request.json")
-
-TOPOLOGY_AMLIGHT = os.path.join(TEST_DATA_DIR, "amlight.json")
-TOPOLOGY_SAX = os.path.join(TEST_DATA_DIR, "sax.json")
-TOPOLOGY_ZAOXI = os.path.join(TEST_DATA_DIR, "zaoxi.json")
-
-TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
-TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
-
 
 class SolverTests(unittest.TestCase):
     """
     Check that the solver from pce does what we expects it to do.
     """
+
+    TEST_DATA_DIR = pathlib.Path(__file__).parent.joinpath("data")
+
+    TOPOLOGY_SDX = TEST_DATA_DIR.joinpath("sdx.json")
+    CONNECTION_REQ = TEST_DATA_DIR.joinpath("test_request.json")
+
+    TOPOLOGY_AMLIGHT = TEST_DATA_DIR.joinpath("amlight.json")
+    TOPOLOGY_SAX = TEST_DATA_DIR.joinpath("sax.json")
+    TOPOLOGY_ZAOXI = TEST_DATA_DIR.joinpath("zaoxi.json")
+
+    TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
+    TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
+
     def setUp(self):
-        with open(TOPOLOGY, "r", encoding="utf-8") as t:
+        with open(self.TOPOLOGY_SDX, "r", encoding="utf-8") as t:
             topology_data = json.load(t)
-        with open(CONNECTION, "r", encoding="utf-8") as c:
+        with open(self.CONNECTION_REQ, "r", encoding="utf-8") as c:
             connection_data = json.load(c)
 
         self.temanager = TEManager(topology_data, connection_data)
@@ -56,7 +57,7 @@ class SolverTests(unittest.TestCase):
 
     def test_computation_breakdown(self):
         try:
-            for topology_file in TOPOLOGY_FILE_LIST:
+            for topology_file in self.TOPOLOGY_FILE_LIST:
                 print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
@@ -88,7 +89,7 @@ class SolverTests(unittest.TestCase):
 
     def test_computation_update(self):
         try:
-            for topology_file in TOPOLOGY_FILE_LIST:
+            for topology_file in self.TOPOLOGY_FILE_LIST:
                 print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
@@ -98,7 +99,7 @@ class SolverTests(unittest.TestCase):
             return False
 
         try:
-            for topology_file in TOPOLOGY_FILE_LIST_UPDATE:
+            for topology_file in self.TOPOLOGY_FILE_LIST_UPDATE:
                 print(f"Updating Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
@@ -131,13 +132,13 @@ class SolverTests(unittest.TestCase):
         Take the old-style list of lists and make a traffic matrix.
         """
         assert isinstance(requests, list)
-    
+
         new_requests: list(ConnectionRequest) = []
-    
+
         for request in requests:
             assert isinstance(request, list)
             assert len(request) == 4
-    
+
             new_requests.append(
                 ConnectionRequest(
                     source=request[0],
@@ -146,9 +147,8 @@ class SolverTests(unittest.TestCase):
                     required_latency=request[3],
                 )
             )
-    
-        return TrafficMatrix(connection_requests=new_requests)
 
+        return TrafficMatrix(connection_requests=new_requests)
 
 
 if __name__ == "__main__":
