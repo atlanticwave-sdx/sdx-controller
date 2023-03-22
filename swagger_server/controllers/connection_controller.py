@@ -17,12 +17,9 @@ logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 logger.setLevel(logging.DEBUG)
 
-DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
 # Get DB connection and tables set up.
-db_tuples = [("config_table", "test-config")]
-
 db_instance = DbUtils()
-db_instance._initialize_db(DB_NAME, db_tuples)
+db_instance.initialize_db()
 
 MANIFEST = os.environ.get("MANIFEST")
 
@@ -66,7 +63,7 @@ def getconnection_by_id(connection_id):
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db(connection_id)
+    value = db_instance.read_from_db(f"{connection_id}")
     return value
 
 

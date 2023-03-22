@@ -4,6 +4,7 @@ python_dateutil >= 2.8
 setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
+pymongo > 3.0
 
 pce @ git+https://github.com/atlanticwave-sdx/pce@97.refactor-connection-breakdown
 git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a

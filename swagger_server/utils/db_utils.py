@@ -1,67 +1,55 @@
 import logging
 import os
 
-import _pickle as pickle
-import dataset
-
-DB_CONFIG_TABLE_NAME = os.environ.get("DB_CONFIG_TABLE_NAME")
+import pymongo
 
 
 class DbUtils(object):
     def __init__(self):
-        # self.table_name
-        self.config_table = DB_CONFIG_TABLE_NAME
+        self.db_name = os.environ.get("DB_NAME")
+        if self.db_name is None:
+            raise Exception("DB_NAME environment variable is not set")
+
+        self.config_table_name = os.environ.get("DB_CONFIG_TABLE_NAME")
+        if self.config_table_name is None:
+            raise Exception("DB_CONFIG_TABLE_NAME environ variable is not set")
+
+        mongo_connstring = os.environ.get("MONGODB_CONNSTRING")
+        if mongo_connstring is None:
+            raise Exception("MONGODB_CONNSTRING environment variable is not set")
+        self.mongo_client = pymongo.MongoClient(mongo_connstring)
+
         self.logger = logging.getLogger(__name__)
-        # self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.DEBUG)
 
-    def _initialize_db(self, db_filename, db_tables_tuples, print_table_on_load=False):
-        # DB related utils
-        # Details on the setup:
-        # https://dataset.readthedocs.io/en/latest/api.html
-        # https://github.com/g2p/bedup/issues/38#issuecomment-43703630
-        self.logger.debug("Connection to DB: %s" % db_filename)
-        self.db = dataset.connect(
-            "sqlite:///" + db_filename,
-            engine_kwargs={"connect_args": {"check_same_thread": False}},
-        )
+    def initialize_db(self):
+        self.logger.debug(f"Trying to load {self.db_name} from DB")
 
-        # Load the tables, create table if table does not.
-        for (name, table) in db_tables_tuples:
-            self.logger.debug("DB name: {}, table name: {}".format(name, table))
-            if table in self.db:  # https://github.com/pudo/dataset/issues/281
-                self.logger.debug("Trying to load {} from DB".format(name))
-                t = self.db.load_table(table)
-                if print_table_on_load:
-                    entries = t.find()
-                    self.logger.debug("\n\n&&&&& ENTRIES in %s &&&&&" % name)
-                    for e in entries:
-                        self.logger.debug("\n%s" % str(e))
-                    self.logger.debug("&&&&& END ENTRIES &&&&&\n\n")
-                setattr(self, name, t)
+        if self.db_name not in self.mongo_client.list_database_names():
+            self.logger.debug(f"No existing {self.db_name} from DB, creating table")
+            self.sdxdb = self.mongo_client[self.db_name]
+            self.logger.debug(f"DB {self.db_name} initialized")
 
-            else:
-                # If load_table() fails, that's fine! It means that the
-                # table doesn't yet exist. So, create it.
-                self.logger.debug("No existing {} from DB, creating table".format(name))
-                t = self.db[table]
-                setattr(self, name, t)
-
-    def read_from_db(self, key):
-        # Returns the manifest filename if it exists or None if it does not.
-        d = self.config_table.find_one(key=key)
-        if d == None:
-            self.logger.debug("Did not find entry.")
-            return None
-        value = d["value"]
-        self.logger.debug("DB return value: " + str(value))
-        return value
+        self.sdxdb = self.mongo_client[self.db_name]
+        config_col = self.sdxdb[self.config_table_name]
+        self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, key, value):
-        # Pushes key-value to DB.
-        if self.read_from_db(key) == None:
-            self.logger.debug("Adding key value pair {}:{} to DB.".format(key, value))
-            self.config_table.insert({"key": key, "value": value})
-        else:
-            # Update entry if already exists.
-            self.logger.debug("Updating DB entry {}:{}.".format(key, value))
-            self.config_table.update({"key": key, "value": value}, ["key"])
+        obj = self.read_from_db(key)
+        if obj is None:
+            self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
+            return self.sdxdb[self.db_name][self.config_table_name].insert_one(
+                {key: value}
+            )
+
+        query = {"_id": obj["_id"]}
+        self.logger.debug(f"Updating DB entry {key}:{value}.")
+        result = self.sdxdb[self.db_name][self.config_table_name].replace_one(
+            query, {key: value}
+        )
+        return result
+
+    def read_from_db(self, key):
+        return self.sdxdb[self.db_name][self.config_table_name].find_one(
+            {key: {"$exists": 1}}
+        )
