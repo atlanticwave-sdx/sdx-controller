@@ -24,30 +24,6 @@ TOPOLOGY_FILE_LIST = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 TOPOLOGY_FILE_LIST_UPDATE = [TOPOLOGY_AMLIGHT, TOPOLOGY_ZAOXI, TOPOLOGY_SAX]
 
 
-def make_traffic_matrix(requests: list) -> TrafficMatrix:
-    """
-    Take the old-style list of lists and make a traffic matrix.
-    """
-    assert isinstance(requests, list)
-
-    new_requests: list(ConnectionRequest) = []
-
-    for request in requests:
-        assert isinstance(request, list)
-        assert len(request) == 4
-
-        new_requests.append(
-            ConnectionRequest(
-                source=request[0],
-                destination=request[1],
-                required_bandwidth=request[2],
-                required_latency=request[3],
-            )
-        )
-
-    return TrafficMatrix(connection_requests=new_requests)
-
-
 class SolverTests(unittest.TestCase):
     """
     Check that the solver from pce does what we expects it to do.
@@ -67,7 +43,7 @@ class SolverTests(unittest.TestCase):
         print(f"Graph edges: {self.graph.edges}")
         print(f"Connection[0]: {self.connection[0]}")
 
-        tm = make_traffic_matrix(self.connection)
+        tm = self._make_traffic_matrix(self.connection)
         print(f"TM: {tm}")
 
         solution = TESolver(self.graph, tm).solve()
@@ -96,7 +72,7 @@ class SolverTests(unittest.TestCase):
         print(f"Graph connectivity: {conn}")
         num_nodes = self.graph.number_of_nodes()
 
-        tm = make_traffic_matrix(self.connection)
+        tm = self._make_traffic_matrix(self.connection)
 
         solution = TESolver(self.graph, tm).solve()
         print(f"TESolver result: {solution}")
@@ -137,7 +113,7 @@ class SolverTests(unittest.TestCase):
         conn = self.temanager.requests_connectivity(self.connection)
         print(f"Graph connectivity: {conn}")
 
-        tm = make_traffic_matrix(self.connection)
+        tm = self._make_traffic_matrix(self.connection)
 
         solution = TESolver(self.graph, tm).solve()
         print(f"TESolver result: {solution}")
@@ -149,6 +125,30 @@ class SolverTests(unittest.TestCase):
         # # TODO: determine correct input to breakdown method.
         # breakdown = self.temanager.generate_connection_breakdown(path)
         # print(f"Breakdown: {breakdown}")
+
+    def _make_traffic_matrix(self, requests: list) -> TrafficMatrix:
+        """
+        Take the old-style list of lists and make a traffic matrix.
+        """
+        assert isinstance(requests, list)
+    
+        new_requests: list(ConnectionRequest) = []
+    
+        for request in requests:
+            assert isinstance(request, list)
+            assert len(request) == 4
+    
+            new_requests.append(
+                ConnectionRequest(
+                    source=request[0],
+                    destination=request[1],
+                    required_bandwidth=request[2],
+                    required_latency=request[3],
+                )
+            )
+    
+        return TrafficMatrix(connection_requests=new_requests)
+
 
 
 if __name__ == "__main__":
