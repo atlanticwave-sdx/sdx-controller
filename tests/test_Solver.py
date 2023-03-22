@@ -48,7 +48,10 @@ def make_traffic_matrix(requests: list) -> TrafficMatrix:
     return TrafficMatrix(connection_requests=new_requests)
 
 
-class Test_Solver(unittest.TestCase):
+class SolverTests(unittest.TestCase):
+    """
+    Check that the solver from pce does what we expects it to do.
+    """
     def setUp(self):
         with open(TOPOLOGY, "r", encoding="utf-8") as t:
             topology_data = json.load(t)
@@ -67,10 +70,10 @@ class Test_Solver(unittest.TestCase):
         tm = make_traffic_matrix(self.connection)
         print(f"TM: {tm}")
 
-        path, value = TESolver(self.graph, tm).solve()
-        print(f"TESolver result: path: {path}, value: {value}")
-        self.assertIsInstance(path, ConnectionSolution)
-        self.assertEqual(value, 5.0)
+        solution = TESolver(self.graph, tm).solve()
+        print(f"TESolver result: {solution}")
+        self.assertIsInstance(solution, ConnectionSolution)
+        self.assertEqual(solution.cost, 5.0)
 
         # breakdown = self.temanager.generate_connection_breakdown(result)
         # print(f"Breakdown: {breakdown}")
@@ -95,12 +98,13 @@ class Test_Solver(unittest.TestCase):
 
         tm = make_traffic_matrix(self.connection)
 
-        path, value = TESolver(self.graph, tm).solve()
-        print(f"TESolver result: path: {path}, value: {value}")
+        solution = TESolver(self.graph, tm).solve()
+        print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
         # compute a path.
-        self.assertIsNone(path, "No path was computed")
+        self.assertIsNone(solution.connection_map, "No path was computed")
+        self.assertEqual(solution.cost, 0)
 
         # # TODO: what do we break down here?
         # breakdown = self.temanager.generate_connection_breakdown(path)
@@ -135,12 +139,12 @@ class Test_Solver(unittest.TestCase):
 
         tm = make_traffic_matrix(self.connection)
 
-        path, value = TESolver(self.graph, tm).solve()
-        print(f"TESolver result: path: {path}, value: {value}")
+        solution = TESolver(self.graph, tm).solve()
+        print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
         # compute a path.
-        self.assertIsNone(path, "No path was computed")
+        self.assertIsNone(solution.connection_map, "No path was computed")
 
         # # TODO: determine correct input to breakdown method.
         # breakdown = self.temanager.generate_connection_breakdown(path)
