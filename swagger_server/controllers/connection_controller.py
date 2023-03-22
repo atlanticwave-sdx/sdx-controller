@@ -3,7 +3,7 @@ import logging
 import os
 
 import connexion
-from sdx.datamodel.topologymanager.temanager import TEManager
+from sdx.pce.topology.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 
 from swagger_server.messaging.topic_queue_producer import TopicQueueProducer
