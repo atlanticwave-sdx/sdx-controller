@@ -3,9 +3,9 @@ import pathlib
 import unittest
 
 from sdx.datamodel.parsing.exceptions import DataModelException
-from sdx.datamodel.topologymanager.temanager import TEManager
 from sdx.pce.load_balancing.te_solver import TESolver
 from sdx.pce.models import ConnectionRequest, ConnectionSolution, TrafficMatrix
+from sdx.pce.topology.temanager import TEManager
 
 
 class SolverTests(unittest.TestCase):
@@ -33,23 +33,22 @@ class SolverTests(unittest.TestCase):
 
         self.temanager = TEManager(topology_data, connection_data)
         self.graph = self.temanager.generate_graph_te()
-        self.connection = self.temanager.generate_connection_te()
+        self.connection_request = self.temanager.generate_connection_te()
 
     def test_computation(self):
         print(f"Number of nodes: {self.graph.number_of_nodes()}")
         print(f"Graph edges: {self.graph.edges}")
-        print(f"Connection[0]: {self.connection[0]}")
+        print(f"Traffic Matrix: {self.connection_request}")
 
-        tm = self._make_traffic_matrix(self.connection)
-        print(f"TM: {tm}")
-
-        solution = TESolver(self.graph, tm).solve()
+        solution = TESolver(self.graph, self.connection_request).solve()
         print(f"TESolver result: {solution}")
+
         self.assertIsInstance(solution, ConnectionSolution)
         self.assertEqual(solution.cost, 5.0)
 
-        # breakdown = self.temanager.generate_connection_breakdown(result)
-        # print(f"Breakdown: {breakdown}")
+        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        print(f"Breakdown: {breakdown}")
+        self.assertIsNotNone(breakdown)
 
     def test_computation_breakdown(self):
         try:
@@ -57,21 +56,21 @@ class SolverTests(unittest.TestCase):
                 print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                    self.temanager.manager.add_topology(data)
+                    self.temanager.topology_manager.add_topology(data)
         except DataModelException as e:
             print(e)
             return False
 
         self.graph = self.temanager.generate_graph_te()
-        self.connection = self.temanager.generate_connection_te()
+        self.connection_request = self.temanager.generate_connection_te()
 
-        conn = self.temanager.requests_connectivity(self.connection)
+        conn = self.temanager.requests_connectivity(self.connection_request)
         print(f"Graph connectivity: {conn}")
         num_nodes = self.graph.number_of_nodes()
 
-        tm = self._make_traffic_matrix(self.connection)
+        # tm = self._make_traffic_matrix(self.connection)
 
-        solution = TESolver(self.graph, tm).solve()
+        solution = TESolver(self.graph, self.connection_request).solve()
         print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
@@ -89,7 +88,7 @@ class SolverTests(unittest.TestCase):
                 print(f"Adding Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                    self.temanager.manager.add_topology(data)
+                    self.temanager.topology_manager.add_topology(data)
         except DataModelException as e:
             print(e)
             return False
@@ -99,20 +98,20 @@ class SolverTests(unittest.TestCase):
                 print(f"Updating Topology: {topology_file}")
                 with open(topology_file, "r", encoding="utf-8") as data_file:
                     data = json.load(data_file)
-                    self.temanager.manager.update_topology(data)
+                    self.temanager.topology_manager.update_topology(data)
         except DataModelException as e:
             print(e)
             return False
 
         self.graph = self.temanager.generate_graph_te()
-        self.connection = self.temanager.generate_connection_te()
+        self.connection_request = self.temanager.generate_connection_te()
 
-        conn = self.temanager.requests_connectivity(self.connection)
+        conn = self.temanager.requests_connectivity(self.connection_request)
         print(f"Graph connectivity: {conn}")
 
-        tm = self._make_traffic_matrix(self.connection)
+        # tm = self._make_traffic_matrix(self.connection)
 
-        solution = TESolver(self.graph, tm).solve()
+        solution = TESolver(self.graph, self.connection_request).solve()
         print(f"TESolver result: {solution}")
 
         # The reality, for now, is that TE Solver has not been able to
