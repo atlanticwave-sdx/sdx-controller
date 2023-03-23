@@ -47,7 +47,7 @@ class SolverTests(unittest.TestCase):
         self.assertIsInstance(solution, ConnectionSolution)
         self.assertEqual(solution.cost, 5.0)
 
-        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        breakdown = self.temanager.generate_connection_breakdown(solution)
         print(f"Breakdown: {breakdown}")
         self.assertIsNotNone(breakdown)
 
@@ -75,7 +75,7 @@ class SolverTests(unittest.TestCase):
         self.assertIsNone(solution.connection_map, "No path was computed")
         self.assertEqual(solution.cost, 0)
 
-        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        breakdown = self.temanager.generate_connection_breakdown(solution)
         print(f"Breakdown: {breakdown}")
         self.assertIsNone(breakdown)
 
@@ -106,7 +106,7 @@ class SolverTests(unittest.TestCase):
         self.assertIsNone(solution.connection_map, "No path was computed")
         self.assertEqual(solution.cost, 0)
 
-        breakdown = self.temanager.generate_connection_breakdown_tm(solution)
+        breakdown = self.temanager.generate_connection_breakdown(solution)
         print(f"Breakdown: {breakdown}")
         self.assertIsNone(breakdown)
 
