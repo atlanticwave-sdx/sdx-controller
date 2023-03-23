@@ -1,20 +1,13 @@
 import json
+import logging
 import os
 
 import connexion
-import six
-from sdx.datamodel.parsing.exceptions import DataModelException
-from sdx.datamodel.topologymanager.temanager import TEManager
-from sdx.pce.LoadBalancing.MC_Solver import runMC_Solver
-from sdx.pce.LoadBalancing.RandomTopologyGenerator import (
-    GetConnection,
-    GetNetworkToplogy,
-    lbnxgraphgenerator,
-)
+from sdx.pce.load_balancing.te_solver import TESolver
+from sdx.pce.topology.temanager import TEManager
 
-from swagger_server import util
-from swagger_server.messaging.topic_queue_producer import *
-from swagger_server.utils.db_utils import *
+from swagger_server.messaging.topic_queue_producer import TopicQueueProducer
+from swagger_server.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
@@ -34,7 +27,7 @@ MANIFEST = os.environ.get("MANIFEST")
 def is_json(myjson):
     try:
         json.loads(myjson)
-    except ValueError as e:
+    except ValueError:
         return False
     return True
 
@@ -48,12 +41,12 @@ def find_between(s, first, last):
         return ""
 
 
-def delete_connection(connection_id):  # noqa: E501
-    """Delete connection order by ID
+def delete_connection(connection_id):
+    """
+    Delete connection order by ID.
 
-    delete a connection # noqa: E501
-
-    :param connection_id: ID of the connection that needs to be deleted
+    :param connection_id: ID of the connection that needs to be
+        deleted
     :type connection_id: int
 
     :rtype: None
@@ -61,10 +54,9 @@ def delete_connection(connection_id):  # noqa: E501
     return "do some magic!"
 
 
-def getconnection_by_id(connection_id):  # noqa: E501
-    """Find connection by ID
-
-    connection details # noqa: E501
+def getconnection_by_id(connection_id):
+    """
+    Find connection by ID.
 
     :param connection_id: ID of connection that needs to be fetched
     :type connection_id: int
@@ -75,10 +67,9 @@ def getconnection_by_id(connection_id):  # noqa: E501
     return value
 
 
-def place_connection(body):  # noqa: E501
-    """Place an connection request from the SDX-Controller
-
-     # noqa: E501
+def place_connection(body):
+    """
+    Place an connection request from the SDX-Controller.
 
     :param body: order placed for creating a connection
     :type body: dict | bytes
@@ -116,16 +107,10 @@ def place_connection(body):  # noqa: E501
     graph = temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    solution = TESolver(graph, connection).solve()
+    logger.debug(f"TESolver result: {solution}")
 
-    with open("./tests/data/connection.json", "w") as json_file:
-        json.dump(connection, json_file, indent=4)
-
-    num_nodes = graph.number_of_nodes()
-    lbnxgraphgenerator(num_nodes, 0.4, connection, graph)
-    result = runMC_Solver()
-
-    breakdown = temanager.generate_connection_breakdown(result)
+    breakdown = temanager.generate_connection_breakdown(solution)
     logger.debug("-------BREAKDOWN:------")
     logger.debug(json.dumps(breakdown))
 
