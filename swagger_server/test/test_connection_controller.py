@@ -55,6 +55,10 @@ class TestConnectionController(BaseTestCase):
             content_type="application/json",
         )
         print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 400 failure because the request is incomplete: the
+        # bare minimum connection request we sent does not have
+        # ingress port data, etc., for example.
         self.assertStatus(response, 400)
 
 
