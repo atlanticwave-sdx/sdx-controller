@@ -43,12 +43,9 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          # - SC1072 is Hadolint mystery error.
-          # - DL3008 asks to pin Debian package versions.
-          ignore: "SC1072,DL3008"
 
       - name: Lint bapm-server Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: bapm-server/Dockerfile
-          ignore: "SC1072,DL3008"
+
