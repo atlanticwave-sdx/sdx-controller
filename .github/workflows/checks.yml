@@ -43,5 +43,6 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          # Ignore the mystery error.
-          ignore: SC1072
+          # - SC1072 is Hadolint mystery error.
+          # - DL3008 asks to pin Debian package versions.
+          ignore: SC1072, DL3008
