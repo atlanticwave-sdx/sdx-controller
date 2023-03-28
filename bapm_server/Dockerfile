@@ -1,8 +1,7 @@
 FROM python:3.9-slim-bullseye
 
-RUN apt-get -y upgrade
-
 RUN apt-get update \
+    && apt-get -y upgrade \
     && apt-get install -y gcc python-dev git
 
 RUN mkdir -p /usr/src/app
