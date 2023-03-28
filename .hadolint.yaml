@@ -1,4 +1,4 @@
 ignored:
   # DL3008 asks to pin Debian package versions, but that way we will
   # miss out on security updates.
-  - DL3000
+  - DL3008
