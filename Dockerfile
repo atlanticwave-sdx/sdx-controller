@@ -1,5 +1,3 @@
-# FROM python:3.9.6-buster
-
 FROM python:3.9-slim-bullseye
 
 RUN apt-get -y upgrade \
@@ -8,7 +6,6 @@ RUN apt-get -y upgrade \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get install -y python-dev
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
