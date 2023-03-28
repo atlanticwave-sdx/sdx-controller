@@ -47,5 +47,5 @@ jobs:
       - name: Lint bapm-server Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: bapm-server/Dockerfile
+          dockerfile: bapm_server/Dockerfile
 
