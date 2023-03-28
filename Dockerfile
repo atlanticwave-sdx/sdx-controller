@@ -5,7 +5,8 @@ FROM python:3.9-slim-bullseye
 RUN apt-get -y upgrade
 
 RUN apt-get update \
-    && apt-get install -y gcc python3-dev git
+    && apt-get install -y --no-install-recommends \
+    gcc python3-dev git
 
 # RUN apt-get install -y python-dev
 RUN mkdir -p /usr/src/app
