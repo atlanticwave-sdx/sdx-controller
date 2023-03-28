@@ -40,11 +40,12 @@ class TestConnectionController(BaseTestCase):
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
         self.assertStatus(response, 204)
 
-    @unittest.skip(reason="This test does not work right now")
     def test_place_connection(self):
-        """Test case for place_connection
+        """
+        Test case for place_connection.
 
-        Place an connection request from the SDX-Controller
+        Place an connection request from the SDX-Controller without
+        sufficient .
         """
         body = Connection()
         response = self.client.open(
@@ -53,7 +54,12 @@ class TestConnectionController(BaseTestCase):
             data=json.dumps(body),
             content_type="application/json",
         )
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 400 failure because the request is incomplete: the
+        # bare minimum connection request we sent does not have
+        # ingress port data, etc., for example.
+        self.assertStatus(response, 400)
 
 
 if __name__ == "__main__":

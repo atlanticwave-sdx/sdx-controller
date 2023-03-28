@@ -8,15 +8,12 @@ import time
 from optparse import OptionParser
 
 import connexion
-
-# make sure to install datamodel:
-# https://github.com/atlanticwave-sdx/datamodel
-from datamodel.sdxdatamodel import parsing, topologymanager, validation
-from datamodel.sdxdatamodel.parsing.exceptions import DataModelException
-from datamodel.sdxdatamodel.parsing.topologyhandler import TopologyHandler
-from datamodel.sdxdatamodel.topologymanager.grenmlconverter import GrenmlConverter
-from datamodel.sdxdatamodel.topologymanager.manager import TopologyManager
-from datamodel.sdxdatamodel.validation.topologyvalidator import TopologyValidator
+from sdx.datamodel import parsing, topologymanager, validation
+from sdx.datamodel.parsing.exceptions import DataModelException
+from sdx.datamodel.parsing.topologyhandler import TopologyHandler
+from sdx.datamodel.topologymanager.grenmlconverter import GrenmlConverter
+from sdx.datamodel.topologymanager.manager import TopologyManager
+from sdx.datamodel.validation.topologyvalidator import TopologyValidator
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import *
@@ -83,7 +80,9 @@ def process_lc_json_msg(
             num_domain_topos = 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
         else:
-            num_domain_topos = db_instance.read_from_db("num_domain_topos")
+            num_domain_topos = db_instance.read_from_db("num_domain_topos")[
+                "num_domain_topos"
+            ]
             num_domain_topos = int(num_domain_topos) + 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
 
@@ -164,10 +163,9 @@ def main():
     MANIFEST = os.environ.get("MANIFEST")
 
     # Get DB connection and tables set up.
-    db_tuples = [("config_table", "test-config")]
-
     db_instance = DbUtils()
-    db_instance._initialize_db(DB_NAME, db_tuples)
+    db_instance.initialize_db()
+
     thread_queue = Queue()
     start_consumer(thread_queue, db_instance)
 

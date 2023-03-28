@@ -4,15 +4,7 @@ python_dateutil >= 2.8
 setuptools >= 21.0.0
 pika >= 1.2.0
 dataset
+pymongo > 3.0
 
-git+https://github.com/atlanticwave-sdx/pce@main
-
-# ortools should be a dependency of pce:
-# https://github.com/atlanticwave-sdx/pce/issues/45
-ortools
-
-git+https://github.com/atlanticwave-sdx/datamodel@main
-
-# grenml should be a dependency of datamodel:
-# https://github.com/atlanticwave-sdx/datamodel/issues/70
-grenml
+pce @ git+https://github.com/atlanticwave-sdx/pce@1.0.1.dev2
+sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a

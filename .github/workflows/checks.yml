@@ -5,7 +5,7 @@ name: Code checks
 on:
   push:
     branches:
-      - main
+      - "main"
   pull_request:
 
 permissions:
@@ -33,11 +33,11 @@ jobs:
 
       - name: Run "black --check"
         run: |
-          python -m black --check --verbose .
+          python -m black --check .
 
       - name: Run "isort --check"
         run: |
-          python -m isort --check --profile black --verbose .
+          python -m isort --check --profile black .
 
       - name: Lint sdx-controller Dockerfile
         uses: hadolint/hadolint-action@v2.1.0

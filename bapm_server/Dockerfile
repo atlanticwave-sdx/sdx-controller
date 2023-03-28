@@ -5,7 +5,7 @@ FROM python:3.9-slim-bullseye
 RUN apt-get -y upgrade
 
 RUN apt-get update \
-    && apt-get install -y gcc python3-dev git
+    && apt-get install -y gcc python-dev git
 
 # RUN apt-get install -y python-dev
 RUN mkdir -p /usr/src/app
@@ -18,7 +18,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 
-EXPOSE 8080
-
 ENTRYPOINT ["python3"]
-CMD ["-m", "swagger_server"]
+CMD ["__main__.py"]
+
+# CMD ["/bin/bash"]
