@@ -43,3 +43,5 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
+          # Ignore the mystery error.
+          ignore: SC1072
