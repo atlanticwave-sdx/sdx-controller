@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-          cache: 'pip'  # cache pip dependencies
+          cache: "pip"  # cache pip dependencies
 
       - name: Install dependencies
         run: |
@@ -38,3 +38,14 @@ jobs:
       - name: Run "isort --check"
         run: |
           python -m isort --check --profile black .
+
+      - name: Lint sdx-controller Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Lint bapm-server Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: bapm_server/Dockerfile
+

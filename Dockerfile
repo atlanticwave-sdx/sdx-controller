@@ -1,14 +1,12 @@
-# FROM python:3.9.6-buster
-
 FROM python:3.9-slim-bullseye
 
-RUN apt-get -y upgrade
-
 RUN apt-get update \
-    && apt-get install -y gcc python3-dev git
+    && apt-get -y upgrade \
+    && apt-get install -y --no-install-recommends gcc python3-dev git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /usr/src/app
 
-# RUN apt-get install -y python-dev
-RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY requirements.txt /usr/src/app/

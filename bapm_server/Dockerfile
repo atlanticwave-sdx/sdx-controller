@@ -1,13 +1,11 @@
-# FROM python:3.9.6-buster
-
 FROM python:3.9-slim-bullseye
 
-RUN apt-get -y upgrade
-
 RUN apt-get update \
-    && apt-get install -y gcc python-dev git
+    && apt-get -y upgrade \
+    && apt-get install -y --no-install-recommends gcc python-dev git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get install -y python-dev
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
@@ -20,5 +18,3 @@ COPY . /usr/src/app
 
 ENTRYPOINT ["python3"]
 CMD ["__main__.py"]
-
-# CMD ["/bin/bash"]
