@@ -35,7 +35,7 @@ class DbUtils(object):
         self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, key, value):
-        obj = self.read_from_db(key)
+        obj = self.read_from_db(str(key))
         if obj is None:
             self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
             return self.sdxdb[self.db_name][self.config_table_name].insert_one(

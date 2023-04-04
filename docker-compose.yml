@@ -6,7 +6,7 @@ services:
     image: mongo:3.7
     container_name: mongodb
     ports:
-      - 27017:27017
+      - 27117:27017
     environment:
       # MONGO_INITDB_DATABASE: test
       MONGO_INITDB_ROOT_USERNAME: sdx
@@ -24,7 +24,7 @@ services:
       - 8080:8080
     environment:
       # update to sdx controller host name
-      - MONGODB_CONNSTRING=mongodb://sdx:passw@152.54.3.143:27017/
+      - MONGODB_CONNSTRING=mongodb://sdx:passw@152.54.3.143:27117/
       - SDX_HOST=aw-sdx-controller.renci.org
       - SDX_PORT=8080
       - SDX_VERSION=1.0.0
