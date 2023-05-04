@@ -93,7 +93,9 @@ def place_connection(body):
     num_domain_topos = 0
 
     if db_instance.read_from_db("num_domain_topos") is not None:
-        num_domain_topos = db_instance.read_from_db("num_domain_topos")["num_domain_topos"]
+        num_domain_topos = db_instance.read_from_db("num_domain_topos")[
+            "num_domain_topos"
+        ]
 
     temanager = TEManager(topo_json, body)
     lc_domain_topo_dict = {}
