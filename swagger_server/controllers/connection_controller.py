@@ -85,19 +85,23 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    topo_val = db_instance.read_from_db("latest_topo")
+    topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
+    # print("--------")
+    # print(topo_val)
     topo_json = json.loads(topo_val)
 
     num_domain_topos = 0
 
     if db_instance.read_from_db("num_domain_topos") is not None:
-        num_domain_topos = db_instance.read_from_db("num_domain_topos")
+        num_domain_topos = db_instance.read_from_db("num_domain_topos")[
+            "num_domain_topos"
+        ]
 
     temanager = TEManager(topo_json, body)
     lc_domain_topo_dict = {}
 
     for i in range(1, int(num_domain_topos) + 1):
-        curr_topo_str = db_instance.read_from_db("LC-" + str(i))
+        curr_topo_str = db_instance.read_from_db("LC-" + str(i))["LC-" + str(i)]
         curr_topo_json = json.loads(curr_topo_str)
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
