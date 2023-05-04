@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 
-import argparse
 import json
 import logging
 import threading
-import time
-from optparse import OptionParser
 
 import connexion
-from sdx.datamodel import parsing, topologymanager, validation
-from sdx.datamodel.parsing.exceptions import DataModelException
-from sdx.datamodel.parsing.topologyhandler import TopologyHandler
-from sdx.datamodel.topologymanager.grenmlconverter import GrenmlConverter
 from sdx.datamodel.topologymanager.manager import TopologyManager
-from sdx.datamodel.validation.topologyvalidator import TopologyValidator
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import *
@@ -104,7 +96,13 @@ def start_consumer(thread_queue, db_instance):
     t1.start()
 
     manager = TopologyManager()
-    num_domain_topos = 0
+
+    if db_instance.read_from_db("num_domain_topos") is None:
+        num_domain_topos = 0
+    else:
+        num_domain_topos = db_instance.read_from_db("num_domain_topos")[
+            "num_domain_topos"
+        ]
 
     if db_instance.read_from_db("num_domain_topos") is not None:
         db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
