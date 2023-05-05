@@ -64,7 +64,9 @@ def process_lc_json_msg(
         manager.update_topology(msg_json)
     # Add new topology
     else:
-        domain_list.add(domain_name)
+        domain_list.append(domain_name)
+        db_instance.add_key_value_pair_to_db("domain_list", domain_list)
+
         logger.info("adding topo")
         manager.add_topology(msg_json)
 
@@ -72,9 +74,7 @@ def process_lc_json_msg(
             num_domain_topos = 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
         else:
-            num_domain_topos = db_instance.read_from_db("num_domain_topos")[
-                "num_domain_topos"
-            ]
+            num_domain_topos = len(domain_list)
             num_domain_topos = int(num_domain_topos) + 1
             db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
 
@@ -97,18 +97,21 @@ def start_consumer(thread_queue, db_instance):
 
     manager = TopologyManager()
 
-    if db_instance.read_from_db("num_domain_topos") is None:
-        num_domain_topos = 0
-    else:
-        num_domain_topos = db_instance.read_from_db("num_domain_topos")[
-            "num_domain_topos"
-        ]
+    latest_topo = {}
+    domain_list = []
+
+    if db_instance.read_from_db("domain_list") is not None:
+        domain_list = db_instance.read_from_db("domain_list")["domain_list"]
+
+    num_domain_topos = len(domain_list)
 
     if db_instance.read_from_db("num_domain_topos") is not None:
         db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
-
-    latest_topo = {}
-    domain_list = set()
+        for topo in range(1, num_domain_topos + 1):
+            db_key = "LC-" + str(topo)
+            topology = db_instance.read_from_db(db_key)[db_key]
+            topo_json = json.loads(topology)
+            manager.add_topology(topo_json)
 
     while True:
         if thread_queue.empty():
