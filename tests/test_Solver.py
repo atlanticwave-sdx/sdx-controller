@@ -84,13 +84,13 @@ class SolverTests(unittest.TestCase):
             print(f"Adding Topology: {topology_file}")
             with open(topology_file, "r", encoding="utf-8") as data_file:
                 data = json.load(data_file)
-                self.temanager.topology_manager.add_topology(data)
+                self.temanager.add_topology(data)
 
         for topology_file in self.TOPOLOGY_FILE_LIST_UPDATE:
             print(f"Updating Topology: {topology_file}")
             with open(topology_file, "r", encoding="utf-8") as data_file:
                 data = json.load(data_file)
-                self.temanager.topology_manager.update_topology(data)
+                self.temanager.update_topology(data)
 
         graph = self.temanager.generate_graph_te()
         connection_request = self.temanager.generate_connection_te()
