@@ -76,19 +76,19 @@ def place_connection(body):
 
     :rtype: Connection
     """
-    logger.info("Placing connection:")
-    logger.info(body)
+    logger.info(f"Placing connection: {body}")
     if connexion.request.is_json:
         body = connexion.request.get_json()
+        logger.info(f"Gathered connexion JSON: {body}")
 
     logger.info("Placing connection. Saving to database.")
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
     topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
-    # print("--------")
-    # print(topo_val)
     topo_json = json.loads(topo_val)
+
+    logger.info(f"Read topology {topo_val}")
 
     num_domain_topos = 0
 
@@ -106,13 +106,25 @@ def place_connection(body):
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
         ]
+        logger.debug(f"Adding #{i} topology {curr_topo_json}")
         temanager.add_topology(curr_topo_json)
 
     graph = temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
 
+    logger.info(f"Generated graph: '{graph}', connection: '{connection}'")
+
+    if graph is None:
+        return "Could not generate a graph", 400
+
+    if connection is None:
+        return "Could not generate a connection request", 400
+
     solution = TESolver(graph, connection).solve()
     logger.debug(f"TESolver result: {solution}")
+
+    if solution is None:
+        return "Could not solve the request", 400
 
     breakdown = temanager.generate_connection_breakdown(solution)
     logger.debug("-------BREAKDOWN:------")
