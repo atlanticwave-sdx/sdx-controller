@@ -6,5 +6,5 @@ pika >= 1.2.0
 dataset
 pymongo > 3.0
 
-pce @ git+https://github.com/atlanticwave-sdx/pce@1.0.1.dev3
+pce @ git+https://github.com/atlanticwave-sdx/pce@1.0.1.dev4
 sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a
