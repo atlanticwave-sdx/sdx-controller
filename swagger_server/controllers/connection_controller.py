@@ -106,7 +106,7 @@ def place_connection(body):
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
         ]
-        temanager.manager.add_topology(curr_topo_json)
+        temanager.add_topology(curr_topo_json)
 
     graph = temanager.generate_graph_te()
     connection = temanager.generate_connection_te()
