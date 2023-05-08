@@ -7,4 +7,4 @@ dataset
 pymongo > 3.0
 
 pce @ git+https://github.com/atlanticwave-sdx/pce@107.gen-connection-bugfix
-sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@1.0.0a
+sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@90.connection-parsing-fix
