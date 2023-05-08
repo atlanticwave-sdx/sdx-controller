@@ -5,7 +5,7 @@ import logging
 import threading
 
 import connexion
-from sdx.datamodel.topologymanager.manager import TopologyManager
+from sdx.pce.topologymanager.manager import TopologyManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import *
