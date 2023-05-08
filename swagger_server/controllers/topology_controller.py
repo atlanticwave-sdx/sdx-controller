@@ -4,8 +4,8 @@ from queue import Queue
 
 import connexion
 import six
-from sdx.datamodel.topologymanager.grenmlconverter import GrenmlConverter
-from sdx.datamodel.topologymanager.manager import TopologyManager
+from sdx.pce.topology.grenmlconverter import GrenmlConverter
+from sdx.pce.topology.manager import TopologyManager
 
 from swagger_server import util
 from swagger_server.models.topology import Topology  # noqa: E501
