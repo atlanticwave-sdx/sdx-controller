@@ -126,12 +126,15 @@ def place_connection(body):
     solution = solver.solve()
     logger.debug(f"TESolver result: {solution}")
 
-    if solution is None:
+    if solution is None or solution.connection_map is None:
         return "Could not solve the request", 400
 
     breakdown = temanager.generate_connection_breakdown(solution)
     logger.debug("-------BREAKDOWN:------")
     logger.debug(json.dumps(breakdown))
+
+    if breakdown is None:
+        return "Could not break down the solution", 400
 
     for entry in breakdown:
         domain_name = find_between(entry, "topology:", ".net")
