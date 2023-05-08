@@ -122,7 +122,7 @@ def place_connection(body):
 
     solver = TESolver(graph, traffic_matrix)
     logger.info(f"TESolver: {solver}")
-    
+
     solution = solver.solve()
     logger.debug(f"TESolver result: {solution}")
 
