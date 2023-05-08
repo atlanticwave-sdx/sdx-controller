@@ -4,8 +4,9 @@ import json
 import logging
 import os
 
-from bapm_consumer import *
 from elasticsearch import Elasticsearch
+
+from bapm_consumer import *
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
