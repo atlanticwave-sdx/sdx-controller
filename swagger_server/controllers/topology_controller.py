@@ -25,7 +25,7 @@ def get_topology():  # noqa: E501
 
     :rtype: str
     """
-    topo_val = db_instance.read_from_db("latest_topo")
+    topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
     return topo_val
 
 
