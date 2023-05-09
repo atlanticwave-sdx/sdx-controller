@@ -138,8 +138,8 @@ def place_connection(body):
     if breakdown is None:
         return "Could not break down the solution", 400
 
-    for entry, val in breakdown:
-        logger.debug(f"Attempting to publish {entry}, with {val}")
+    for entry in breakdown.items():
+        logger.debug(f"Attempting to publish {entry}")
         domain_name = find_between(entry, "topology:", ".net")
         exchange_name = "connection"
         producer = TopicQueueProducer(
