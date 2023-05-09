@@ -133,14 +133,13 @@ def place_connection(body):
         return "Could not solve the request", 400
 
     breakdown = temanager.generate_connection_breakdown(solution)
-    logger.debug("-------BREAKDOWN:------")
-    logger.debug(json.dumps(breakdown))
+    logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
 
     if breakdown is None:
         return "Could not break down the solution", 400
 
-    for entry in breakdown:
-        logger.debug(f"Attempting to publish {entry}")
+    for entry, val in breakdown:
+        logger.debug(f"Attempting to publish {entry}, with {val}")
         domain_name = find_between(entry, "topology:", ".net")
         exchange_name = "connection"
         producer = TopicQueueProducer(
