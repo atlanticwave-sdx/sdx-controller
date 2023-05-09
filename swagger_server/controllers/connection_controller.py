@@ -141,7 +141,7 @@ def place_connection(body):
     for domain, link in breakdown.items():
         logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
         # domain_name = find_between(entry, "topology:", ".net")
-        domain_name = domain
+        domain_name = f"{domain}"
         exchange_name = "connection"
         producer = TopicQueueProducer(
             timeout=5, exchange_name=exchange_name, routing_key=domain_name
