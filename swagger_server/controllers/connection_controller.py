@@ -143,16 +143,20 @@ def place_connection(body):
 
     for domain, link in breakdown.items():
         logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
-        domain_name = find_between(entry, "topology:", ".net") or f"{domain}" 
+
+        # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
+        # extract a string like "amlight".
+        domain_name = find_between(entry, "topology:", ".net") or f"{domain}"
         exchange_name = "connection"
-        producer = TopicQueueProducer(
-            timeout=5, exchange_name=exchange_name, routing_key=domain_name
-        )
+
         logger.debug(
             f"Publishing '{link}' with exchange_name: {exchange_name}, "
             f"routing_key: {domain_name}"
         )
-        # producer.call(json.dumps(breakdown[entry]))
+
+        producer = TopicQueueProducer(
+            timeout=5, exchange_name=exchange_name, routing_key=domain_name
+        )
         producer.call(json.dumps(link))
         producer.stop_keep_alive()
 
