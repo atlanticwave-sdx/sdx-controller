@@ -140,9 +140,14 @@ def place_connection(body):
         return "Could not break down the solution", 400
 
     for entry in breakdown:
+        logger.debug(f"Attempting to publish {entry}")
         domain_name = find_between(entry, "topology:", ".net")
         producer = TopicQueueProducer(
             timeout=5, exchange_name="connection", routing_key=domain_name
+        )
+        logger.debug(
+            f"Publishing '{json.dumps(breakdown[entry])}' with "
+            f"exchange_name: {exchange_name}, routing_key: {domain_name}"
         )
         producer.call(json.dumps(breakdown[entry]))
         producer.stop_keep_alive()
