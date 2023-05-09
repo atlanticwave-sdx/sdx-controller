@@ -26,7 +26,13 @@ def get_topology():  # noqa: E501
     :rtype: str
     """
     topo_val = db_instance.read_from_db("latest_topo")
-    return topo_val
+
+    # TODO: this is a workaround because of the way we read values
+    # from MongoDB; refactor and test this more.
+    if topo_val is None:
+        return None
+
+    return topo_val["latest_topo"]
 
 
 def get_topologyby_grenml():  # noqa: E501
