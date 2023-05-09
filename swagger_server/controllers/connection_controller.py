@@ -32,7 +32,10 @@ def is_json(myjson):
     return True
 
 
-def find_between(s, first, last):
+def find_between(s:str, first:str, last:str) -> str:
+    """
+    Find a substring of s that is betwen `first` and `last`.
+    """
     if s is None or first is None or last is None:
         return None
 
