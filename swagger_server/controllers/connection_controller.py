@@ -33,6 +33,9 @@ def is_json(myjson):
 
 
 def find_between(s, first, last):
+    if s is None or first is None or last is None:
+        return None
+
     try:
         start = s.index(first) + len(first)
         end = s.index(last, start)
