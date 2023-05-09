@@ -142,8 +142,9 @@ def place_connection(body):
     for entry in breakdown:
         logger.debug(f"Attempting to publish {entry}")
         domain_name = find_between(entry, "topology:", ".net")
+        exchange_name = "connection"
         producer = TopicQueueProducer(
-            timeout=5, exchange_name="connection", routing_key=domain_name
+            timeout=5, exchange_name=exchange_name, routing_key=domain_name
         )
         logger.debug(
             f"Publishing '{json.dumps(breakdown[entry])}' with "
