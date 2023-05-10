@@ -146,7 +146,7 @@ def place_connection(body):
 
         # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
         # extract a string like "amlight".
-        domain_name = find_between(entry, "topology:", ".net") or f"{domain}"
+        domain_name = find_between(domain, "topology:", ".net") or f"{domain}"
         exchange_name = "connection"
 
         logger.debug(
