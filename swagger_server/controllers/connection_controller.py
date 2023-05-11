@@ -33,6 +33,12 @@ def is_json(myjson):
 
 
 def find_between(s, first, last):
+    """
+    Find the substring of `s` that is betwen `first` and `last`.
+    """
+    if s is None or first is None or last is None:
+        return None
+
     try:
         start = s.index(first) + len(first)
         end = s.index(last, start)
@@ -76,19 +82,19 @@ def place_connection(body):
 
     :rtype: Connection
     """
-    logger.info("Placing connection:")
-    logger.info(body)
+    logger.info(f"Placing connection: {body}")
     if connexion.request.is_json:
         body = connexion.request.get_json()
+        logger.info(f"Gathered connexion JSON: {body}")
 
     logger.info("Placing connection. Saving to database.")
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
     topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
-    # print("--------")
-    # print(topo_val)
     topo_json = json.loads(topo_val)
+
+    logger.info(f"Read topology {topo_val}")
 
     num_domain_topos = 0
 
@@ -106,24 +112,52 @@ def place_connection(body):
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
         ]
-        temanager.manager.add_topology(curr_topo_json)
+        logger.debug(f"Adding #{i} topology {curr_topo_json}")
+        temanager.add_topology(curr_topo_json)
 
     graph = temanager.generate_graph_te()
-    connection = temanager.generate_connection_te()
+    traffic_matrix = temanager.generate_connection_te()
 
-    solution = TESolver(graph, connection).solve()
+    logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
+
+    if graph is None:
+        return "Could not generate a graph", 400
+
+    if traffic_matrix is None:
+        return "Could not generate a traffic matrix", 400
+
+    solver = TESolver(graph, traffic_matrix)
+    logger.info(f"TESolver: {solver}")
+
+    solution = solver.solve()
     logger.debug(f"TESolver result: {solution}")
 
-    breakdown = temanager.generate_connection_breakdown(solution)
-    logger.debug("-------BREAKDOWN:------")
-    logger.debug(json.dumps(breakdown))
+    if solution is None or solution.connection_map is None:
+        return "Could not solve the request", 400
 
-    for entry in breakdown:
-        domain_name = find_between(entry, "topology:", ".net")
-        producer = TopicQueueProducer(
-            timeout=5, exchange_name="connection", routing_key=domain_name
+    breakdown = temanager.generate_connection_breakdown(solution)
+    logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
+
+    if breakdown is None:
+        return "Could not break down the solution", 400
+
+    for domain, link in breakdown.items():
+        logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
+
+        # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
+        # extract a string like "amlight".
+        domain_name = find_between(domain, "topology:", ".net") or f"{domain}"
+        exchange_name = "connection"
+
+        logger.debug(
+            f"Publishing '{link}' with exchange_name: {exchange_name}, "
+            f"routing_key: {domain_name}"
         )
-        producer.call(json.dumps(breakdown[entry]))
+
+        producer = TopicQueueProducer(
+            timeout=5, exchange_name=exchange_name, routing_key=domain_name
+        )
+        producer.call(json.dumps(link))
         producer.stop_keep_alive()
 
     return "Connection published"
