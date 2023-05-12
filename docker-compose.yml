@@ -14,7 +14,7 @@ services:
       MONGODB_DATA_DIR: /data/db
     volumes:
       # named volumes
-      - ~/mongodb:/data/db
+      - ./db:/data/db
 
   sdx-controller:
     image: sdx-controller
