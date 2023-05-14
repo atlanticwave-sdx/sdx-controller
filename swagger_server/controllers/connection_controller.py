@@ -115,6 +115,9 @@ def place_connection(body):
         logger.debug(f"Adding #{i} topology {curr_topo_json}")
         temanager.add_topology(curr_topo_json)
 
+    for num, val in enumerate(temanager.topology_manager.topology_list.items()):
+        logger.info(f"TE topology #{num}: {val}")
+
     graph = temanager.generate_graph_te()
     traffic_matrix = temanager.generate_connection_te()
 
