@@ -107,7 +107,16 @@ def place_connection(body):
     lc_domain_topo_dict = {}
 
     for i in range(1, int(num_domain_topos) + 1):
-        curr_topo_str = db_instance.read_from_db("LC-" + str(i))["LC-" + str(i)]
+        lc = f"LC-{i}"
+        logger.debug(f"Reading {lc} from DB")
+        curr_topo = db_instance.read_from_db(lc)
+        logger.debug(f"Read {lc} from DB: {curr_topo}")
+        if curr_topo is None:
+            continue
+        else:
+            # Get the actual thing minus the Mongo ObjectID.
+            curr_topo_str = curr_topo[lc]
+
         curr_topo_json = json.loads(curr_topo_str)
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"

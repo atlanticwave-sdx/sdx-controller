@@ -108,8 +108,15 @@ def start_consumer(thread_queue, db_instance):
     if db_instance.read_from_db("num_domain_topos") is not None:
         db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
         for topo in range(1, num_domain_topos + 1):
-            db_key = "LC-" + str(topo)
-            topology = db_instance.read_from_db(db_key)[db_key]
+            db_key = f"LC-{topo}"
+            logger.debug(f"Reading {db_key} from DB")
+            topology = db_instance.read_from_db(db_key)
+            logger.debug(f"Read {db_key}: {topology}")
+            if topology is None:
+                continue
+            else:
+                # Get the actual thing minus the Mongo ObjectID.
+                topology = topology[db_key]
             topo_json = json.loads(topology)
             manager.add_topology(topo_json)
 
