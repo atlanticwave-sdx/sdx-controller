@@ -103,7 +103,10 @@ def place_connection(body):
             "num_domain_topos"
         ]
 
-    temanager = TEManager(topo_json, body)
+    # Initializing TEManager with `None` topology data is a
+    # work-around for
+    # https://github.com/atlanticwave-sdx/sdx-controller/issues/145
+    temanager = TEManager(topology_data = None, connection_data = body)
     lc_domain_topo_dict = {}
 
     for i in range(1, int(num_domain_topos) + 1):
