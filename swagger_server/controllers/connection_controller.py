@@ -121,7 +121,7 @@ def place_connection(body):
         else:
             # Get the actual thing minus the Mongo ObjectID.
             curr_topo_str = curr_topo.get(lc)
-            logger.debug(f"Read {lc} from DB: {curr_topo.get(lc).get('id)}")
+            logger.debug(f"Read {lc} from DB: {curr_topo.get(lc).get('id')}")
 
         curr_topo_json = json.loads(curr_topo_str)
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
