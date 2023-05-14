@@ -128,7 +128,7 @@ def place_connection(body):
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
         ]
-        logger.debug(f"Adding #{i} topology {curr_topo_json}")
+        logger.debug(f"Adding #{i} topology {curr_topo_json.get('id')}")
         temanager.add_topology(curr_topo_json)
 
     for num, val in enumerate(temanager.topology_manager.topology_list):
