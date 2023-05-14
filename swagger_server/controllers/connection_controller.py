@@ -139,6 +139,11 @@ def place_connection(body):
 
     logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
+    import networkx as nx
+    import pprint
+
+    print(f"graph: {pprint.pformat(nx.to_dict_of_dicts(graph))}")
+
     if graph is None:
         return "Could not generate a graph", 400
 
