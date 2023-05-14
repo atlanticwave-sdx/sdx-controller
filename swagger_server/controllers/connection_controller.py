@@ -109,7 +109,9 @@ def place_connection(body):
     temanager = TEManager(topology_data=None, connection_data=body)
     lc_domain_topo_dict = {}
 
-    for i in range(1, int(num_domain_topos) + 1):
+    # Read LC-1, LC-2, LC-3, and LC-4 topologies because of
+    # https://github.com/atlanticwave-sdx/sdx-controller/issues/152
+    for i in range(1, int(num_domain_topos) + 2):
         lc = f"LC-{i}"
         logger.debug(f"Reading {lc} from DB")
         curr_topo = db_instance.read_from_db(lc)
