@@ -9,10 +9,10 @@
     "ingress_port":
     {
         "id": "urn:sdx:port:amlight.net:B2:2",
-        "name": "Novi01:2",        
+        "name": "Novi01:2",
         "node": "urn:sdx:node:amlight.net:B2",
         "status": "up"
-    },    
+    },
     "egress_port":
     {
         "id": "urn:sdx:port:amlight.net:A1:1",

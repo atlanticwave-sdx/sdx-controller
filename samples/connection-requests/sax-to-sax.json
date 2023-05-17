@@ -15,7 +15,7 @@
     "ingress_port":
     {
         "id": "urn:ogf:network:sdx:port:sax:B1:2",
-        "name": "Novi01:2",        
+        "name": "Novi01:2",
         "node": "urn:ogf:network:sdx:node:sax:B1",
         "status": "up"
     }
