@@ -137,7 +137,7 @@ def place_connection(body):
     graph = temanager.generate_graph_te()
     if graph is None:
         return "Could not generate a graph", 400
-    
+
     traffic_matrix = temanager.generate_connection_te()
     if traffic_matrix is None:
         return "Could not generate a traffic matrix", 400
@@ -145,8 +145,6 @@ def place_connection(body):
     logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
     solver = TESolver(graph, traffic_matrix)
-    logger.info(f"TESolver: {solver}")
-
     solution = solver.solve()
     logger.debug(f"TESolver result: {solution}")
 
