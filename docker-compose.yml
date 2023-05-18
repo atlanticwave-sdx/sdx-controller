@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
 
+  # See https://hub.docker.com/_/mongo/ for documentation about
+  # MongoDB Docker images.
   sdx-controller-mongodb:
     image: mongo:3.7
     container_name: mongodb
