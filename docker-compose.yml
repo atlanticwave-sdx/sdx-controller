@@ -18,6 +18,7 @@ services:
 
   sdx-controller:
     image: sdx-controller
+    container_name: sdx-controller
     tty: true
     build: ./
     ports:
@@ -40,6 +41,7 @@ services:
 
   bapm-server:
     image: bapm-server
+    container_name: bapm-server
     # network_mode: "host"
     tty: true
     build: ./bapm_server
