@@ -5,8 +5,6 @@ services:
   sdx-mongodb:
     image: mongo:3.7
     container_name: mongodb
-    ports:
-      - 27317:27017
     environment:
       # MONGO_INITDB_DATABASE: test
       MONGO_INITDB_ROOT_USERNAME: sdx
