@@ -135,15 +135,14 @@ def place_connection(body):
         logger.info(f"TE topology #{num}: {val}")
 
     graph = temanager.generate_graph_te()
-    traffic_matrix = temanager.generate_connection_te()
-
-    logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
-
     if graph is None:
         return "Could not generate a graph", 400
-
+    
+    traffic_matrix = temanager.generate_connection_te()
     if traffic_matrix is None:
         return "Could not generate a traffic matrix", 400
+
+    logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
     solver = TESolver(graph, traffic_matrix)
     logger.info(f"TESolver: {solver}")
