@@ -13,8 +13,11 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: passw
       MONGODB_DATA_DIR: /data/db
     volumes:
-      # named volumes
-      - ./db:/data/db
+      # Named volumes. The 'Z' option tells Docker to label the
+      # content with a private unshared label. Private volumes can
+      # only be used by the current container.  See
+      # https://docs.docker.com/engine/reference/commandline/run/
+      - ./db:/data/db:Z
 
   sdx-controller:
     image: sdx-controller
