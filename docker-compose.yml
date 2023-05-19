@@ -2,29 +2,33 @@ version: '3.8'
 
 services:
 
-  my-mongodb:
+  # See https://hub.docker.com/_/mongo/ for documentation about
+  # MongoDB Docker images.
+  sdx-controller-mongodb:
     image: mongo:3.7
     container_name: mongodb
-    ports:
-      - 27317:27017
     environment:
       # MONGO_INITDB_DATABASE: test
       MONGO_INITDB_ROOT_USERNAME: sdx
       MONGO_INITDB_ROOT_PASSWORD: passw
       MONGODB_DATA_DIR: /data/db
     volumes:
-      # named volumes
-      - ~/mongodb:/data/db
+      # Named volumes. The 'Z' option tells Docker to label the
+      # content with a private unshared label. Private volumes can
+      # only be used by the current container.  See
+      # https://docs.docker.com/engine/reference/commandline/run/
+      - ./db:/data/db:Z
 
   sdx-controller:
     image: sdx-controller
+    container_name: sdx-controller
     tty: true
     build: ./
     ports:
       - 8080:8080
     environment:
-      # update to sdx controller host name
-      - MONGODB_CONNSTRING=mongodb://sdx:passw@152.54.3.143:27317/
+      # Use sdx-controller-mongodb service specified above.
+      - MONGODB_CONNSTRING=mongodb://sdx:passw@sdx-controller-mongodb:27017/
       - SDX_HOST=aw-sdx-controller.renci.org
       - SDX_PORT=8080
       - SDX_VERSION=1.0.0
@@ -40,6 +44,7 @@ services:
 
   bapm-server:
     image: bapm-server
+    container_name: bapm-server
     # network_mode: "host"
     tty: true
     build: ./bapm_server
