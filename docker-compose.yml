@@ -27,7 +27,7 @@ services:
     ports:
       - 8080:8080
     environment:
-      # Use sdx-mongodb service specified above.
+      # Use sdx-controller-mongodb service specified above.
       - MONGODB_CONNSTRING=mongodb://sdx:passw@sdx-controller-mongodb:27017/
       - SDX_HOST=aw-sdx-controller.renci.org
       - SDX_PORT=8080
