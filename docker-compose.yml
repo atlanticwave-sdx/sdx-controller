@@ -22,7 +22,7 @@ services:
     image: sdx-controller
     container_name: sdx-controller
     depends_on:
-      sdx-controller-mongodb
+      - sdx-controller-mongodb
     tty: true
     build: ./
     ports:
