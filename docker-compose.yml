@@ -6,7 +6,6 @@ services:
   # MongoDB Docker images.
   sdx-controller-mongodb:
     image: mongo:3.7
-    container_name: mongodb
     environment:
       # MONGO_INITDB_DATABASE: test
       MONGO_INITDB_ROOT_USERNAME: sdx
@@ -20,7 +19,6 @@ services:
 
   sdx-controller:
     image: sdx-controller
-    container_name: sdx-controller
     depends_on:
       - sdx-controller-mongodb
     tty: true
@@ -45,7 +43,6 @@ services:
 
   bapm-server:
     image: bapm-server
-    container_name: bapm-server
     # network_mode: "host"
     tty: true
     build: ./bapm_server
