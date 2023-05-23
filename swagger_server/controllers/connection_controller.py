@@ -103,32 +103,48 @@ def place_connection(body):
             "num_domain_topos"
         ]
 
-    temanager = TEManager(topo_json, body)
+    # Initializing TEManager with `None` topology data is a
+    # work-around for
+    # https://github.com/atlanticwave-sdx/sdx-controller/issues/145
+    temanager = TEManager(topology_data=None, connection_data=body)
     lc_domain_topo_dict = {}
 
-    for i in range(1, int(num_domain_topos) + 1):
-        curr_topo_str = db_instance.read_from_db("LC-" + str(i))["LC-" + str(i)]
+    # Read LC-1, LC-2, LC-3, and LC-4 topologies because of
+    # https://github.com/atlanticwave-sdx/sdx-controller/issues/152
+    for i in range(1, int(num_domain_topos) + 2):
+        lc = f"LC-{i}"
+        logger.debug(f"Reading {lc} from DB")
+        curr_topo = db_instance.read_from_db(lc)
+        if curr_topo is None:
+            logger.debug(f"Read {lc} from DB: {curr_topo}")
+            continue
+        else:
+            # Get the actual thing minus the Mongo ObjectID.
+            curr_topo_str = curr_topo.get(lc)
+            # Just print a substring, not the whole thing.
+            logger.debug(f"Read {lc} from DB: {curr_topo_str[0:50]}...")
+
         curr_topo_json = json.loads(curr_topo_str)
         lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
             "lc_queue_name"
         ]
-        logger.debug(f"Adding #{i} topology {curr_topo_json}")
+        logger.debug(f"Adding #{i} topology {curr_topo_json.get('id')} to TEManager")
         temanager.add_topology(curr_topo_json)
 
+    for num, val in enumerate(temanager.topology_manager.topology_list):
+        logger.info(f"TE topology #{num}: {val}")
+
     graph = temanager.generate_graph_te()
-    traffic_matrix = temanager.generate_connection_te()
-
-    logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
-
     if graph is None:
         return "Could not generate a graph", 400
 
+    traffic_matrix = temanager.generate_connection_te()
     if traffic_matrix is None:
         return "Could not generate a traffic matrix", 400
 
-    solver = TESolver(graph, traffic_matrix)
-    logger.info(f"TESolver: {solver}")
+    logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
+    solver = TESolver(graph, traffic_matrix)
     solution = solver.solve()
     logger.debug(f"TESolver result: {solution}")
 
