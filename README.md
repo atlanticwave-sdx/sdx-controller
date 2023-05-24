@@ -38,9 +38,9 @@ A `docker-compose.yaml` is provided for bringing up run
 sdx-controller, bapm-server, and MongoDB.
 
 The communication between SDX controller and Local controller is
-enabled by RabbitMQ, which can either run on the SDX controller, or on
-a separate node.  See notes under testing for some hints about running
-RabbitMQ.
+enabled by RabbitMQ, which can either run on the same node as SDX
+controller, or on a separate node.  See notes under testing for some
+hints about running RabbitMQ.
 
 Copy `env.template` to `.env`, and adjust it according to your
 environment.  And then, from the project root directory, do:
