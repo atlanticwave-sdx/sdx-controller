@@ -13,11 +13,10 @@ The SDX controller is the central point of the AW-SDX system. It coordinates amo
 ### BAPM
 The Behavior, Anomaly, and Performance Manager (BAPM) is a self-driving, multi-layer system. It collects fine-grained measurement data from the SDX's underlying infrastructures, and send data reports to the SDX controller. The SDX controller BAPM server included in this project is responsible for receiving and processing the BAPM data.
 
-## Requirements
-Python 3.9.6+
+## Prerequisites 
 
-## Prerequisite: run the RabbitMQ server
-The communication between SDX controller and Local controller is enabled by RabbitMQ. RabbitMQ can either run on the SDX controller, or run on a separate node. The easiest way to run RabbitMQ is using docker:
+- run the RabbitMQ server
+ The easiest way to run RabbitMQ is using docker:
 
 ```
 sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
@@ -26,6 +25,21 @@ sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:la
 Then in `env` and `docker-compose.yml` files, change `MQ_HOST` host to the corresponding IP address or hostname of the RabbitMQ server
 
 ## Run with Python
+
+You will need:
+
+ - Python 3.9.6+
+ - RabbitMQ
+ - MongoDB
+
+The communication between SDX controller and Local controller is
+enabled by RabbitMQ.  RabbitMQ can either run on the SDX controller,
+or run on a separate node.
+
+See notes under testing for some hints about running RabbitMQ and
+MongoDB.
+
+
 The SDX controller server is a swagger-enabled Flask server based on the [swagger-codegen](https://github.com/swagger-api/swagger-codegen) project.
 To run the SDX controller server, please execute the following from the project root directory:
 
