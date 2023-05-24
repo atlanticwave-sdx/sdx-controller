@@ -37,7 +37,6 @@ services:
       - SDX_PORT=${SDX_PORT}
       - SDX_VERSION=${SDX_VERSION}
       - MQ_HOST=${MQ_HOST}
-      - PUB_TOPIC=${PUB_TOPIC}
       - SUB_TOPIC=${SUB_TOPIC}
       - SUB_QUEUE=${SUB_QUEUE}
       - DB_NAME=${DB_NAME}
