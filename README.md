@@ -21,7 +21,7 @@ the [swagger-codegen](https://github.com/swagger-api/swagger-codegen)
 project.
 
 
-### BAPM
+## BAPM
 
 The Behavior, Anomaly, and Performance Manager (BAPM) is a
 self-driving, multi-layer system. It collects fine-grained measurement
