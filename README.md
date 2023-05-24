@@ -24,11 +24,6 @@ data from the SDX's underlying infrastructures, and send data reports
 to the SDX controller. The SDX controller BAPM server included in this
 project is responsible for receiving and processing the BAPM data.
 
-## Prerequisites
-
-
-Then in `env` and `docker-compose.yml` files, change `MQ_HOST` host to the corresponding IP address or hostname of the RabbitMQ server
-
 ## Run with Python
 
 You will need:
