@@ -13,14 +13,8 @@ The SDX controller is the central point of the AW-SDX system. It coordinates amo
 ### BAPM
 The Behavior, Anomaly, and Performance Manager (BAPM) is a self-driving, multi-layer system. It collects fine-grained measurement data from the SDX's underlying infrastructures, and send data reports to the SDX controller. The SDX controller BAPM server included in this project is responsible for receiving and processing the BAPM data.
 
-## Prerequisites 
+## Prerequisites
 
-- run the RabbitMQ server
- The easiest way to run RabbitMQ is using docker:
-
-```
-sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
-```
 
 Then in `env` and `docker-compose.yml` files, change `MQ_HOST` host to the corresponding IP address or hostname of the RabbitMQ server
 
@@ -92,16 +86,6 @@ docker build -t bapm-server .
 docker-compose up
 ```
 
-MongoDB is included in `docker-compose`, so running `docker-compose up` will bring up MongoDB as well. But if it's preferred to run MongoDB separately from `docker-compose`, here is the way:
-
-```
-$ docker run -it --rm --name mongo \
-    -p 27017:27017 \
-    -e MONGO_INITDB_ROOT_USERNAME=guest \
-    -e MONGO_INITDB_ROOT_PASSWORD=guest \
-    mongo:3.7
-```
-
 ## Communication between SDX Controller and Local Controller
 
 The SDX controller and local controller communicate using RabbitMQ. All the topology and connectivity related messages are sent with RPC, with receiver confirmation. The monitoring related messages are sent without receiver confirmation.
@@ -116,15 +100,21 @@ Local controller sends domain information to SDX controller:
 
 ## Testing
 
-The test suite expects MongoDB and RabbitMQ, which can be launched
-with Docker (or Podman), as shown in the earlier examples.
+Some of the tests expects MongoDB and RabbitMQ, which can be launched
+with Docker (or Podman):
+
+```
+$ docker run -rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
+$ docker run -rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
+```
 
 Some environment variables are expected to be set for the tests to
-work as expected. Edit `env.local` according to your environment, and
-make sure the env vars are present in your shell:
+work as expected. Copy `env.template` to `.env` and edit it according
+to your environment, and make sure the env vars are present in your
+shell:
 
 ```console
-$ source env.local
+$ source .env
 ```
 
 And now run [tox]:
