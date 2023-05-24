@@ -55,6 +55,8 @@ controller](https://user-images.githubusercontent.com/29924060/139588283-2ea3280
 Copy the `env.template` to `.env`, and adjust it according to your
 environment.
 
+###
+
 The communication between SDX controller and Local controller is
 enabled by RabbitMQ, which can either run on the same node as SDX
 controller, or on a separate node.  See notes under testing for some
@@ -101,7 +103,7 @@ To run sdx-controller alone:
 $ docker run -p 8080:8080 sdx-controller --env-file=.env
 ```
 
-### Run with Python
+### Running with Python
 
 You will need:
 
