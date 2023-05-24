@@ -46,13 +46,6 @@ The Swagger definition lives here:
 http://localhost:8080/SDX-Controller/1.0.0/swagger.json
 ```
 
-To launch the integration tests, use tox:
-
-```
-sudo pip install tox
-tox
-```
-
 ## Running with Docker (Recommended)
 
 Running with Docker provides clean and integrated environment for each server instance, and provide easy scalability capabilities. Therefore, we recommend using Docker to run the SDX controller. 
