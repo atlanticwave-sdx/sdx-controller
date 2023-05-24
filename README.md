@@ -29,6 +29,7 @@ data from the SDX's underlying infrastructures, and send data reports
 to the SDX controller. The SDX controller BAPM server included in this
 project is responsible for receiving and processing the BAPM data.
 
+
 ## Run with Python
 
 You will need:
@@ -39,30 +40,28 @@ You will need:
 
 The communication between SDX controller and Local controller is
 enabled by RabbitMQ.  RabbitMQ can either run on the SDX controller,
-or run on a separate node.
+or run on a separate node.  See notes under testing for some hints
+about running RabbitMQ and MongoDB.
 
-See notes under testing for some hints about running RabbitMQ and
-MongoDB.
+Prior to running SDX Server, you will need to copy `env.template` to
+`.env`, adjust it to your environment, and source it.
 
-
-To run the SDX controller server, please execute the following from the project root directory:
-
-```
-pip3 install -r requirements.txt
-python3 -m swagger_server
+```console
+$ source .env
 ```
 
-and open your browser to here:
+To run the SDX controller server, do this from the project root
+directory:
 
-```
-http://localhost:8080/SDX-Controller/1.0.0/ui/
+```console
+$ pip3 install -r requirements.txt
+$ python3 -m swagger_server
 ```
 
-The Swagger definition lives here:
+Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
+the API.  The OpenAPI/Swagger definition should be available at
+http://localhost:8080/SDX-Controller/1.0.0/swagger.json.
 
-```
-http://localhost:8080/SDX-Controller/1.0.0/swagger.json
-```
 
 ## Running with Docker (Recommended)
 
