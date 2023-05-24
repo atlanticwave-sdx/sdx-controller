@@ -45,7 +45,7 @@ hints about running RabbitMQ.
 You might need to install Elastic Search too.  The script
 `elastic-search-setup.sh` should be useful on Rocky Linux systems:
 
-```
+```console
 $ sudo sh elastic-search-setup.sh
 ```
 
@@ -55,13 +55,13 @@ A `docker-compose.yaml` is provided for bringing up run
 sdx-controller, bapm-server, and a MongoDB instance used by
 sdx-controller.  From the project root directory, do:
 
-```
+```console
 $ docker compose up
 ```
 
 If you have made some local changes that you need to test, use:
 
-```
+```console
 $ docker compose up --build
 ```
 
@@ -75,7 +75,7 @@ http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
 We have two container images: sdx-server and `bapm-server. Do this to
 build them:
 
-```bash
+```console
 $ docker build -t sdx-controller .
 $ cd bapm_server
 $ docker build -t bapm-server .
@@ -83,7 +83,7 @@ $ docker build -t bapm-server .
 
 To run sdx-controller alone:
 
-```
+```console
 $ docker run -p 8080:8080 sdx-controller --env-file=.env
 ```
 
@@ -130,7 +130,7 @@ controller](https://user-images.githubusercontent.com/29924060/139588283-2ea3280
 Some of the tests expects MongoDB and RabbitMQ, which can be launched
 with Docker (or Podman):
 
-```
+```console
 $ docker run -rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
 $ docker run -rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
 ```
