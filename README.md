@@ -34,9 +34,9 @@ project is responsible for receiving and processing the BAPM data.
 
 You will need:
 
- - Python 3.9.6+
- - RabbitMQ
- - MongoDB
+* Python 3.9.6+
+* RabbitMQ
+* MongoDB
 
 The communication between SDX controller and Local controller is
 enabled by RabbitMQ.  RabbitMQ can either run on the SDX controller,
