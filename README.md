@@ -119,6 +119,7 @@ directory:
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
 $ pip3 install -r requirements.txt
+$ source .env
 $ python3 -m swagger_server
 ```
 
