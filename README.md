@@ -128,7 +128,7 @@ $ python3 -m swagger_server
 ## Running the test suite
 
 Some of the tests expects MongoDB and RabbitMQ, which can be launched
-with Docker (or Podman):
+with Docker:
 
 ```console
 $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
