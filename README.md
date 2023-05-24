@@ -74,18 +74,14 @@ sdx-controller, bapm-server, and a MongoDB instance used by
 sdx-controller.  From the project root directory, do:
 
 ```console
-$ docker compose up
-```
-
-If you have made some local changes that you need to test, use:
-
-```console
 $ docker compose up --build
 ```
 
 Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
 the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
+
+Use `docker compose down` to shut down the services.
 
 
 #### Building the container images
