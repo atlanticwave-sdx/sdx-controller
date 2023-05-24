@@ -62,7 +62,7 @@ $ python3 -m swagger_server
 
 Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
 the API.  The OpenAPI/Swagger definition should be available at
-http://localhost:8080/SDX-Controller/1.0.0/swagger.json.
+http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
 
 
 ## Running with Docker Compose (recommended)
