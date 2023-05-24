@@ -4,8 +4,9 @@ services:
 
   # See https://hub.docker.com/_/mongo/ for documentation about
   # MongoDB Docker images.
-  sdx-controller-mongodb:
+  sdx-controller-mongodb-service:
     image: mongo:3.7
+    container_name: sdx-controller-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: sdx
       MONGO_INITDB_ROOT_PASSWORD: passw
@@ -16,10 +17,11 @@ services:
         source: mongodb
         target: /data/db
 
-  sdx-controller:
+  sdx-controller-service:
     image: sdx-controller
+    container_name: sdx-controller
     depends_on:
-      - sdx-controller-mongodb
+      - sdx-controller-mongodb-service
     tty: true
     build: ./
     ports:
@@ -40,8 +42,9 @@ services:
       - DB_CONFIG_TABLE_NAME=sdx-config-test-1
       - MANIFEST=README.md
 
-  bapm-server:
+  bapm-server-service:
     image: bapm-server
+    container_name: bapm-server
     tty: true
     build: ./bapm_server
     environment:
