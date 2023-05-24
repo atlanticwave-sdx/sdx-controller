@@ -63,10 +63,10 @@ the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/swagger.json.
 
 
-## Running with Docker Compose (Recommended)
+## Running with Docker Compose (recommended)
 
-Copy `env.template` to `.env`, adjust it to your environment, and
-source it.  And then, from the project root directory, do:
+Copy `env.template` to `.env`, and adjust it according to your
+environment.  And then, from the project root directory, do:
 
 ```
 $ docker compose up
@@ -78,33 +78,30 @@ If you have made some local changes that you need to test, use:
 $ docker compose up --build
 ```
 
-To run the server on a Docker container, execute the following from the project root directory:
+You might need to install Elastic Search too.  The script
+`elastic-search-setup.sh` should be useful on Rocky Linux systems:
+
+```
+$ sudo sh elastic-search-setup.sh
+```
+
+### Building the container images
+
+We have two container images: sdx-server and `bapm-server. Do this to
+build them:
 
 ```bash
-# building the image
-docker build -t sdx-controller .
-
-# starting up a container
-docker run -p 8080:8080 sdx-controller
+$ docker build -t sdx-controller .
+$ cd bapm_server
+$ docker build -t bapm-server .
 ```
 
-To run the SDX Controller server and BAPM server, Docker is required.
-Execute the following from the project root directory:
+To run sdx-controller alone:
 
 ```
-# install ElasticSearch
-sh elastic-search-setup.sh
-
-# building SDX Controller image
-docker build -t sdx-controller .
-
-# build BAPM server image
-cd bapm_server
-docker build -t bapm-server .
-
-# run both SDX controller and BAPM server with docker-compose
-docker-compose up
+$ docker run -p 8080:8080 sdx-controller --env-file=.env
 ```
+
 
 ## Communication between SDX Controller and Local Controller
 
