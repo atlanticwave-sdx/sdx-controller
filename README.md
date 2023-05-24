@@ -15,6 +15,11 @@ and OESS. Its major responsibilities include:
 * Distribute connection requests to corresponding LCs.
 * Receive and process measurement data from Behavior, Anomaly and
   Performance Manager (BAPM).
+  
+The SDX controller server is a swagger-enabled Flask server based on
+the [swagger-codegen](https://github.com/swagger-api/swagger-codegen)
+project.
+
 
 ### BAPM
 
@@ -40,7 +45,6 @@ See notes under testing for some hints about running RabbitMQ and
 MongoDB.
 
 
-The SDX controller server is a swagger-enabled Flask server based on the [swagger-codegen](https://github.com/swagger-api/swagger-codegen) project.
 To run the SDX controller server, please execute the following from the project root directory:
 
 ```
