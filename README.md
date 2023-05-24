@@ -55,8 +55,8 @@ Local controller sends domain information to SDX controller:
 
 ### Configuration
 
-Copy the `env.template` to `.env`, and adjust it according to your
-environment.
+Copy the provided `env.template` file to `.env`, and adjust it
+according to your environment.
 
 The communication between SDX controller and Local controller is
 enabled by RabbitMQ, which can either run on the same node as SDX
@@ -77,6 +77,7 @@ sdx-controller, bapm-server, and a MongoDB instance used by
 sdx-controller.  From the project root directory, do:
 
 ```console
+$ source .env
 $ docker compose up --build
 ```
 
