@@ -131,8 +131,8 @@ Some of the tests expects MongoDB and RabbitMQ, which can be launched
 with Docker (or Podman):
 
 ```console
-$ docker run -rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
-$ docker run -rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
+$ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
+$ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
 ```
 
 Some environment variables are expected to be set for the tests to
