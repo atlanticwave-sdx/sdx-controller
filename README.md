@@ -15,7 +15,7 @@ and OESS. Its major responsibilities include:
 * Distribute connection requests to corresponding LCs.
 * Receive and process measurement data from Behavior, Anomaly and
   Performance Manager (BAPM).
-  
+
 The SDX controller server is a swagger-enabled Flask server based on
 the [swagger-codegen](https://github.com/swagger-api/swagger-codegen)
 project.
@@ -32,18 +32,28 @@ project is responsible for receiving and processing the BAPM data.
 
 ## Running SDX Controller
 
-### Running with Docker Compose (recommended)
+### Configuration
 
-A `docker-compose.yaml` is provided for bringing up run
-sdx-controller, bapm-server, and MongoDB.
+Copy the `env.template` to `.env`, and adjust it according to your
+environment.
 
 The communication between SDX controller and Local controller is
 enabled by RabbitMQ, which can either run on the same node as SDX
 controller, or on a separate node.  See notes under testing for some
 hints about running RabbitMQ.
 
-Copy `env.template` to `.env`, and adjust it according to your
-environment.  And then, from the project root directory, do:
+You might need to install Elastic Search too.  The script
+`elastic-search-setup.sh` should be useful on Rocky Linux systems:
+
+```
+$ sudo sh elastic-search-setup.sh
+```
+
+### Running with Docker Compose (recommended)
+
+A `docker-compose.yaml` is provided for bringing up run
+sdx-controller, bapm-server, and a MongoDB instance used by
+sdx-controller.  From the project root directory, do:
 
 ```
 $ docker compose up
@@ -59,13 +69,6 @@ Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
 the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
 
-
-You might need to install Elastic Search too.  The script
-`elastic-search-setup.sh` should be useful on Rocky Linux systems:
-
-```
-$ sudo sh elastic-search-setup.sh
-```
 
 #### Building the container images
 
@@ -94,13 +97,6 @@ You will need:
 
 See notes under testing for some hints about running RabbitMQ and
 MongoDB.
-
-Prior to running SDX Server, you will need to copy `env.template` to
-`.env`, adjust it to your environment, and source it.
-
-```console
-$ source .env
-```
 
 To run the SDX controller server, do this from the project root
 directory:
