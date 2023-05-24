@@ -37,15 +37,16 @@ RabbitMQ. All the topology and connectivity related messages are sent
 with RPC, with receiver confirmation. The monitoring related messages
 are sent without receiver confirmation.
 
-Below are two sample scenarios for RabbitMQ implementation:
+Below are two sample scenarios for RabbitMQ implementation.
 
 SDX controller breaks down the topology and sends connectivity
-information to local controllers: ![SDX controller to local
-controller](https://user-images.githubusercontent.com/29924060/139588273-100a0bb2-14ba-496f-aedf-a122b9793325.jpg)
+information to local controllers: 
 
-Local controller sends domain information to SDX controller: ![Local
-controller to SDX
-controller](https://user-images.githubusercontent.com/29924060/139588283-2ea32803-92e3-4812-9e8a-3d829549ae40.jpg)
+![SDX controller to local controller][sdx-to-lc-img]
+
+Local controller sends domain information to SDX controller: 
+
+![Local controller to SDX controller][lc-to-sdx-img]
 
 
 ## Running SDX Controller
@@ -152,3 +153,6 @@ $ tox
 <!-- References -->
 
 [tox]: https://tox.wiki/en/latest/
+
+[sdx-to-lc-img]: https://user-images.githubusercontent.com/29924060/139588273-100a0bb2-14ba-496f-aedf-a122b9793325.jpg
+[lc-to-sdx-img]: https://user-images.githubusercontent.com/29924060/139588283-2ea32803-92e3-4812-9e8a-3d829549ae40.jpg
