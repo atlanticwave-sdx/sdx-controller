@@ -1,5 +1,7 @@
 # SDX Controller Service
 
+[![controller-ci-badge]][controller-ci] [![controller-cov-badge]][controller-cov]
+
 ## Overview
 
 The SDX controller is the central point of the AW-SDX system. It
@@ -156,3 +158,9 @@ $ tox
 
 [sdx-to-lc-img]: https://user-images.githubusercontent.com/29924060/139588273-100a0bb2-14ba-496f-aedf-a122b9793325.jpg
 [lc-to-sdx-img]: https://user-images.githubusercontent.com/29924060/139588283-2ea32803-92e3-4812-9e8a-3d829549ae40.jpg
+
+[controller-ci-badge]: https://github.com/atlanticwave-sdx/sdx-controller/actions/workflows/test.yml/badge.svg
+[controller-ci]: https://github.com/atlanticwave-sdx/sdx-controller/actions/workflows/test.yml
+
+[controller-cov-badge]: https://coveralls.io/repos/github/atlanticwave-sdx/sdx-controller/badge.svg?branch=main (Coverage Status)
+[controller-cov]: https://coveralls.io/github/atlanticwave-sdx/sdx-controller?branch=main
