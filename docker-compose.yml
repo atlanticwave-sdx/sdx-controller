@@ -26,8 +26,11 @@ services:
     ports:
       - 8080:8080
     environment:
-      # Use sdx-controller-mongodb service specified above.
-      - MONGODB_CONNSTRING=${MONGODB_CONNSTRING}
+      # Use sdx-controller-mongodb service specified above.  Note that
+      # we do not use the same MONGODB_CONNSTRING variable from .env
+      # here, because that is helpful for running unit/integration
+      # tests.
+      - MONGODB_CONNSTRING="mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@sdx-controller-mongodb:27017/"
       - SDX_HOST=${SDX_HOST}
       - SDX_PORT=${SDX_PORT}
       - SDX_VERSION=${SDX_VERSION}
