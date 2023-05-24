@@ -54,6 +54,8 @@ To run the SDX controller server, do this from the project root
 directory:
 
 ```console
+$ python3 -m venv venv --upgrade-deps
+$ source ./venv/bin/activate
 $ pip3 install -r requirements.txt
 $ python3 -m swagger_server
 ```
