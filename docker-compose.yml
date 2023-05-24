@@ -4,7 +4,7 @@ services:
 
   # See https://hub.docker.com/_/mongo/ for documentation about
   # MongoDB Docker images.
-  sdx-controller-mongodb:
+  sdx-controller-mongodb-service:
     image: mongo:3.7
     container_name: mongodb
     environment:
@@ -19,7 +19,7 @@ services:
       # https://docs.docker.com/engine/reference/commandline/run/
       - ./db:/data/db:Z
 
-  sdx-controller:
+  sdx-controller-service:
     image: sdx-controller
     container_name: sdx-controller
     tty: true
@@ -40,7 +40,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
 
-  bapm-server:
+  bapm-server-service:
     image: bapm-server
     container_name: bapm-server
     # network_mode: "host"
