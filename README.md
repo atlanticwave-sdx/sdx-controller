@@ -63,11 +63,20 @@ the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/swagger.json.
 
 
-## Running with Docker (Recommended)
+## Running with Docker Compose (Recommended)
 
-Running with Docker provides clean and integrated environment for each
-server instance, and provide easy scalability capabilities. Therefore,
-we recommend using Docker to run the SDX controller.
+Copy `env.template` to `.env`, adjust it to your environment, and
+source it.  And then, from the project root directory, do:
+
+```
+$ docker-compose up
+```
+
+If you have made some local changes that you need to test, use:
+
+```
+$ docker compose up --build
+```
 
 To run the server on a Docker container, execute the following from the project root directory:
 
@@ -82,7 +91,7 @@ docker run -p 8080:8080 sdx-controller
 To run the SDX Controller server and BAPM server, Docker is required.
 Execute the following from the project root directory:
 
-```bash
+```
 # install ElasticSearch
 sh elastic-search-setup.sh
 
