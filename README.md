@@ -123,7 +123,7 @@ $ source .env
 $ python3 -m swagger_server
 ```
 
-## Testing
+## Running the test suite
 
 Some of the tests expects MongoDB and RabbitMQ, which can be launched
 with Docker (or Podman):
