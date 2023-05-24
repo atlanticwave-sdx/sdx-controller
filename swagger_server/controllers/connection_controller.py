@@ -21,8 +21,6 @@ logger.setLevel(logging.DEBUG)
 db_instance = DbUtils()
 db_instance.initialize_db()
 
-MANIFEST = os.environ.get("MANIFEST")
-
 
 def is_json(myjson):
     try:

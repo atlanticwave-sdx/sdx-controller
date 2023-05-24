@@ -40,7 +40,6 @@ services:
       - MQ_HOST=aw-sdx-monitor.renci.org
       - DB_NAME=test-db
       - DB_CONFIG_TABLE_NAME=sdx-config-test-1
-      - MANIFEST=README.md
 
   bapm-server:
     image: bapm-server
