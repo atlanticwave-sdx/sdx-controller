@@ -30,9 +30,9 @@ to the SDX controller. The SDX controller BAPM server included in this
 project is responsible for receiving and processing the BAPM data.
 
 
-# Running SDX Controller
+## Running SDX Controller
 
-## Running with Docker Compose (recommended)
+### Running with Docker Compose (recommended)
 
 A `docker-compose.yaml` is provided for bringing up run
 sdx-controller, bapm-server, and MongoDB.
@@ -67,7 +67,7 @@ You might need to install Elastic Search too.  The script
 $ sudo sh elastic-search-setup.sh
 ```
 
-### Building the container images
+#### Building the container images
 
 We have two container images: sdx-server and `bapm-server. Do this to
 build them:
@@ -84,7 +84,7 @@ To run sdx-controller alone:
 $ docker run -p 8080:8080 sdx-controller --env-file=.env
 ```
 
-## Run with Python
+### Run with Python
 
 You will need:
 
