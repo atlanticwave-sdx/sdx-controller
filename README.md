@@ -60,11 +60,6 @@ $ pip3 install -r requirements.txt
 $ python3 -m swagger_server
 ```
 
-Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
-the API.  The OpenAPI/Swagger definition should be available at
-http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
-
-
 ## Running with Docker Compose (recommended)
 
 Copy `env.template` to `.env`, and adjust it according to your
@@ -79,6 +74,11 @@ If you have made some local changes that you need to test, use:
 ```
 $ docker compose up --build
 ```
+
+Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
+the API.  The OpenAPI/Swagger definition should be available at
+http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
+
 
 You might need to install Elastic Search too.  The script
 `elastic-search-setup.sh` should be useful on Rocky Linux systems:
