@@ -136,9 +136,9 @@ $ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=g
 ```
 
 Some environment variables are expected to be set for the tests to
-work as expected. Copy `env.template` to `.env` and edit it according
-to your environment, and make sure the env vars are present in your
-shell:
+work as expected, so you may want to copy `env.template` to `.env` and
+edit it according to your environment, and make sure the env vars are
+present in your shell:
 
 ```console
 $ source .env
