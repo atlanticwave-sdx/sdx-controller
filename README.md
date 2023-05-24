@@ -69,7 +69,7 @@ Copy `env.template` to `.env`, adjust it to your environment, and
 source it.  And then, from the project root directory, do:
 
 ```
-$ docker-compose up
+$ docker compose up
 ```
 
 If you have made some local changes that you need to test, use:
