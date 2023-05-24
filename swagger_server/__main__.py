@@ -168,7 +168,6 @@ def main():
     threading.Thread(target=lambda: app.run(port=8080)).start()
 
     DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
-    MANIFEST = os.environ.get("MANIFEST")
 
     # Get DB connection and tables set up.
     db_instance = DbUtils()
