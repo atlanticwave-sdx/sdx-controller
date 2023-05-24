@@ -1,17 +1,28 @@
 # SDX Controller Service
 
 ## Overview
-The SDX controller is the central point of the AW-SDX system. It coordinates among local controllers (LCs), datamodels, Path Computation Engine (PCE), as well as domain managers, such as Kytos and OESS. Its major responsibilities include:
+
+The SDX controller is the central point of the AW-SDX system. It
+coordinates among local controllers (LCs), datamodels, Path
+Computation Engine (PCE), as well as domain managers, such as Kytos
+and OESS. Its major responsibilities include:
 
 * Collect domain topology from all the LCs.
 * Assumble domain topology into global network topology.
 * Handle user SDX end-to-end connection request.
-* Call Path Computation Engine (PCE) to compute optimal path, and break down topology into per-LC topology.
+* Call Path Computation Engine (PCE) to compute optimal path, and
+  break down topology into per-LC topology.
 * Distribute connection requests to corresponding LCs.
-* Receive and process measurement data from Behavior, Anomaly and Performance Manager (BAPM).
+* Receive and process measurement data from Behavior, Anomaly and
+  Performance Manager (BAPM).
 
 ### BAPM
-The Behavior, Anomaly, and Performance Manager (BAPM) is a self-driving, multi-layer system. It collects fine-grained measurement data from the SDX's underlying infrastructures, and send data reports to the SDX controller. The SDX controller BAPM server included in this project is responsible for receiving and processing the BAPM data.
+
+The Behavior, Anomaly, and Performance Manager (BAPM) is a
+self-driving, multi-layer system. It collects fine-grained measurement
+data from the SDX's underlying infrastructures, and send data reports
+to the SDX controller. The SDX controller BAPM server included in this
+project is responsible for receiving and processing the BAPM data.
 
 ## Prerequisites
 
@@ -56,7 +67,9 @@ http://localhost:8080/SDX-Controller/1.0.0/swagger.json
 
 ## Running with Docker (Recommended)
 
-Running with Docker provides clean and integrated environment for each server instance, and provide easy scalability capabilities. Therefore, we recommend using Docker to run the SDX controller. 
+Running with Docker provides clean and integrated environment for each
+server instance, and provide easy scalability capabilities. Therefore,
+we recommend using Docker to run the SDX controller.
 
 To run the server on a Docker container, execute the following from the project root directory:
 
@@ -68,7 +81,7 @@ docker build -t sdx-controller .
 docker run -p 8080:8080 sdx-controller
 ```
 
-To run the SDX Controller server and BAPM server, Docker is required. 
+To run the SDX Controller server and BAPM server, Docker is required.
 Execute the following from the project root directory:
 
 ```bash
@@ -88,7 +101,10 @@ docker-compose up
 
 ## Communication between SDX Controller and Local Controller
 
-The SDX controller and local controller communicate using RabbitMQ. All the topology and connectivity related messages are sent with RPC, with receiver confirmation. The monitoring related messages are sent without receiver confirmation.
+The SDX controller and local controller communicate using
+RabbitMQ. All the topology and connectivity related messages are sent
+with RPC, with receiver confirmation. The monitoring related messages
+are sent without receiver confirmation.
 
 Below are two sample scenarios for RabbitMQ implementation:
 
