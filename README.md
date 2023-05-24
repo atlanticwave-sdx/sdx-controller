@@ -30,37 +30,17 @@ to the SDX controller. The SDX controller BAPM server included in this
 project is responsible for receiving and processing the BAPM data.
 
 
-## Run with Python
-
-You will need:
-
-* Python 3.9.6+
-* RabbitMQ
-* MongoDB
-
-The communication between SDX controller and Local controller is
-enabled by RabbitMQ.  RabbitMQ can either run on the SDX controller,
-or run on a separate node.  See notes under testing for some hints
-about running RabbitMQ and MongoDB.
-
-Prior to running SDX Server, you will need to copy `env.template` to
-`.env`, adjust it to your environment, and source it.
-
-```console
-$ source .env
-```
-
-To run the SDX controller server, do this from the project root
-directory:
-
-```console
-$ python3 -m venv venv --upgrade-deps
-$ source ./venv/bin/activate
-$ pip3 install -r requirements.txt
-$ python3 -m swagger_server
-```
+# Running SDX Controller
 
 ## Running with Docker Compose (recommended)
+
+A `docker-compose.yaml` is provided for bringing up run
+sdx-controller, bapm-server, and MongoDB.
+
+The communication between SDX controller and Local controller is
+enabled by RabbitMQ, which can either run on the SDX controller, or on
+a separate node.  See notes under testing for some hints about running
+RabbitMQ.
 
 Copy `env.template` to `.env`, and adjust it according to your
 environment.  And then, from the project root directory, do:
@@ -104,6 +84,33 @@ To run sdx-controller alone:
 $ docker run -p 8080:8080 sdx-controller --env-file=.env
 ```
 
+## Run with Python
+
+You will need:
+
+* Python 3.9.6+
+* RabbitMQ
+* MongoDB
+
+See notes under testing for some hints about running RabbitMQ and
+MongoDB.
+
+Prior to running SDX Server, you will need to copy `env.template` to
+`.env`, adjust it to your environment, and source it.
+
+```console
+$ source .env
+```
+
+To run the SDX controller server, do this from the project root
+directory:
+
+```console
+$ python3 -m venv venv --upgrade-deps
+$ source ./venv/bin/activate
+$ pip3 install -r requirements.txt
+$ python3 -m swagger_server
+```
 
 ## Communication between SDX Controller and Local Controller
 
