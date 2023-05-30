@@ -79,7 +79,6 @@ jobs:
           SDX_VERSION: '1.0.0'
           SDX_NAME: 'sdx-controller-test'
           MQ_HOST: 'localhost'
-          MQ_NAME: 'sdx-controller'
           SUB_QUEUE: 'sdx-controller-test-queue'
           DB_NAME: 'sdx-controllder-test-db'
           DB_CONFIG_TABLE_NAME: 'sdx-controller-test-table'
