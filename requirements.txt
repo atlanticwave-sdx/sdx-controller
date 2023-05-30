@@ -7,4 +7,4 @@ dataset
 pymongo > 3.0
 
 pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.0
-sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@1.0.1.dev3
+sdxdatamodel @ git+https://github.com/atlanticwave-sdx/datamodel@2.0.0
