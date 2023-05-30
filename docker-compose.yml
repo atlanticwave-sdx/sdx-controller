@@ -51,7 +51,6 @@ services:
     tty: true
     build: ./bapm_server
     environment:
-
       - ES_HOST=${ES_HOST}
       - ES_PORT=${ES_PORT}
       - BAPM_MQ_HOST=${BAPM_MQ_HOST}
