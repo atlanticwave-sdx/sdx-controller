@@ -35,6 +35,7 @@ class DbUtils(object):
         self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, key, value):
+        key = str(key)
         obj = self.read_from_db(key)
         if obj is None:
             self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
@@ -50,6 +51,7 @@ class DbUtils(object):
         return result
 
     def read_from_db(self, key):
+        key = str(key)
         return self.sdxdb[self.db_name][self.config_table_name].find_one(
             {key: {"$exists": 1}}
         )
