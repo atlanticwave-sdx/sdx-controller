@@ -6,7 +6,6 @@ services:
   # MongoDB Docker images.
   sdx-controller-mongodb-service:
     image: mongo:3.7
-    container_name: sdx-controller-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -24,7 +23,6 @@ services:
 
   sdx-controller-service:
     image: sdx-controller
-    container_name: sdx-controller
     depends_on:
       - sdx-controller-mongodb-service
     tty: true
@@ -47,7 +45,6 @@ services:
 
   bapm-server-service:
     image: bapm-server
-    container_name: bapm-server
     tty: true
     build: ./bapm_server
     environment:
