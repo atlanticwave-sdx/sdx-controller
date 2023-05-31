@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Make tests more usable (#94, #133)
+- Avoid installing unused packages in bapm-server image (#157)
 
 ### Changed
 
