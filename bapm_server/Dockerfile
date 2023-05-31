@@ -1,11 +1,5 @@
 FROM python:3.9-slim-bullseye
 
-RUN apt-get update \
-    && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gcc python-dev git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
