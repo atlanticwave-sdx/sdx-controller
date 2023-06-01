@@ -120,7 +120,7 @@ def start_consumer(thread_queue, db_instance):
             topo_json = json.loads(topology)
             manager.add_topology(topo_json)
 
-    while not thread_queue.empty():
+    while True:
         msg = thread_queue.get()
         logger.debug("MQ received message:" + str(msg))
 
