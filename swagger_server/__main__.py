@@ -121,6 +121,7 @@ def start_consumer(thread_queue, db_instance):
             manager.add_topology(topo_json)
 
     while True:
+        # Queue.get() will block until there's an item in the queue.
         msg = thread_queue.get()
         logger.debug("MQ received message:" + str(msg))
 
