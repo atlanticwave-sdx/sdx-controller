@@ -42,8 +42,12 @@ def process_lc_json_msg(
 ):
     logger.info("MQ received message:" + str(msg))
     msg_json = json.loads(msg)
-    msg_id = msg_json["id"]
-    msg_version = msg_json["version"]
+
+    msg_id = msg_json.get("id")
+    msg_version = msg_json.get("version")
+    if msg_id is None or msg_version is None:
+        logger.info("Message without ID or version; ignoring")
+        return
 
     lc_queue_name = msg_json["lc_queue_name"]
     logger.debug("---lc_queue_name:---")
