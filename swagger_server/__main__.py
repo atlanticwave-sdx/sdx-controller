@@ -58,6 +58,10 @@ def process_lc_json_msg(
     #     return
 
     domain_name = find_between(msg_id, "topology:", ".net")
+    if domain_name is None:
+        logger.info("Could not find a domain name for the topology; ignoring")
+        return
+
     msg_json["domain_name"] = domain_name
 
     db_msg_id = str(msg_id) + "-" + str(msg_version)
