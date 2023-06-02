@@ -49,9 +49,13 @@ def process_lc_json_msg(
         logger.info("Message without ID or version; ignoring")
         return
 
-    lc_queue_name = msg_json["lc_queue_name"]
-    logger.debug("---lc_queue_name:---")
-    logger.debug(lc_queue_name)
+    # TODO: it doesn't seem that lc_queue_name is actually used.
+    lc_queue_name = msg_json.get("lc_queue_name")
+    logger.debug(f"lc_queue_name: {lc_queue_name}")
+
+    if lc_queue_name is None:
+        logger.info("Message without queue name; ignoring")
+        return
 
     domain_name = find_between(msg_id, "topology:", ".net")
     msg_json["domain_name"] = domain_name
