@@ -1,6 +1,6 @@
 [tool.black]
-src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
+src_paths = ["setup.py", "swagger_server", "bapm_server"]
 
 [tool.isort]
 profile = "black"
-src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
+src_paths = ["setup.py", "swagger_server", "bapm_server"]
