@@ -3,6 +3,7 @@
 import json
 import logging
 import threading
+from queue import Queue
 
 import connexion
 from sdx.pce.topology.manager import TopologyManager
