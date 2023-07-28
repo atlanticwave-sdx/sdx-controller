@@ -1,6 +1,3 @@
-
-
-
 def get_node():  # noqa: E501
     """get an existing node
 

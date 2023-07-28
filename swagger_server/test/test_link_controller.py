@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-
 from swagger_server.test import BaseTestCase
 
 

@@ -1,6 +1,3 @@
-
-
-
 def get_link():  # noqa: E501
     """get an existing link
 
