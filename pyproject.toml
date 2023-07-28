@@ -7,7 +7,7 @@ src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
 
 [tool.coverage.run]
 branch = true
-omit = [ "tests/*", "swagger_server/test/" ]
+omit = [ "tests/*", "swagger_server/test/*" ]
 relative_files = true
 
 # The section below will let us have relative paths in test coverage
