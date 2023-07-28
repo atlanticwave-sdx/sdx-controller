@@ -7,7 +7,6 @@ src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
 
 [tool.coverage.run]
 branch = true
-# source_pkgs = sdx.pce
 omit = [ "tests/*", "swagger_server/test/" ]
 relative_files = true
 
