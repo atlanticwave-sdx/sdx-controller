@@ -2,9 +2,8 @@ import json
 import pathlib
 import unittest
 
-from sdx.datamodel.parsing.exceptions import DataModelException
 from sdx.pce.load_balancing.te_solver import TESolver
-from sdx.pce.models import ConnectionRequest, ConnectionSolution, TrafficMatrix
+from sdx.pce.models import ConnectionSolution
 from sdx.pce.topology.temanager import TEManager
 
 

@@ -1,7 +1,4 @@
-import connexion
-import six
 
-from swagger_server import util
 
 
 def get_link():  # noqa: E501
