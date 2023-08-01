@@ -1,13 +1,13 @@
 [tool.black]
-src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
+src_paths = ["setup.py", "swagger_server", "bapm_server"]
 
 [tool.isort]
 profile = "black"
-src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
+src_paths = ["setup.py", "swagger_server", "bapm_server"]
 
 [tool.coverage.run]
 branch = true
-omit = [ "tests/*", "swagger_server/test/*" ]
+omit = [ "swagger_server/test/*" ]
 relative_files = true
 
 # The section below will let us have relative paths in test coverage
@@ -22,3 +22,4 @@ source = [
     # In tox environments.
     ".tox/**/site-packages/",
 ]
+
