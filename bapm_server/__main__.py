@@ -3,10 +3,12 @@
 import json
 import logging
 import os
+import threading
+from queue import Queue
 
 from elasticsearch import Elasticsearch
 
-from bapm_consumer import *
+from bapm_consumer import BAPMConsumer
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)

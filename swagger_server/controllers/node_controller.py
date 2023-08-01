@@ -1,9 +1,3 @@
-import connexion
-import six
-
-from swagger_server import util
-
-
 def get_node():  # noqa: E501
     """get an existing node
 

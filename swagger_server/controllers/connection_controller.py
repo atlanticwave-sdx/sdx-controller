@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 
 import connexion
 from sdx.pce.load_balancing.te_solver import TESolver

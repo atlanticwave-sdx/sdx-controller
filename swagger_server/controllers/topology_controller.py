@@ -1,15 +1,9 @@
 import json
-import os
-from queue import Queue
 
-import connexion
-import six
 from sdx.pce.topology.grenmlconverter import GrenmlConverter
 from sdx.pce.topology.manager import TopologyManager
 
-from swagger_server import util
-from swagger_server.models.topology import Topology  # noqa: E501
-from swagger_server.utils.db_utils import *
+from swagger_server.utils.db_utils import DbUtils
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
