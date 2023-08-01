@@ -4,3 +4,21 @@ src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
 [tool.isort]
 profile = "black"
 src_paths = ["setup.py", "swagger_server", "bapm_server", "tests"]
+
+[tool.coverage.run]
+branch = true
+omit = [ "tests/*", "swagger_server/test/*" ]
+relative_files = true
+
+# The section below will let us have relative paths in test coverage
+# report. See https://hynek.me/articles/testing-packaging/
+[tool.coverage.paths]
+source = [
+    # In checkouts.
+    "swagger_server/",
+    "bapm_server/",
+    # In installed paths.
+    "**/site-packages/",
+    # In tox environments.
+    ".tox/**/site-packages/",
+]

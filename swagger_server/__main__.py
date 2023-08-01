@@ -3,13 +3,14 @@
 import json
 import logging
 import threading
+from queue import Queue
 
 import connexion
 from sdx.pce.topology.manager import TopologyManager
 
 from swagger_server import encoder
-from swagger_server.messaging.rpc_queue_consumer import *
-from swagger_server.utils.db_utils import *
+from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
+from swagger_server.utils.db_utils import DbUtils
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
@@ -164,8 +165,6 @@ def main():
 
     # Run swagger in a thread
     threading.Thread(target=lambda: app.run(port=8080)).start()
-
-    DB_NAME = os.environ.get("DB_NAME") + ".sqlite3"
 
     # Get DB connection and tables set up.
     db_instance = DbUtils()
