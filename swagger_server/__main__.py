@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import threading
 from queue import Queue
 
@@ -14,6 +15,7 @@ from swagger_server.utils.db_utils import DbUtils
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
+LOG_FILE = os.environ.get("LOG_FILE")
 
 
 def is_json(myjson):
@@ -154,7 +156,10 @@ def start_consumer(thread_queue, db_instance):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    if LOG_FILE:
+        logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     # Run swagger service
     app = connexion.App(__name__, specification_dir="./swagger/")
