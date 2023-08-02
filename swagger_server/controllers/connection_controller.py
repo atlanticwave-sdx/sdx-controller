@@ -89,14 +89,14 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
-    topo_json = json.loads(topo_val)
-
-    logger.info(f"Read topology {topo_val}")
+    if db_instance.read_from_db("latest_topo"):
+        topo_val = db_instance.read_from_db("latest_topo")["latest_topo"]
+        topo_json = json.loads(topo_val)
+        logger.info(f"Read topology {topo_val}")
 
     num_domain_topos = 0
 
-    if db_instance.read_from_db("num_domain_topos") is not None:
+    if db_instance.read_from_db("num_domain_topos"):
         num_domain_topos = db_instance.read_from_db("num_domain_topos")[
             "num_domain_topos"
         ]
