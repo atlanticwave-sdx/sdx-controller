@@ -1,7 +1,5 @@
 import connexion
-import six
 
-from swagger_server import util
 from swagger_server.models.user import User  # noqa: E501
 
 

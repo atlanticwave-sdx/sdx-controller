@@ -4,7 +4,6 @@ import functools
 import logging
 import os
 import threading
-import time
 from queue import Queue
 
 import pika
