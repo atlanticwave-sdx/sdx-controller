@@ -22,7 +22,7 @@ class Topology(Model):
         id: str = None,
         name: str = None,
         version: int = None,
-        time_stamp: datetime = None,
+        timestamp: datetime = None,
         nodes: List[Node] = None,
         links: List[Link] = None,
     ):  # noqa: E501
@@ -34,8 +34,8 @@ class Topology(Model):
         :type name: str
         :param version: The version of this Topology.  # noqa: E501
         :type version: int
-        :param time_stamp: The time_stamp of this Topology.  # noqa: E501
-        :type time_stamp: datetime
+        :param timestamp: The timestamp of this Topology.  # noqa: E501
+        :type timestamp: datetime
         :param nodes: The nodes of this Topology.  # noqa: E501
         :type nodes: List[Node]
         :param links: The links of this Topology.  # noqa: E501
@@ -45,7 +45,7 @@ class Topology(Model):
             "id": str,
             "name": str,
             "version": int,
-            "time_stamp": datetime,
+            "timestamp": datetime,
             "nodes": List[Node],
             "links": List[Link],
         }
@@ -54,14 +54,14 @@ class Topology(Model):
             "id": "id",
             "name": "name",
             "version": "version",
-            "time_stamp": "time_stamp",
+            "timestamp": "timestamp",
             "nodes": "nodes",
             "links": "links",
         }
         self._id = id
         self._name = name
         self._version = version
-        self._time_stamp = time_stamp
+        self._timestamp = timestamp
         self._nodes = nodes
         self._links = links
 
@@ -150,29 +150,29 @@ class Topology(Model):
         self._version = version
 
     @property
-    def time_stamp(self) -> datetime:
-        """Gets the time_stamp of this Topology.
+    def timestamp(self) -> datetime:
+        """Gets the timestamp of this Topology.
 
 
-        :return: The time_stamp of this Topology.
+        :return: The timestamp of this Topology.
         :rtype: datetime
         """
-        return self._time_stamp
+        return self._timestamp
 
-    @time_stamp.setter
-    def time_stamp(self, time_stamp: datetime):
-        """Sets the time_stamp of this Topology.
+    @timestamp.setter
+    def timestamp(self, timestamp: datetime):
+        """Sets the timestamp of this Topology.
 
 
-        :param time_stamp: The time_stamp of this Topology.
-        :type time_stamp: datetime
+        :param timestamp: The timestamp of this Topology.
+        :type timestamp: datetime
         """
-        if time_stamp is None:
+        if timestamp is None:
             raise ValueError(
-                "Invalid value for `time_stamp`, must not be `None`"
+                "Invalid value for `timestamp`, must not be `None`"
             )  # noqa: E501
 
-        self._time_stamp = time_stamp
+        self._timestamp = timestamp
 
     @property
     def nodes(self) -> List[Node]:
