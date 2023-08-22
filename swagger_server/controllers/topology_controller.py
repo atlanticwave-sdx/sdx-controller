@@ -1,7 +1,7 @@
 import json
 
-from sdx.pce.topology.grenmlconverter import GrenmlConverter
-from sdx.pce.topology.manager import TopologyManager
+from sdx_pce.topology.grenmlconverter import GrenmlConverter
+from sdx_pce.topology.manager import TopologyManager
 
 from swagger_server.utils.db_utils import DbUtils
 

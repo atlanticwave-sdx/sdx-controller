@@ -7,7 +7,7 @@ import threading
 from queue import Queue
 
 import connexion
-from sdx.pce.topology.manager import TopologyManager
+from sdx_pce.topology.manager import TopologyManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
