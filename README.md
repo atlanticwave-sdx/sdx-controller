@@ -127,6 +127,21 @@ $ source .env
 $ python3 -m swagger_server
 ```
 
+### Test topology files and connection requests
+
+During normal course of operation, SDX Controller receives topology
+data from Local Controllers, which are dynamically created based on
+real network topology. We have developed some static topology files
+and connection requests that can be used during development and
+testing. Since they are used in several places during SDX development,
+they are all consolidated in the lower-layer [datamodel] library's
+repository:
+
+- [AmLight topology][amlight.json] ([raw][amlight_raw])
+- [SAX topology][sax.json] ([raw][sax_raw])
+- [ZAOXI topology][zaoxi.json] ([raw][zaoxi_raw])
+- [Sample connection request][test_request] ([raw][test_request_raw])
+
 ## Running the test suite
 
 Some of the tests expects MongoDB and RabbitMQ, which can be launched
@@ -165,3 +180,17 @@ $ tox
 
 [controller-cov-badge]: https://coveralls.io/repos/github/atlanticwave-sdx/sdx-controller/badge.svg?branch=main (Coverage Status)
 [controller-cov]: https://coveralls.io/github/atlanticwave-sdx/sdx-controller?branch=main
+
+[datamodel]: https://github.com/atlanticwave-sdx/datamodel
+
+[amlight.json]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/topologies/amlight.json
+[amlight_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/topologies/amlight.json
+
+[sax.json]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/topologies/sax.json
+[sax_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/topologies/sax.json
+
+[zaoxi.json]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/topologies/zaoxi.json
+[zaoxi_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/topologies/zaoxi.json
+
+[test_request]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/requests/test_request.json
+[test_request_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/requests/test_request.json
