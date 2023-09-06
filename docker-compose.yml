@@ -6,6 +6,8 @@ services:
   # MongoDB Docker images.
   mongodb-service:
     image: mongo:3.7
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
