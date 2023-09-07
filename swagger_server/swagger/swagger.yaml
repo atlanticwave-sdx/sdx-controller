@@ -457,7 +457,7 @@ components:
           status: up
         complete: false
         status: success
-        time_stamp: 2000-01-23T04:56:07+00:00
+        timestamp: 2000-01-23T04:56:07+00:00
         version: 1
       xml:
         name: Connection
@@ -500,7 +500,7 @@ components:
       - links
       - name
       - nodes
-      - time_stamp
+      - timestamp
       - version
       type: object
       properties:
@@ -513,7 +513,7 @@ components:
           type: integer
           format: int64
           example: 1
-        time_stamp:
+        timestamp:
           type: string
           format: date-time
         nodes:
@@ -566,7 +566,7 @@ components:
             id: id
             state: enabled
             status: up
-        time_stamp: 2000-01-23T04:56:07.000+00:00
+        timestamp: 2000-01-23T04:56:07.000+00:00
         name: amLight
         links:
         - residual_bandwidth: 596213.79545492655597627162933349609375
