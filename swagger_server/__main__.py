@@ -45,14 +45,26 @@ def process_lc_json_msg(
 ):
     logger.info("MQ received message:" + str(msg))
     msg_json = json.loads(msg)
-    msg_id = msg_json["id"]
-    msg_version = msg_json["version"]
 
-    lc_queue_name = msg_json["lc_queue_name"]
-    logger.debug("---lc_queue_name:---")
-    logger.debug(lc_queue_name)
+    msg_id = msg_json.get("id")
+    msg_version = msg_json.get("version")
+    if msg_id is None or msg_version is None:
+        logger.info("Message without ID or version; ignoring")
+        return
+
+    # # TODO: it doesn't seem that lc_queue_name is actually used.
+    # lc_queue_name = msg_json.get("lc_queue_name")
+    # logger.debug(f"lc_queue_name: {lc_queue_name}")
+
+    # if lc_queue_name is None:
+    #     logger.info("Message without queue name; ignoring")
+    #     return
 
     domain_name = find_between(msg_id, "topology:", ".net")
+    if domain_name is None:
+        logger.info("Could not find a domain name for the topology; ignoring")
+        return
+
     msg_json["domain_name"] = domain_name
 
     db_msg_id = str(msg_id) + "-" + str(msg_version)

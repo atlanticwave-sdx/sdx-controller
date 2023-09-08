@@ -25,20 +25,23 @@ class RpcConsumer(object):
         self._thread_queue = thread_queue
 
     def on_request(self, ch, method, props, message_body):
-        response = message_body
+        # response = message_body
         self._thread_queue.put(message_body)
 
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=MQ_HOST)
-        )
-        self.channel = self.connection.channel()
+        ## TODO: What is this for?
+        # self.connection = pika.BlockingConnection(
+        #     pika.ConnectionParameters(host=MQ_HOST)
+        # )
+        # self.channel = self.connection.channel()
 
-        ch.basic_publish(
-            exchange=self.exchange_name,
-            routing_key=props.reply_to,
-            properties=pika.BasicProperties(correlation_id=props.correlation_id),
-            body=str(response),
-        )
+        ## TODO: What is this for?
+        # ch.basic_publish(
+        #     exchange=self.exchange_name,
+        #     routing_key=props.reply_to,
+        #     properties=pika.BasicProperties(correlation_id=props.correlation_id),
+        #     body=str(response),
+        # )
+
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start_consumer(self):
