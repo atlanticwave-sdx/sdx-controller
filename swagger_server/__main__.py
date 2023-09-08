@@ -6,8 +6,6 @@ import threading
 from queue import Queue
 
 import connexion
-from sdx_pce.load_balancing.te_solver import TESolver
-from sdx_pce.topology.temanager import TEManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer

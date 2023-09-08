@@ -66,7 +66,7 @@ class LcMessageHandler:
                     "num_domain_topos", num_domain_topos
                 )
 
-        logger.info("adding topo to db:")
+        logger.info("Adding topo to db.")
         db_key = "LC-" + str(num_domain_topos)
         self.db_instance.add_key_value_pair_to_db(db_key, json.dumps(msg_json))
 

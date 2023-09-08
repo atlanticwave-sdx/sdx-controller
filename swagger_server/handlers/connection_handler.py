@@ -55,12 +55,8 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    print("Removed connection")
-                    print(link_connections_dict)
                     self.place_connection(connection)
                     link_connections_dict[simple_link].append(connection)
-                    print("Placed connection")
-                    print(link_connections_dict)
 
         self.db_instance.add_key_value_pair_to_db(
             "link_connections_dict", json.dumps(link_connections_dict)
