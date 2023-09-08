@@ -6,6 +6,7 @@ from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 
 from swagger_server.messaging.topic_queue_producer import TopicQueueProducer
+from swagger_server.models.simple_link import SimpleLink
 from swagger_server.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
@@ -118,7 +119,7 @@ def place_connection(body):
         else:
             # Get the actual thing minus the Mongo ObjectID.
             curr_topo_str = curr_topo.get(lc)
-            # Just print a substring, not the whole thing.
+            # Just log a substring, not the whole thing.
             logger.debug(f"Read {lc} from DB: {curr_topo_str[0:50]}...")
 
         curr_topo_json = json.loads(curr_topo_str)
@@ -154,7 +155,36 @@ def place_connection(body):
     if breakdown is None:
         return "Could not break down the solution", 400
 
+    link_connections_dict_json = (
+        db_instance.read_from_db("link_connections_dict")["link_connections_dict"]
+        if db_instance.read_from_db("link_connections_dict")
+        else None
+    )
+
+    if link_connections_dict_json:
+        link_connections_dict = json.loads(link_connections_dict_json)
+    else:
+        link_connections_dict = {}
+
     for domain, link in breakdown.items():
+        port_list = []
+        for key in link.keys():
+            if "uni_" in key and "port_id" in link[key]:
+                port_list.append(link[key]["port_id"])
+
+        if port_list:
+            simple_link = SimpleLink(port_list).to_string()
+
+            if simple_link not in link_connections_dict:
+                link_connections_dict[simple_link] = []
+
+            if body not in link_connections_dict[simple_link]:
+                link_connections_dict[simple_link].append(body)
+
+            db_instance.add_key_value_pair_to_db(
+                "link_connections_dict", json.dumps(link_connections_dict)
+            )
+
         logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
 
         # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
