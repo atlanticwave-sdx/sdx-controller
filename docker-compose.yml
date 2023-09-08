@@ -45,17 +45,17 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
 
-  bapm-server-service:
-    image: bapm-server
-    tty: true
-    build: ./bapm_server
-    environment:
-      - ES_HOST=${ES_HOST}
-      - ES_PORT=${ES_PORT}
-      - BAPM_MQ_HOST=${BAPM_MQ_HOST}
-      - BAPM_EXCHANGE=${BAPM_EXCHANGE}
-      - BAPM_QUEUE=${BAPM_QUEUE}
-      - BAPM_ROUTING_KEY=${BAPM_ROUTING_KEY}
+  # bapm-server-service:
+  #   image: bapm-server
+  #   tty: true
+  #   build: ./bapm_server
+  #   environment:
+  #     - ES_HOST=${ES_HOST}
+  #     - ES_PORT=${ES_PORT}
+  #     - BAPM_MQ_HOST=${BAPM_MQ_HOST}
+  #     - BAPM_EXCHANGE=${BAPM_EXCHANGE}
+  #     - BAPM_QUEUE=${BAPM_QUEUE}
+  #     - BAPM_ROUTING_KEY=${BAPM_ROUTING_KEY}
 
 volumes:
   mongodb:

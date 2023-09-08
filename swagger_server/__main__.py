@@ -7,11 +7,14 @@ import threading
 from queue import Queue
 
 import connexion
+from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.manager import TopologyManager
+from sdx_pce.topology.temanager import TEManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
 from swagger_server.utils.db_utils import DbUtils
+from swagger_server.models.simple_link import SimpleLink
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
@@ -34,6 +37,52 @@ def find_between(s, first, last):
     except ValueError:
         return ""
 
+def _handle_link_failure(db_instance, msg_json):
+    print("inside _handle_link_failure()")
+    logger.debug("Removing connections that contain failed link.")
+    if db_instance.read_from_db("link_connections_dict") is None:
+        logger.debug("No connection has been placed yet.")
+        return
+    link_connections_dict_str = db_instance.read_from_db("link_connections_dict")
+
+    if link_connections_dict_str:
+        link_connections_dict = json.loads(
+            link_connections_dict_str["link_connections_dict"]
+        )
+    else:
+        logger.debug("Failed to retrieve link_connections_dict from DB.")
+
+    print("link_connections_dict")
+    print(link_connections_dict)
+
+    for link in msg_json["link_failure"]:
+        print("---link:----")
+        print(link)
+        port_list = []
+        if "ports" not in link:
+            continue 
+        for port in link["ports"]:
+            if "id" not in port:
+                continue
+            port_list.append(port["id"])
+
+        simple_link = SimpleLink(port_list).to_string()
+        
+        if simple_link in link_connections_dict:
+            print("---found failed link record!---")
+            connections = link_connections_dict[simple_link]
+            print(connections)
+
+
+    # for link in link_connections_dict:
+    #     connections = link_connections_dict[link]
+    #     if connections:
+    #         for connection_data in connections:
+    #             connection_data["connection_failure"] = True
+    #             # Need to remove existing connection
+    #             generate_breakdown_and_send_to_lc(
+    #                 connection_data, link_connections_dict, db_instance
+    #             )
 
 def process_lc_json_msg(
     msg,
@@ -63,8 +112,11 @@ def process_lc_json_msg(
 
     # Update existing topology
     if domain_name in domain_list:
-        logger.info("updating topo")
+        logger.info("Updating topo")
         manager.update_topology(msg_json)
+        if "link_failure" in msg_json:
+            logger.info("Processing link failure.")
+            _handle_link_failure(db_instance, msg_json)
     # Add new topology
     else:
         domain_list.append(domain_name)
@@ -103,25 +155,26 @@ def start_consumer(thread_queue, db_instance):
     latest_topo = {}
     domain_list = []
 
-    if db_instance.read_from_db("domain_list") is not None:
-        domain_list = db_instance.read_from_db("domain_list")["domain_list"]
+
+    # if db_instance.read_from_db("domain_list") is not None:
+    #     domain_list = db_instance.read_from_db("domain_list")["domain_list"]
 
     num_domain_topos = len(domain_list)
 
-    if db_instance.read_from_db("num_domain_topos") is not None:
-        db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
-        for topo in range(1, num_domain_topos + 1):
-            db_key = f"LC-{topo}"
-            logger.debug(f"Reading {db_key} from DB")
-            topology = db_instance.read_from_db(db_key)
-            logger.debug(f"Read {db_key}: {topology}")
-            if topology is None:
-                continue
-            else:
-                # Get the actual thing minus the Mongo ObjectID.
-                topology = topology[db_key]
-            topo_json = json.loads(topology)
-            manager.add_topology(topo_json)
+    # if db_instance.read_from_db("num_domain_topos") is not None:
+    #     db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
+    #     for topo in range(1, num_domain_topos + 1):
+    #         db_key = f"LC-{topo}"
+    #         logger.debug(f"Reading {db_key} from DB")
+    #         topology = db_instance.read_from_db(db_key)
+    #         logger.debug(f"Read {db_key}: {topology}")
+    #         if topology is None:
+    #             continue
+    #         else:
+    #             # Get the actual thing minus the Mongo ObjectID.
+    #             topology = topology[db_key]
+    #         topo_json = json.loads(topology)
+    #         manager.add_topology(topo_json)
 
     while True:
         # Queue.get() will block until there's an item in the queue.
