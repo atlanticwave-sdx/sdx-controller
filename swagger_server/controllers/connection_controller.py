@@ -6,8 +6,8 @@ from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 
 from swagger_server.messaging.topic_queue_producer import TopicQueueProducer
-from swagger_server.utils.db_utils import DbUtils
 from swagger_server.models.simple_link import SimpleLink
+from swagger_server.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
@@ -162,9 +162,7 @@ def place_connection(body):
     )
 
     if link_connections_dict_json:
-        link_connections_dict = json.loads(
-            link_connections_dict_json
-        )
+        link_connections_dict = json.loads(link_connections_dict_json)
     else:
         link_connections_dict = {}
 
@@ -179,7 +177,7 @@ def place_connection(body):
 
             if simple_link not in link_connections_dict:
                 link_connections_dict[simple_link] = []
-            
+
             if body not in link_connections_dict[simple_link]:
                 link_connections_dict[simple_link].append(body)
 

@@ -1,5 +1,6 @@
 from typing import List
 
+
 class SimpleLink:
     def __init__(self, ports: List[str]):
         self._ports = ports
@@ -13,7 +14,7 @@ class SimpleLink:
         :rtype: List[Port]
         """
         return self._ports
-    
+
     @ports.setter
     def ports(self, ports: List[str]):
         """Sets the ports of this Link.
@@ -31,4 +32,4 @@ class SimpleLink:
         self._ports.sort()
 
     def to_string(self):
-        return ','.join(self._ports)
+        return ",".join(self._ports)

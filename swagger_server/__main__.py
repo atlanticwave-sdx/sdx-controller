@@ -13,8 +13,8 @@ from sdx_pce.topology.temanager import TEManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
-from swagger_server.utils.db_utils import DbUtils
 from swagger_server.models.simple_link import SimpleLink
+from swagger_server.utils.db_utils import DbUtils
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
@@ -37,13 +37,16 @@ def find_between(s, first, last):
     except ValueError:
         return ""
 
+
 def _remove_connection(connection, db_instance):
     # call pce to remove connection
     pass
 
+
 def _place_connection(connection, db_instance):
     # call pce to generate breakdown, and place connection
     pass
+
 
 def _handle_link_failure(db_instance, msg_json):
     logger.debug("Handling connections that contain failed link.")
@@ -62,14 +65,14 @@ def _handle_link_failure(db_instance, msg_json):
     for link in msg_json["link_failure"]:
         port_list = []
         if "ports" not in link:
-            continue 
+            continue
         for port in link["ports"]:
             if "id" not in port:
                 continue
             port_list.append(port["id"])
 
         simple_link = SimpleLink(port_list).to_string()
-        
+
         if simple_link in link_connections_dict:
             logger.debug("Found failed link record!")
             connections = link_connections_dict[simple_link]
@@ -82,10 +85,10 @@ def _handle_link_failure(db_instance, msg_json):
                 link_connections_dict[simple_link].append(connection)
                 logger.debug("Placed connection:")
                 logger.debug(connection)
-    
+
     db_instance.add_key_value_pair_to_db(
-                "link_connections_dict", json.dumps(link_connections_dict)
-            )
+        "link_connections_dict", json.dumps(link_connections_dict)
+    )
 
 
 def process_lc_json_msg(
@@ -158,7 +161,6 @@ def start_consumer(thread_queue, db_instance):
 
     latest_topo = {}
     domain_list = []
-
 
     if db_instance.read_from_db("domain_list") is not None:
         domain_list = db_instance.read_from_db("domain_list")["domain_list"]
