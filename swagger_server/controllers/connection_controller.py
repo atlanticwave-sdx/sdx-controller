@@ -119,7 +119,7 @@ def place_connection(body):
         else:
             # Get the actual thing minus the Mongo ObjectID.
             curr_topo_str = curr_topo.get(lc)
-            # Just print a substring, not the whole thing.
+            # Just log a substring, not the whole thing.
             logger.debug(f"Read {lc} from DB: {curr_topo_str[0:50]}...")
 
         curr_topo_json = json.loads(curr_topo_str)
@@ -176,8 +176,6 @@ def place_connection(body):
 
         if port_list:
             simple_link = SimpleLink(port_list).to_string()
-            print("---simple_link")
-            print(simple_link)
 
             if simple_link not in link_connections_dict:
                 link_connections_dict[simple_link] = []
@@ -206,9 +204,5 @@ def place_connection(body):
         )
         producer.call(json.dumps(link))
         producer.stop_keep_alive()
-
-    print("--FINAL link_connections_dict--")
-    link_dict = db_instance.read_from_db("link_connections_dict")["link_connections_dict"]
-    print(json.loads(link_dict))
 
     return "Connection published"
