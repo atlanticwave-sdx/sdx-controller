@@ -83,11 +83,6 @@ class ConnectionHandler:
 
     def place_connection(self, connection):
         # call pce to generate breakdown, and place connection
-        # if self.db_instance.read_from_db("latest_topo"):
-        #     topo_val = self.db_instance.read_from_db("latest_topo")["latest_topo"]
-        #     topo_json = json.loads(topo_val)
-        #     logger.info(f"Read topology {topo_val}")
-
         num_domain_topos = 0
 
         if self.db_instance.read_from_db("num_domain_topos"):
