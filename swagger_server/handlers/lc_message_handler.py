@@ -42,6 +42,7 @@ class LcMessageHandler:
         # Update existing topology
         if domain_name in domain_list:
             logger.info("Updating topo")
+            logger.debug(msg_json)
             self.manager.update_topology(msg_json)
             if "link_failure" in msg_json:
                 logger.info("Processing link failure.")

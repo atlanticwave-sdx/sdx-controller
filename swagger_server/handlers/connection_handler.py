@@ -143,20 +143,18 @@ class ConnectionHandler:
         self._send_breakdown_to_lc(temanager, connection, solution)
 
     def handle_link_failure(self, msg_json):
-        logger.debug("Handling connections that contain failed link.")
-        if self.db_instance.read_from_db("link_connections_dict") is None:
-            logger.debug("No connection has been placed yet.")
-            return
+        logger.debug("---Handling connections that contain failed link.---")
         link_connections_dict_str = self.db_instance.read_from_db(
             "link_connections_dict"
         )
 
-        if link_connections_dict_str:
-            link_connections_dict = json.loads(
-                link_connections_dict_str["link_connections_dict"]
-            )
-        else:
-            logger.debug("Failed to retrieve link_connections_dict from DB.")
+        if not link_connections_dict_str:
+            logger.debug("No connection has been placed yet.")
+            return
+
+        link_connections_dict = json.loads(
+            link_connections_dict_str["link_connections_dict"]
+        )
 
         for link in msg_json["link_failure"]:
             port_list = []
