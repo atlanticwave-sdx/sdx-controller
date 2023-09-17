@@ -68,28 +68,30 @@ class RpcConsumer(object):
 
         latest_topo = {}
         domain_list = []
-        num_domain_topos = len(domain_list)
+        num_domain_topos = 0
 
         # This part reads from DB when SDX controller initially starts.
         # It looks for domain_list, and num_domain_topos, if they are already in DB,
         # Then use the existing ones from DB.
-        # if db_instance.read_from_db("domain_list") is not None:
-        #     domain_list = db_instance.read_from_db("domain_list")["domain_list"]
+        if db_instance.read_from_db("domain_list"):
+            domain_list = db_instance.read_from_db("domain_list")["domain_list"]
+            num_domain_topos = len(domain_list)
 
-        # if db_instance.read_from_db("num_domain_topos") is not None:
-        #     db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
-        #     for topo in range(1, num_domain_topos + 1):
-        #         db_key = f"LC-{topo}"
-        #         logger.debug(f"Reading {db_key} from DB")
-        #         topology = db_instance.read_from_db(db_key)
-        #         logger.debug(f"Read {db_key}: {topology}")
-        #         if topology is None:
-        #             continue
-        #         else:
-        #             # Get the actual thing minus the Mongo ObjectID.
-        #             topology = topology[db_key]
-        #         topo_json = json.loads(topology)
-        #         manager.add_topology(topo_json)
+        if db_instance.read_from_db("latest_topo"):
+            latest_topo = db_instance.read_from_db("latest_topo")["latest_topo"]
+
+        if db_instance.read_from_db("num_domain_topos"):
+            db_instance.add_key_value_pair_to_db("num_domain_topos", num_domain_topos)
+            for topo in range(1, num_domain_topos + 2):
+                db_key = f"LC-{topo}"
+                topology = db_instance.read_from_db(db_key)
+
+                if topology:
+                    # Get the actual thing minus the Mongo ObjectID.
+                    topology = topology[db_key]
+                    topo_json = json.loads(topology)
+                    manager.add_topology(topo_json)
+                    logger.debug(f"Read {db_key}: {topology}")
 
         while True:
             # Queue.get() will block until there's an item in the queue.

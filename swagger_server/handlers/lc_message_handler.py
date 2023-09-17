@@ -27,7 +27,7 @@ class LcMessageHandler:
         msg_version = msg_json["version"]
 
         lc_queue_name = msg_json["lc_queue_name"]
-        logger.debug("---lc_queue_name:---")
+        logger.debug("Processing LC message: lc_queue_name:")
         logger.debug(lc_queue_name)
 
         domain_name = self.parse_helper.find_between(msg_id, "topology:", ".net")

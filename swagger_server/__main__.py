@@ -20,7 +20,7 @@ def main():
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
 
     # Run swagger service
     app = connexion.App(__name__, specification_dir="./swagger/")

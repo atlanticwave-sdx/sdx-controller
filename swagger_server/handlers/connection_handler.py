@@ -21,6 +21,66 @@ class ConnectionHandler:
         # call pce to remove connection
         pass
 
+    def _send_breakdown_to_lc(self, temanager, connection, solution):
+        breakdown = temanager.generate_connection_breakdown(solution)
+        logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
+
+        if breakdown is None:
+            return "Could not break down the solution", 400
+
+        link_connections_dict_json = (
+            self.db_instance.read_from_db("link_connections_dict")[
+                "link_connections_dict"
+            ]
+            if self.db_instance.read_from_db("link_connections_dict")
+            else None
+        )
+
+        if link_connections_dict_json:
+            link_connections_dict = json.loads(link_connections_dict_json)
+        else:
+            link_connections_dict = {}
+
+        for domain, link in breakdown.items():
+            port_list = []
+            for key in link.keys():
+                if "uni_" in key and "port_id" in link[key]:
+                    port_list.append(link[key]["port_id"])
+
+            if port_list:
+                simple_link = SimpleLink(port_list).to_string()
+
+                if simple_link not in link_connections_dict:
+                    link_connections_dict[simple_link] = []
+
+                if connection not in link_connections_dict[simple_link]:
+                    link_connections_dict[simple_link].append(connection)
+
+                self.db_instance.add_key_value_pair_to_db(
+                    "link_connections_dict", json.dumps(link_connections_dict)
+                )
+
+            logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
+
+            # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
+            # extract a string like "amlight".
+            domain_name = (
+                self.parse_helper.find_between(domain, "topology:", ".net")
+                or f"{domain}"
+            )
+            exchange_name = "connection"
+
+            logger.debug(
+                f"Publishing '{link}' with exchange_name: {exchange_name}, "
+                f"routing_key: {domain_name}"
+            )
+
+            producer = TopicQueueProducer(
+                timeout=5, exchange_name=exchange_name, routing_key=domain_name
+            )
+            producer.call(json.dumps(link))
+            producer.stop_keep_alive()
+
     def place_connection(self, connection):
         # call pce to generate breakdown, and place connection
         # if self.db_instance.read_from_db("latest_topo"):
@@ -85,64 +145,7 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        breakdown = temanager.generate_connection_breakdown(solution)
-        logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
-
-        if breakdown is None:
-            return "Could not break down the solution", 400
-
-        link_connections_dict_json = (
-            self.db_instance.read_from_db("link_connections_dict")[
-                "link_connections_dict"
-            ]
-            if self.db_instance.read_from_db("link_connections_dict")
-            else None
-        )
-
-        if link_connections_dict_json:
-            link_connections_dict = json.loads(link_connections_dict_json)
-        else:
-            link_connections_dict = {}
-
-        for domain, link in breakdown.items():
-            port_list = []
-            for key in link.keys():
-                if "uni_" in key and "port_id" in link[key]:
-                    port_list.append(link[key]["port_id"])
-
-            if port_list:
-                simple_link = SimpleLink(port_list).to_string()
-
-                if simple_link not in link_connections_dict:
-                    link_connections_dict[simple_link] = []
-
-                if connection not in link_connections_dict[simple_link]:
-                    link_connections_dict[simple_link].append(body)
-
-                self.db_instance.add_key_value_pair_to_db(
-                    "link_connections_dict", json.dumps(link_connections_dict)
-                )
-
-            logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
-
-            # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
-            # extract a string like "amlight".
-            domain_name = (
-                self.parse_helper.find_between(domain, "topology:", ".net")
-                or f"{domain}"
-            )
-            exchange_name = "connection"
-
-            logger.debug(
-                f"Publishing '{link}' with exchange_name: {exchange_name}, "
-                f"routing_key: {domain_name}"
-            )
-
-            producer = TopicQueueProducer(
-                timeout=5, exchange_name=exchange_name, routing_key=domain_name
-            )
-            producer.call(json.dumps(link))
-            producer.stop_keep_alive()
+        self._send_breakdown_to_lc(temanager, connection, solution)
 
     def handle_link_failure(self, msg_json):
         logger.debug("Handling connections that contain failed link.")
