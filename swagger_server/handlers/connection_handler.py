@@ -148,7 +148,10 @@ class ConnectionHandler:
             "link_connections_dict"
         )
 
-        if not link_connections_dict_str:
+        if (
+            not link_connections_dict_str
+            or not link_connections_dict_str["link_connections_dict"]
+        ):
             logger.debug("No connection has been placed yet.")
             return
 
