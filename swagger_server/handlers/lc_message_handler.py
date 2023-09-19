@@ -27,7 +27,7 @@ class LcMessageHandler:
         msg_version = msg_json["version"]
 
         lc_queue_name = msg_json["lc_queue_name"]
-        logger.debug("---lc_queue_name:---")
+        logger.debug("Processing LC message: lc_queue_name:")
         logger.debug(lc_queue_name)
 
         domain_name = self.parse_helper.find_between(msg_id, "topology:", ".net")
@@ -42,6 +42,7 @@ class LcMessageHandler:
         # Update existing topology
         if domain_name in domain_list:
             logger.info("Updating topo")
+            logger.debug(msg_json)
             self.manager.update_topology(msg_json)
             if "link_failure" in msg_json:
                 logger.info("Processing link failure.")

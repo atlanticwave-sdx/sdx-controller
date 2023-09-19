@@ -6,6 +6,7 @@ import threading
 from queue import Queue
 
 import connexion
+from sdx_pce.topology.manager import TopologyManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
@@ -20,7 +21,7 @@ def main():
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
 
     # Run swagger service
     app = connexion.App(__name__, specification_dir="./swagger/")
@@ -36,8 +37,10 @@ def main():
     db_instance = DbUtils()
     db_instance.initialize_db()
 
+    topology_manager = TopologyManager()
+
     thread_queue = Queue()
-    rpc = RpcConsumer(thread_queue, "")
+    rpc = RpcConsumer(thread_queue, "", topology_manager)
     rpc.start_sdx_consumer(thread_queue, db_instance)
 
 
