@@ -19,7 +19,8 @@
             "location": {
                 "address": "Miami",
                 "latitude": 25.75633040531146,
-                "longitude": -80.37676058477908
+                "longitude": -80.37676058477908,
+                "ISO3166-2-lvl4": "US-MIA"
             },
             "ports": [
                 {
@@ -31,8 +32,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -44,8 +45,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -57,8 +58,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -71,7 +72,8 @@
             "location": {
                 "address": "BocaRaton",
                 "latitude": 26.381437356374075,
-                "longitude": -80.10225977485742
+                "longitude": -80.10225977485742,
+                "ISO3166-2-lvl4": "US-BC"
             },
             "ports": [
                 {
@@ -83,8 +85,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -96,8 +98,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -109,8 +111,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -123,7 +125,8 @@
             "location": {
                 "address": "redclara",
                 "latitude": 30.34943181039702,
-                "longitude": -81.66666016473143
+                "longitude": -81.66666016473143,
+                "ISO3166-2-lvl4": "US-RC"
             },
             "ports": [
                 {
@@ -135,8 +138,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -148,8 +151,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -162,7 +165,8 @@
             "location": {
                 "address": "SaoPaulo",
                 "latitude": -23.5311561958366,
-                "longitude": -46.650271781410524
+                "longitude": -46.650271781410524,
+                "ISO3166-2-lvl4": "BR-SP"
             },
             "ports": [
                 {
@@ -174,8 +178,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -187,8 +191,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -200,8 +204,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -213,8 +217,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -227,7 +231,8 @@
             "location": {
                 "address": "PanamaCity",
                 "latitude": 8.993040465928525,
-                "longitude": -79.4947050137491
+                "longitude": -79.4947050137491,
+                "ISO3166-2-lvl4": "US-PN"
             },
             "ports": [
                 {
@@ -239,8 +244,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -252,8 +257,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -265,8 +270,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -278,8 +283,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -292,7 +297,8 @@
             "location": {
                 "address": "Fortaleza",
                 "latitude": -3.73163824920348,
-                "longitude": -38.52443289673026
+                "longitude": -38.52443289673026,
+                "ISO3166-2-lvl4": "BR-FR"
             },
             "ports": [
                 {
@@ -304,8 +310,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -317,8 +323,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -330,8 +336,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -344,7 +350,8 @@
             "location": {
                 "address": "Santiago",
                 "latitude": -33.4507049233331,
-                "longitude": -70.64634765264213
+                "longitude": -70.64634765264213,
+                "ISO3166-2-lvl4": "CL-SN"
             },
             "ports": [
                 {
@@ -356,8 +363,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -369,8 +376,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -383,7 +390,8 @@
             "location": {
                 "address": "Sangano",
                 "latitude": -9.533459658700743,
-                "longitude": 13.216709879405311
+                "longitude": 13.216709879405311,
+                "ISO3166-2-lvl4": "IT-SN"
             },
             "ports": [
                 {
@@ -395,8 +403,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -408,8 +416,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -421,8 +429,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -435,7 +443,8 @@
             "location": {
                 "address": "CapeTown",
                 "latitude": -3.73163824920348,
-                "longitude": -38.52443289673026
+                "longitude": -38.52443289673026,
+                "ISO3166-2-lvl4": "ZA-WC"
             },
             "ports": [
                 {
@@ -447,8 +456,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -460,8 +469,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -473,8 +482,8 @@
                         "100-200",
                         "10001"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -487,7 +496,8 @@
             "location": {
                 "address": "Karoo",
                 "latitude": -32.3632301851245,
-                "longitude": 22.541224555821298
+                "longitude": 22.541224555821298,
+                "ISO3166-2-lvl4": "ZA-KR"
             },
             "ports": [
                 {
@@ -499,8 +509,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 },
                 {
@@ -512,8 +522,8 @@
                         "100-200",
                         "1000"
                     ],
-                    "status": null,
-                    "state": null,
+                    "status": "up",
+                    "state": "enabled",
                     "private_attributes": null
                 }
             ],
@@ -555,8 +565,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -564,7 +574,7 @@
         {
             "id": "urn:ogf:network:sdx:link:amlight:A1-B1",
             "name": "amlight:A1-B1",
-            "short_name": "redclara-miami",
+            "short_name": "redclara-Miami",
             "nni": false,
             "ports": [
                 {
@@ -595,8 +605,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -635,8 +645,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -675,8 +685,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -684,7 +694,7 @@
         {
             "id": "urn:ogf:network:sdx:link:sax:Panama-Fortaleza",
             "name": "sax:Panama-Fortaleza",
-            "short_name": "Panama-Fortaleza",
+            "short_name": "PanamaCity-Fortaleza",
             "nni": false,
             "ports": [
                 {
@@ -715,8 +725,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -755,8 +765,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -795,8 +805,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -835,16 +845,16 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
         },
         {
-            "id": "urn:ogf:network:sdx:link:nni:Miami-Sanpaolo",
+            "id": "urn:ogf:network:sdx:link:nni:Miami-Saupaolo",
             "name": "nni:Miami-Sanpaolo",
-            "short_name": "Miami-Sanpaolo",
+            "short_name": "Miami-SaoPaulo",
             "nni": true,
             "ports": [
                 {
@@ -875,8 +885,8 @@
             "latency": 10,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -915,8 +925,8 @@
             "latency": 10,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -950,8 +960,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -990,8 +1000,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -1030,8 +1040,8 @@
             "latency": 5,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
@@ -1070,8 +1080,8 @@
             "latency": 10,
             "packet_loss": 59.621339166831824,
             "availability": 56.37376656633328,
-            "status": null,
-            "state": null,
+            "status": "up",
+            "state": "enabled",
             "private_attributes": null,
             "time_stamp": null,
             "measurement_period": null
