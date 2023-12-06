@@ -6,10 +6,12 @@ services:
   # MongoDB Docker images.
   mongodb-service:
     image: mongo:3.7
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGODB_DATA_DIR: /data/db
+      MONGODB_DATA_DIR: ${MONGODB_DATA_DIR}
     volumes:
       # See https://docs.docker.com/storage/volumes/
       #
@@ -33,11 +35,12 @@ services:
       # Use mongodb-service specified above.  Note that we do not use
       # the same MONGODB_CONNSTRING variable from .env here, because
       # that is helpful for running unit/integration tests.
-      - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb-service:27017/
+      - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/
       - SDX_HOST=${SDX_HOST}
       - SDX_PORT=${SDX_PORT}
       - SDX_VERSION=${SDX_VERSION}
       - MQ_HOST=${MQ_HOST}
+      - SUB_TOPIC=${SUB_TOPIC}
       - SUB_QUEUE=${SUB_QUEUE}
       - DB_NAME=${DB_NAME}
       - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}

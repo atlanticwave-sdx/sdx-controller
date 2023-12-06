@@ -38,13 +38,13 @@ class DbUtils(object):
         key = str(key)
         obj = self.read_from_db(key)
         if obj is None:
-            self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
+            # self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
             return self.sdxdb[self.db_name][self.config_table_name].insert_one(
                 {key: value}
             )
 
         query = {"_id": obj["_id"]}
-        self.logger.debug(f"Updating DB entry {key}:{value}.")
+        # self.logger.debug(f"Updating DB entry {key}:{value}.")
         result = self.sdxdb[self.db_name][self.config_table_name].replace_one(
             query, {key: value}
         )
