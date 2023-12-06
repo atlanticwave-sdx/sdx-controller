@@ -1,20 +1,9 @@
-FROM python:3.9-slim-bullseye
+FROM flask-base
 
-RUN apt-get update \
-    && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gcc python3-dev git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /usr/src/app
-
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
-
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-WORKDIR /usr/src/app
-COPY . /usr/src/app
+COPY ./container-sdx-controller /usr/src/app
 
 EXPOSE 8080
 
