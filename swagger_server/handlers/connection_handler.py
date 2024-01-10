@@ -81,8 +81,20 @@ class ConnectionHandler:
             producer.call(json.dumps(link))
             producer.stop_keep_alive()
 
+        # We will get to this point only if all the previous steps
+        # leading up to this point were successful.
+        return "Connection published", 200
+
     def place_connection(self, connection_request: dict):
-        # call pce to generate breakdown, and place connection
+        """
+        Do the actual work of creating a connection.
+
+        This method will call pce library to generate a breakdown
+        across relevant domains, and then send individual connection
+        requests to each of those domains.
+
+        Note that we can return early if things fail.
+        """
         num_domain_topos = 0
 
         if self.db_instance.read_from_db("num_domain_topos"):
