@@ -120,7 +120,9 @@ class ConnectionHandler:
             )
             temanager.add_topology(curr_topo_json)
 
-        for num, val in enumerate(temanager.topology_manager.topology_list):
+        # TODO: using a private variable here -- pce should have a
+        # getter.
+        for num, val in enumerate(temanager.topology_manager._topology_map.values()):
             logger.info(f"TE topology #{num}: {val}")
 
         graph = temanager.generate_graph_te()
