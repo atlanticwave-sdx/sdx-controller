@@ -93,7 +93,7 @@ class ConnectionHandler:
         # Initializing TEManager with `None` topology data is a
         # work-around for
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/145
-        temanager = TEManager(topology_data=None, connection_data=connection)
+        temanager = TEManager(topology_data=None)
         lc_domain_topo_dict = {}
 
         # Read LC-1, LC-2, LC-3, and LC-4 topologies because of
