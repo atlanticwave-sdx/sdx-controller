@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -85,7 +86,7 @@ class ConnectionHandler:
         # leading up to this point were successful.
         return "Connection published", 200
 
-    def place_connection(self, connection_request: dict):
+    def place_connection(self, connection_request: dict) -> Tuple[str, int]:
         """
         Do the actual work of creating a connection.
 
@@ -93,7 +94,8 @@ class ConnectionHandler:
         across relevant domains, and then send individual connection
         requests to each of those domains.
 
-        Note that we can return early if things fail.
+        Note that we can return early if things fail.  Return value is
+        a tuple of the form (reason, HTTP code).
         """
         num_domain_topos = 0
 
