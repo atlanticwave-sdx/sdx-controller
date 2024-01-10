@@ -81,7 +81,7 @@ class ConnectionHandler:
             producer.call(json.dumps(link))
             producer.stop_keep_alive()
 
-    def place_connection(self, connection):
+    def place_connection(self, connection_request: dict):
         # call pce to generate breakdown, and place connection
         num_domain_topos = 0
 
@@ -129,7 +129,9 @@ class ConnectionHandler:
         if graph is None:
             return "Could not generate a graph", 400
 
-        traffic_matrix = temanager.generate_connection_te()
+        traffic_matrix = temanager.generate_traffic_matrix(
+            connection_request=connection_request
+        )
         if traffic_matrix is None:
             return "Could not generate a traffic matrix", 400
 
