@@ -22,7 +22,7 @@ class ConnectionHandler:
         # call pce to remove connection
         pass
 
-    def _send_breakdown_to_lc(self, breakdown):
+    def _send_breakdown_to_lc(self, breakdown, connection_request):
         logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
@@ -53,8 +53,8 @@ class ConnectionHandler:
                 if simple_link not in link_connections_dict:
                     link_connections_dict[simple_link] = []
 
-                if connection not in link_connections_dict[simple_link]:
-                    link_connections_dict[simple_link].append(connection)
+                if connection_request not in link_connections_dict[simple_link]:
+                    link_connections_dict[simple_link].append(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
                     "link_connections_dict", json.dumps(link_connections_dict)
@@ -158,7 +158,7 @@ class ConnectionHandler:
             return "Could not solve the request", 400
 
         breakdown = temanager.generate_connection_breakdown(solution)
-        self._send_breakdown_to_lc(breakdown)
+        self._send_breakdown_to_lc(breakdown, connection_request)
 
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
