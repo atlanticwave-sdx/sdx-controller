@@ -48,7 +48,7 @@ class TestConnectionController(BaseTestCase):
         """
         body = Connection()
         response = self.client.open(
-            "/SDX-Controller/1.0.0/conection",
+            "/SDX-Controller/1.0.0/connection",
             method="POST",
             data=json.dumps(body),
             content_type="application/json",
