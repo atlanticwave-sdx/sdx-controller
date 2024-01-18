@@ -87,6 +87,7 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    connection_handler.place_connection(body)
+    reason, code = connection_handler.place_connection(body)
+    logger.info(f"place_connection result: reason='{reason}', code={code}")
 
-    return "Connection published"
+    return reason, code
