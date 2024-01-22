@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-  mongodb-service:
+  mongodb:
     # See https://hub.docker.com/_/mongo/ for documentation about
     # MongoDB Docker images.
     image: mongo:3.7
@@ -23,16 +23,16 @@ services:
         source: mongodb
         target: /data/db:Z
 
-  sdx-controller-service:
+  sdx-controller:
     image: sdx-controller
     depends_on:
-      - mongodb-service
+      - mongodb
     tty: true
     build: ./
     ports:
       - 8080:8080
     environment:
-      # Use mongodb-service specified above.  Note that we do not use
+      # Use mongodb service specified above.  Note that we do not use
       # the same MONGODB_CONNSTRING variable from .env here, because
       # that is helpful for running unit/integration tests.
       - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/
