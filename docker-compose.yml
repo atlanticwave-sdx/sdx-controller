@@ -45,8 +45,34 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
 
+  # This is a single node elasticsearch with authentication and TLS
+  # disabled, for testing/development.  See
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+  # for a more elaborate setup.
+  elasticsearch-service:
+    image: elasticsearch:8.11.3
+    ports:
+      - ${ES_PORT}:${ES_PORT}
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    mem_limit: 1GB
+
   bapm-server-service:
     image: bapm-server
+    depends_on:
+      - elasticsearch
     tty: true
     build: ./bapm_server
     environment:
@@ -59,3 +85,4 @@ services:
 
 volumes:
   mongodb:
+  elasticsearch-data:
