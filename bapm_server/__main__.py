@@ -34,14 +34,13 @@ def start_consumer(thread_queue, es):
     t1.start()
 
     while True:
-        if not thread_queue.empty():
-            data = thread_queue.get()
-            if is_json(data):
-                resp = es.index(index="measurement-index", id=MSG_ID, document=data)
-                print(resp["result"])
-                MSG_ID += 1
-            else:
-                logger.info("Received non-JSON data. Not saving to ElasticSearch.")
+        data = thread_queue.get()
+        if is_json(data):
+            resp = es.index(index="measurement-index", id=MSG_ID, document=data)
+            print(resp["result"])
+            MSG_ID += 1
+        else:
+            logger.info("Received non-JSON data. Not saving to ElasticSearch.")
 
 
 def main():
