@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-  elasticsearch-service:
+  elasticsearch:
     # This is a single node elasticsearch with authentication and TLS
     # disabled, for testing/development.  See
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
@@ -26,7 +26,7 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     mem_limit: 1GB
 
-  bapm-server-service:
+  bapm-server:
     image: bapm-server
     depends_on:
       - elasticsearch
