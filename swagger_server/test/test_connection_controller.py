@@ -9,6 +9,8 @@ from flask import json
 from swagger_server.models.connection import Connection  # noqa: E501
 from swagger_server.test import BaseTestCase
 
+BASE_PATH = "/SDX-Controller/1.0.0"
+
 
 class TestConnectionController(BaseTestCase):
     """ConnectionController integration test stubs"""
@@ -18,19 +20,21 @@ class TestConnectionController(BaseTestCase):
 
         Delete connection order by ID
         """
+        connection_id = 2
         response = self.client.open(
-            "/SDX-Controller/1.0.0/connection/{connection_id}".format(connection_id=2),
+            f"{BASE_PATH}/connection/{connection_id}",
             method="DELETE",
         )
-        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+        self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
 
     def test_getconnection_by_id(self):
         """Test case for getconnection_by_id
 
         Find connection by ID
         """
+        connection_id = 10
         response = self.client.open(
-            "/SDX-Controller/1.0.0/connection/{connection_id}".format(connection_id=10),
+            f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
         )
 
@@ -47,7 +51,7 @@ class TestConnectionController(BaseTestCase):
         """
         body = Connection()
         response = self.client.open(
-            "/SDX-Controller/1.0.0/connection",
+            f"{BASE_PATH}/connection",
             method="POST",
             data=json.dumps(body),
             content_type="application/json",
