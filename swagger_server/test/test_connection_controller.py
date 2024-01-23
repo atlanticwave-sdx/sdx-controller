@@ -16,9 +16,10 @@ class TestConnectionController(BaseTestCase):
     """ConnectionController integration test stubs"""
 
     def test_delete_connection(self):
-        """Test case for delete_connection
+        """
+        Test case for delete_connection.
 
-        Delete connection order by ID
+        Delete connection order by ID.
         """
         connection_id = 2
         response = self.client.open(
@@ -28,9 +29,10 @@ class TestConnectionController(BaseTestCase):
         self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
 
     def test_getconnection_by_id(self):
-        """Test case for getconnection_by_id
+        """
+        Test case for getconnection_by_id.
 
-        Find connection by ID
+        Find connection by ID.
         """
         connection_id = 10
         response = self.client.open(
@@ -50,6 +52,7 @@ class TestConnectionController(BaseTestCase):
         Place a connection request with no topology present.
         """
         body = Connection()
+
         response = self.client.open(
             f"{BASE_PATH}/connection",
             method="POST",
