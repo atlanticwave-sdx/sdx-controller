@@ -39,12 +39,11 @@ class TestConnectionController(BaseTestCase):
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
         self.assertStatus(response, 204)
 
-    def test_place_connection(self):
+    def test_place_connection_no_topology(self):
         """
         Test case for place_connection.
 
-        Place an connection request from the SDX-Controller without
-        sufficient .
+        Place a connection request with no topology present.
         """
         body = Connection()
         response = self.client.open(
