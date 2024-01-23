@@ -21,17 +21,19 @@ services:
       - type: volume
         source: mongodb
         target: /data/db:Z
-    healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.version()"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    # healthcheck:
+    #   test: ["CMD", "mongo", "--eval", "db.version()"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
 
   sdx-controller:
     image: sdx-controller
     depends_on:
       mongodb:
-        condition: service_healthy
+        # Anther condition is `service_healthy`, and it will require
+        # the `healthcheck` above.
+        condition: service_started
     tty: true
     build: ./
     ports:
