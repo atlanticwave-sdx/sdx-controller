@@ -40,7 +40,7 @@ services:
       # Use mongodb service specified above.  Note that we do not use
       # the same MONGODB_CONNSTRING variable from .env here, because
       # that is helpful for running unit/integration tests.
-      - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/
+      - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@$mongodb:${MONGO_PORT}/
       - SDX_HOST=${SDX_HOST}
       - SDX_PORT=${SDX_PORT}
       - SDX_VERSION=${SDX_VERSION}
