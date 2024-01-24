@@ -17,18 +17,25 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
 
 
+def create_app():
+    """
+    Create a connexion app.
+    """
+    app = connexion.App(__name__, specification_dir="./swagger/")
+    app.app.json_encoder = encoder.JSONEncoder
+    app.add_api(
+        "swagger.yaml", arguments={"title": "SDX-Controller"}, pythonic_params=True
+    )
+    return app
+
+
 def main():
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
         logging.basicConfig(level=logging.DEBUG)
 
-    # Run swagger service
-    app = connexion.App(__name__, specification_dir="./swagger/")
-    app.app.json_encoder = encoder.JSONEncoder
-    app.add_api(
-        "swagger.yaml", arguments={"title": "SDX-Controller"}, pythonic_params=True
-    )
+    app = create_app()
 
     # Run swagger in a thread
     threading.Thread(target=lambda: app.run(port=8080)).start()
