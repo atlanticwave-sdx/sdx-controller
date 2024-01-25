@@ -6,7 +6,7 @@ import threading
 from queue import Queue
 
 import connexion
-from sdx_pce.topology.manager import TopologyManager
+from sdx_pce.topology.temanager import TEManager
 
 from swagger_server import encoder
 from swagger_server.messaging.rpc_queue_consumer import RpcConsumer
@@ -26,6 +26,9 @@ def create_app():
     app.add_api(
         "swagger.yaml", arguments={"title": "SDX-Controller"}, pythonic_params=True
     )
+
+    app.te_manager = TEManager(topology_data=None)
+
     return app
 
 
@@ -44,10 +47,8 @@ def main():
     db_instance = DbUtils()
     db_instance.initialize_db()
 
-    topology_manager = TopologyManager()
-
     thread_queue = Queue()
-    rpc = RpcConsumer(thread_queue, "", topology_manager)
+    rpc = RpcConsumer(thread_queue, "", app.te_manager)
     rpc.start_sdx_consumer(thread_queue, db_instance)
 
 
