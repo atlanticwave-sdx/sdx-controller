@@ -13,4 +13,8 @@ class BaseTestCase(TestCase):
 
         app = create_app()
 
+        # TODO: we need a handle to TEManager in tests, so we will use
+        # this.  There must be a better way to accesss this though.
+        self.te_manager = app.te_manager
+
         return app.app
