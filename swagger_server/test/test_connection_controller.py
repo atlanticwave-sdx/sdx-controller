@@ -7,7 +7,7 @@ import unittest
 from flask import json
 
 from swagger_server.models.connection import Connection  # noqa: E501
-from swagger_server.test import BaseTestCase
+from swagger_server.test import BaseTestCase, TestData
 
 BASE_PATH = "/SDX-Controller/1.0.0"
 
@@ -64,6 +64,35 @@ class TestConnectionController(BaseTestCase):
         # Expect 400 failure because the request is incomplete: the
         # bare minimum connection request we sent does not have
         # ingress port data, etc., for example.
+        self.assertStatus(response, 400)
+
+    def test_place_connection_with_three_topologies(self):
+        """
+        Test case for place_connection.
+
+        Place a connection request when some topologies are known.
+        """
+        for topology_file in [
+            TestData.TOPOLOGY_FILE_AMLIGHT,
+            TestData.TOPOLOGY_FILE_SAX,
+            TestData.TOPOLOGY_FILE_ZAOXI,
+        ]:
+            topology = json.loads(topology_file.read_text())
+            self.te_manager.add_topology(topology)
+
+        request = json.loads(TestData.CONNECTION_REQ.read_text())
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=json.dumps(request),
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 400 failure for now because TEManager is not properly
+        # set up within the handler yet.
         self.assertStatus(response, 400)
 
 
