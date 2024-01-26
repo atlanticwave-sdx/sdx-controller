@@ -140,7 +140,7 @@ $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
 $ pip3 install [--editable] .
 $ source .env
-$ python3 -m swagger_server
+$ python3 -m sdx_server
 ```
 
 ### Test topology files and connection requests
