@@ -1,3 +1,9 @@
+[project.optional-dependencies]
+lint = [
+    "black == 24.*",
+    "isort == 5.*",
+]
+
 [tool.black]
 src_paths = ["setup.py", "swagger_server", "bapm_server"]
 
