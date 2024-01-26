@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import unittest
 
 from flask import json
-
 from sdx_server.models.connection import Connection  # noqa: E501
 from sdx_server.test import BaseTestCase
 

@@ -7,7 +7,6 @@ from queue import Queue
 
 import connexion
 from sdx_pce.topology.manager import TopologyManager
-
 from sdx_server import encoder
 from sdx_server.messaging.rpc_queue_consumer import RpcConsumer
 from sdx_server.utils.db_utils import DbUtils

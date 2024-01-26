@@ -2,7 +2,6 @@ import json
 import logging
 
 import connexion
-
 from sdx_server.handlers.connection_handler import ConnectionHandler
 from sdx_server.utils.db_utils import DbUtils
 

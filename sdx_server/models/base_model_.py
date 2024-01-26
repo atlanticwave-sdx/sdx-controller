@@ -2,7 +2,6 @@ import pprint
 import typing
 
 import six
-
 from sdx_server import util
 
 T = typing.TypeVar("T")

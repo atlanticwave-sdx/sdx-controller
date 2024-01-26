@@ -2,7 +2,6 @@ import os
 import unittest
 
 import pymongo
-
 from sdx_server.utils.db_utils import DbUtils
 
 

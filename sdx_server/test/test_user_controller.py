@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 from flask import json
-
 from sdx_server.models.user import User  # noqa: E501
 from sdx_server.test import BaseTestCase
 
