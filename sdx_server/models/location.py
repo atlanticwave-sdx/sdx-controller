@@ -5,8 +5,8 @@ from __future__ import absolute_import
 from datetime import date, datetime  # noqa: F401
 from typing import Dict, List  # noqa: F401
 
-from swagger_server import util
-from swagger_server.models.base_model_ import Model
+from sdx_server import util
+from sdx_server.models.base_model_ import Model
 
 
 class Location(Model):

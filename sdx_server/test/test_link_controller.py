@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
+from sdx_server.test import BaseTestCase
 
 
 class TestLinkController(BaseTestCase):

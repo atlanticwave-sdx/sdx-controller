@@ -3,7 +3,7 @@ import unittest
 
 import pymongo
 
-from swagger_server.utils.db_utils import DbUtils
+from sdx_server.utils.db_utils import DbUtils
 
 
 class DbUtilsTests(unittest.TestCase):

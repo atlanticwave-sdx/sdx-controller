@@ -3,7 +3,7 @@ import typing
 
 import six
 
-from swagger_server import util
+from sdx_server import util
 
 T = typing.TypeVar("T")
 

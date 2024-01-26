@@ -1,8 +1,8 @@
 import json
 import logging
 
-from swagger_server.handlers.connection_handler import ConnectionHandler
-from swagger_server.utils.parse_helper import ParseHelper
+from sdx_server.handlers.connection_handler import ConnectionHandler
+from sdx_server.utils.parse_helper import ParseHelper
 
 logger = logging.getLogger(__name__)
 
