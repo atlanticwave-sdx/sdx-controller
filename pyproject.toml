@@ -1,14 +1,15 @@
 [build-system]
 requires = [
     "setuptools >= 61.0",
-    "setuptools-scm >= 6.2",
+    # "setuptools-scm >= 6.2",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "sdx-controller"
 description = "AtlanticWave-SDX project's main controller"
-dynamic = [ "version" ]
+# dynamic = [ "version" ]
+version = "2.0.0"
 authors = [
     { name = "Yufeng Xin", email = "yxin@renci.org" },
     { name = "Cong Wang", email = "cwang@renci.org" },
@@ -55,10 +56,10 @@ where = "swagger_server"
 [tool.setuptools]
 packages = ["swagger_server", "bapm_server"]
 
-[tool.setuptools_scm]
-# Write version info collected from git to a file.  This happens when
-# we run `python -m build`.
-write_to = "swagger_server/_version.py"
+# [tool.setuptools_scm]
+# # Write version info collected from git to a file.  This happens when
+# # we run `python -m build`.
+# write_to = "swagger_server/_version.py"
 
 [tool.black]
 include = '\.py?$'
