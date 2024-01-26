@@ -3,9 +3,9 @@ version: '3.8'
 services:
 
   mongodb:
-    image: mongo:7.0.5
     # See https://hub.docker.com/_/mongo/ for documentation about
     # MongoDB Docker images.
+    image: mongo:7.0.5    
     ports:
       - ${MONGO_PORT}:${MONGO_PORT}
     environment:
