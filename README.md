@@ -72,21 +72,37 @@ $ sudo sh elastic-search-setup.sh
 
 ### Running with Docker Compose (recommended)
 
-A `docker-compose.yaml` is provided for bringing up run
-sdx-controller, bapm-server, and a MongoDB instance used by
-sdx-controller.  From the project root directory, do:
+A `compose.yaml` is provided for bringing up SDX Controller and a
+MongoDB instance, and a separate `compose.bapm.yml` is provided for
+bringing up bapm-server and a single-node ElasticSearch instance.
+
+To start/stop SDX Controller, from the project root directory, do:
 
 ```console
 $ source .env
 $ docker compose up --build
+$ docker compose down
 ```
 
 Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
 the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
 
-Use `docker compose down` to shut down the services.
+Similarly, to start/stop BAPM Server, do:
 
+```
+$ source .env
+$ docker compose -f compose.bapm.yml up --build
+$ docker compose -f compose.bapm.yml down
+```
+
+To start/stop all the services together:
+
+```
+$ source .env
+$ docker compose -f compose.yml -f compose.bapm.yml up --build
+$ docker compose -f compose.yml -f compose.bapm.yml down
+```
 
 #### Building the container images
 
