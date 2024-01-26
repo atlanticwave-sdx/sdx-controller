@@ -1,5 +1,5 @@
 [tool.black]
-src_paths = ["setup.py", "swagger_server", "bapm_server"]
+include = '\.py?$'
 
 [tool.isort]
 profile = "black"
