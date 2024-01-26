@@ -45,6 +45,10 @@ test = [
     "randomize >= 0.13",
     "tox == 3.25",
 ]
+lint = [
+    "black == 23.*",
+    "isort == 5.*",
+]
 
 [options.packages.find]
 where = "swagger_server"
