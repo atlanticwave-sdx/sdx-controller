@@ -53,7 +53,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Topology not found
-      x-openapi-router-controller: swagger_server.controllers.topology_controller
+      x-openapi-router-controller: sdx_server.controllers.topology_controller
   /topology/version:
     get:
       tags:
@@ -83,7 +83,7 @@ paths:
       # - topology_auth:
       #   - write:topology
       #   - read:topology
-      x-openapi-router-controller: swagger_server.controllers.topology_controller
+      x-openapi-router-controller: sdx_server.controllers.topology_controller
   /topology/grenml:
     get:
       tags:
@@ -103,7 +103,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Topology not found
-      x-openapi-router-controller: swagger_server.controllers.topology_controller
+      x-openapi-router-controller: sdx_server.controllers.topology_controller
   /node:
     get:
       tags:
@@ -118,7 +118,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Topology not found
-      x-openapi-router-controller: swagger_server.controllers.node_controller
+      x-openapi-router-controller: sdx_server.controllers.node_controller
   /link:
     get:
       tags:
@@ -133,7 +133,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Link not found
-      x-openapi-router-controller: swagger_server.controllers.link_controller
+      x-openapi-router-controller: sdx_server.controllers.link_controller
   /connection:
     post:
       tags:
@@ -156,7 +156,7 @@ paths:
                 $ref: '#/components/schemas/connection'
         "400":
           description: Invalid Connection
-      x-openapi-router-controller: swagger_server.controllers.connection_controller
+      x-openapi-router-controller: sdx_server.controllers.connection_controller
   /connection/{connection_id}:
     get:
       tags:
@@ -190,7 +190,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: connection not found
-      x-openapi-router-controller: swagger_server.controllers.connection_controller
+      x-openapi-router-controller: sdx_server.controllers.connection_controller
     delete:
       tags:
       - connection
@@ -213,7 +213,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: connection not found
-      x-openapi-router-controller: swagger_server.controllers.connection_controller
+      x-openapi-router-controller: sdx_server.controllers.connection_controller
   /user:
     post:
       tags:
@@ -231,7 +231,7 @@ paths:
       responses:
         default:
           description: successful operation
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
   /user/createWithArray:
     post:
       tags:
@@ -243,7 +243,7 @@ paths:
       responses:
         default:
           description: successful operation
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
   /user/createWithList:
     post:
       tags:
@@ -255,7 +255,7 @@ paths:
       responses:
         default:
           description: successful operation
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
   /user/login:
     get:
       tags:
@@ -307,7 +307,7 @@ paths:
                 type: string
         "400":
           description: Invalid username/password supplied
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
   /user/logout:
     get:
       tags:
@@ -317,7 +317,7 @@ paths:
       responses:
         default:
           description: successful operation
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
   /user/{username}:
     get:
       tags:
@@ -347,7 +347,7 @@ paths:
           description: Invalid username supplied
         "404":
           description: User not found
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
     put:
       tags:
       - user
@@ -375,7 +375,7 @@ paths:
           description: Invalid user supplied
         "404":
           description: User not found
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
     delete:
       tags:
       - user
@@ -396,7 +396,7 @@ paths:
           description: Invalid username supplied
         "404":
           description: User not found
-      x-openapi-router-controller: swagger_server.controllers.user_controller
+      x-openapi-router-controller: sdx_server.controllers.user_controller
 components:
   schemas:
     connection:
@@ -808,11 +808,11 @@ components:
           scopes:
             write:topology: modify topology in your account
             read:topology: read your topology
-      x-tokenInfoFunc: swagger_server.controllers.authorization_controller.check_topology_auth
-      x-scopeValidateFunc: swagger_server.controllers.authorization_controller.validate_scope_topology_auth
+      x-tokenInfoFunc: sdx_server.controllers.authorization_controller.check_topology_auth
+      x-scopeValidateFunc: sdx_server.controllers.authorization_controller.validate_scope_topology_auth
     api_key:
       type: apiKey
       name: api_key
       in: header
-      x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
+      x-apikeyInfoFunc: sdx_server.controllers.authorization_controller.check_api_key
 
