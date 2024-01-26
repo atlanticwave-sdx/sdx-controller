@@ -134,7 +134,7 @@ paths:
         "404":
           description: Link not found
       x-openapi-router-controller: swagger_server.controllers.link_controller
-  /conection:
+  /connection:
     post:
       tags:
       - connection

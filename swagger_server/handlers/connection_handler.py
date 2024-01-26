@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -21,8 +22,7 @@ class ConnectionHandler:
         # call pce to remove connection
         pass
 
-    def _send_breakdown_to_lc(self, temanager, connection, solution):
-        breakdown = temanager.generate_connection_breakdown(solution)
+    def _send_breakdown_to_lc(self, breakdown, connection_request):
         logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
@@ -53,8 +53,8 @@ class ConnectionHandler:
                 if simple_link not in link_connections_dict:
                     link_connections_dict[simple_link] = []
 
-                if connection not in link_connections_dict[simple_link]:
-                    link_connections_dict[simple_link].append(connection)
+                if connection_request not in link_connections_dict[simple_link]:
+                    link_connections_dict[simple_link].append(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
                     "link_connections_dict", json.dumps(link_connections_dict)
@@ -81,8 +81,21 @@ class ConnectionHandler:
             producer.call(json.dumps(link))
             producer.stop_keep_alive()
 
-    def place_connection(self, connection):
-        # call pce to generate breakdown, and place connection
+        # We will get to this point only if all the previous steps
+        # leading up to this point were successful.
+        return "Connection published", 200
+
+    def place_connection(self, connection_request: dict) -> Tuple[str, int]:
+        """
+        Do the actual work of creating a connection.
+
+        This method will call pce library to generate a breakdown
+        across relevant domains, and then send individual connection
+        requests to each of those domains.
+
+        Note that we can return early if things fail.  Return value is
+        a tuple of the form (reason, HTTP code).
+        """
         num_domain_topos = 0
 
         if self.db_instance.read_from_db("num_domain_topos"):
@@ -93,7 +106,7 @@ class ConnectionHandler:
         # Initializing TEManager with `None` topology data is a
         # work-around for
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/145
-        temanager = TEManager(topology_data=None, connection_data=connection)
+        temanager = TEManager(topology_data=None)
         lc_domain_topo_dict = {}
 
         # Read LC-1, LC-2, LC-3, and LC-4 topologies because of
@@ -120,14 +133,16 @@ class ConnectionHandler:
             )
             temanager.add_topology(curr_topo_json)
 
-        for num, val in enumerate(temanager.topology_manager.topology_list):
+        for num, val in enumerate(temanager.get_topology_map().values()):
             logger.info(f"TE topology #{num}: {val}")
 
         graph = temanager.generate_graph_te()
         if graph is None:
             return "Could not generate a graph", 400
 
-        traffic_matrix = temanager.generate_connection_te()
+        traffic_matrix = temanager.generate_traffic_matrix(
+            connection_request=connection_request
+        )
         if traffic_matrix is None:
             return "Could not generate a traffic matrix", 400
 
@@ -140,7 +155,8 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        self._send_breakdown_to_lc(temanager, connection, solution)
+        breakdown = temanager.generate_connection_breakdown(solution)
+        self._send_breakdown_to_lc(breakdown, connection_request)
 
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
