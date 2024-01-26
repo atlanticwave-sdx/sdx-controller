@@ -138,7 +138,7 @@ directory:
 ```console
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
-$ pip3 install -r requirements.txt
+$ pip3 install [--editable] .
 $ source .env
 $ python3 -m swagger_server
 ```
