@@ -65,7 +65,7 @@ include = '\.py?$'
 
 [tool.isort]
 profile = "black"
-src_paths = ["setup.py", "swagger_server", "bapm_server"]
+src_paths = ["swagger_server", "bapm_server"]
 
 [tool.coverage.run]
 branch = true
