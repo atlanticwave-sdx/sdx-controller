@@ -12,10 +12,11 @@ WORKDIR /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 
+# In order to make setuptools_scm work during container build, we
+# temporarily bind-mount .git.  Via
+# https://github.com/pypa/setuptools_scm/issues/77#issuecomment-844927695
 RUN --mount=source=.git,target=.git,type=bind \
-    pip install --no-cache-dir -e .
-
-# RUN pip3 install --no-cache-dir .
+    pip install --no-cache-dir .
 
 EXPOSE 8080
 
