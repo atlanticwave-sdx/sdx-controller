@@ -17,7 +17,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
 
 
-def main():
+def create_app():
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
@@ -31,18 +31,23 @@ def main():
     )
 
     # Run swagger in a thread
-    threading.Thread(target=lambda: app.run(port=8080)).start()
+    # threading.Thread(target=lambda: app.run(port=8080)).start()
 
     # Get DB connection and tables set up.
     db_instance = DbUtils()
     db_instance.initialize_db()
 
-    topology_manager = TopologyManager()
+    # topology_manager = TopologyManager()
 
-    thread_queue = Queue()
-    rpc = RpcConsumer(thread_queue, "", topology_manager)
-    rpc.start_sdx_consumer(thread_queue, db_instance)
+    # thread_queue = Queue()
+    # rpc = RpcConsumer(thread_queue, "", topology_manager)
+    # rpc.start_sdx_consumer(thread_queue, db_instance)
 
+    return app
+
+
+application = create_app()
+app = application.app
 
 if __name__ == "__main__":
-    main()
+    app.run()
