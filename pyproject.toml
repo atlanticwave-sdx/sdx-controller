@@ -57,7 +57,7 @@ packages = ["sdx_server", "bapm_server"]
 
 [tool.setuptools_scm]
 # Write version info collected from git to a file.  This happens when
-# we run `python -m build`.
+# during package build step.
 write_to = "sdx_server/_version.py"
 
 [tool.black]
