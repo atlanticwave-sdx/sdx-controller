@@ -65,11 +65,11 @@ include = '\.py?$'
 
 [tool.isort]
 profile = "black"
-src_paths = ["swagger_server", "bapm_server"]
+src_paths = ["sdx_server", "bapm_server"]
 
 [tool.coverage.run]
 branch = true
-omit = [ "swagger_server/test/*" ]
+omit = [ "sdx_server/test/*" ]
 relative_files = true
 
 # The section below will let us have relative paths in test coverage
