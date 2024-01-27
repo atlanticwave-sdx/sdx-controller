@@ -37,11 +37,16 @@ def create_app():
     db_instance = DbUtils()
     db_instance.initialize_db()
 
-    # topology_manager = TopologyManager()
+    topology_manager = TopologyManager()
+    thread_queue = Queue()
+    rpc_consumer = RpcConsumer(thread_queue, "", topology_manager)
 
-    # thread_queue = Queue()
-    # rpc = RpcConsumer(thread_queue, "", topology_manager)
-    # rpc.start_sdx_consumer(thread_queue, db_instance)
+    rpc_thread = threading.Thread(
+        target=rpc_consumer.start_sdx_consumer,
+        kwargs={"thread_queue": thread_queue, "db_instance": db_instance},
+    )
+
+    rpc_thread.start()
 
     return app
 
