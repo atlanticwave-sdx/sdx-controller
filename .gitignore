@@ -136,4 +136,4 @@ dmypy.json
 /*.sqlite3-wal
 
 /db/*
-/swagger_server/_version.py
+/sdx_controller/_version.py
