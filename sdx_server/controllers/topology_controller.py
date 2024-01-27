@@ -2,6 +2,7 @@ import json
 
 from sdx_pce.topology.grenmlconverter import GrenmlConverter
 from sdx_pce.topology.manager import TopologyManager
+
 from sdx_server.utils.db_utils import DbUtils
 
 # Get DB connection and tables set up.

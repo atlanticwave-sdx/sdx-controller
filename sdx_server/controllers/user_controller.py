@@ -1,4 +1,5 @@
 import connexion
+
 from sdx_server.models.user import User  # noqa: E501
 
 

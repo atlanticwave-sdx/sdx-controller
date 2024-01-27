@@ -6,6 +6,7 @@ import threading
 from queue import Queue
 
 import pika
+
 from sdx_server.handlers.lc_message_handler import LcMessageHandler
 from sdx_server.utils.parse_helper import ParseHelper
 

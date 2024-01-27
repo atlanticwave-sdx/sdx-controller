@@ -4,6 +4,7 @@ from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
+
 from sdx_server.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_server.models.simple_link import SimpleLink
 from sdx_server.utils.parse_helper import ParseHelper

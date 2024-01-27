@@ -2,6 +2,7 @@ import logging
 
 import connexion
 from flask_testing import TestCase
+
 from sdx_server.encoder import JSONEncoder
 
 
