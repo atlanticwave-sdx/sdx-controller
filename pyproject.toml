@@ -53,23 +53,23 @@ lint = [
 where = "swagger_server"
 
 [tool.setuptools]
-packages = ["sdx_server", "bapm_server"]
+packages = ["sdx_controller", "bapm_server"]
 
 [tool.setuptools_scm]
 # Write version info collected from git to a file.  This happens when
 # during package build step.
-write_to = "sdx_server/_version.py"
+write_to = "sdx_controller/_version.py"
 
 [tool.black]
 include = '\.py?$'
 
 [tool.isort]
 profile = "black"
-src_paths = ["sdx_server", "bapm_server"]
+src_paths = ["sdx_controller", "bapm_server"]
 
 [tool.coverage.run]
 branch = true
-omit = [ "sdx_server/test/*" ]
+omit = [ "sdx_controller/test/*" ]
 relative_files = true
 
 # The section below will let us have relative paths in test coverage
@@ -77,7 +77,7 @@ relative_files = true
 [tool.coverage.paths]
 source = [
     # In checkouts.
-    "sdx_server/",
+    "sdx_controller/",
     "bapm_server/",
     # In installed paths.
     "**/site-packages/",

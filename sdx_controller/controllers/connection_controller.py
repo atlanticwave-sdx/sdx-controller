@@ -3,8 +3,8 @@ import logging
 
 import connexion
 
-from sdx_server.handlers.connection_handler import ConnectionHandler
-from sdx_server.utils.db_utils import DbUtils
+from sdx_controller.handlers.connection_handler import ConnectionHandler
+from sdx_controller.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "

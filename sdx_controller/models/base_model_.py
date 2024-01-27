@@ -3,7 +3,7 @@ import typing
 
 import six
 
-from sdx_server import util
+from sdx_controller import util
 
 T = typing.TypeVar("T")
 

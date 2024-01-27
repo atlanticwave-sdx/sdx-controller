@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from sdx_server.test import BaseTestCase
+from sdx_controller.test import BaseTestCase
 
 
 class TestTopologyController(BaseTestCase):

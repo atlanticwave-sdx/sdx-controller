@@ -7,8 +7,8 @@ from queue import Queue
 
 import pika
 
-from sdx_server.handlers.lc_message_handler import LcMessageHandler
-from sdx_server.utils.parse_helper import ParseHelper
+from sdx_controller.handlers.lc_message_handler import LcMessageHandler
+from sdx_controller.utils.parse_helper import ParseHelper
 
 MQ_HOST = os.environ.get("MQ_HOST")
 # subscribe to the corresponding queue

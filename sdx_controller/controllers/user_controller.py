@@ -1,6 +1,6 @@
 import connexion
 
-from sdx_server.models.user import User  # noqa: E501
+from sdx_controller.models.user import User  # noqa: E501
 
 
 def create_user(body):  # noqa: E501
