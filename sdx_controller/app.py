@@ -2,6 +2,7 @@
 
 import logging
 import os
+import signal
 import threading
 from queue import Queue
 
@@ -17,13 +18,18 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
 
 
+# TODO: this doesn't seem to work.
+def signal_handler(signum, frame):
+    logging.info("Running signal handler")
+    application.rpc_thread.stop_sdx_consumer()
+
+
 def create_app():
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
 
-    # Run swagger service
     app = connexion.App(__name__, specification_dir="./swagger/")
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api(
@@ -37,16 +43,19 @@ def create_app():
     db_instance = DbUtils()
     db_instance.initialize_db()
 
+    logging.info("Installing signal handler")
+    signal.signal(signal.SIGINT, signal_handler)
+
     topology_manager = TopologyManager()
     thread_queue = Queue()
     rpc_consumer = RpcConsumer(thread_queue, "", topology_manager)
 
-    rpc_thread = threading.Thread(
+    app.rpc_thread = threading.Thread(
         target=rpc_consumer.start_sdx_consumer,
         kwargs={"thread_queue": thread_queue, "db_instance": db_instance},
     )
 
-    rpc_thread.start()
+    app.rpc_thread.start()
 
     return app
 

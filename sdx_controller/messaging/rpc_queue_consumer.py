@@ -32,6 +32,8 @@ class RpcConsumer(object):
 
         self.manager = topology_manager
 
+        self._exit_event = threading.Event()
+
     def on_request(self, ch, method, props, message_body):
         response = message_body
         self._thread_queue.put(message_body)
@@ -104,7 +106,7 @@ class RpcConsumer(object):
                     self.manager.add_topology(topo_json)
                     logger.debug(f"Read {db_key}: {topology}")
 
-        while True:
+        while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.
             msg = thread_queue.get()
             logger.debug("MQ received message:" + str(msg))
@@ -130,3 +132,10 @@ class RpcConsumer(object):
                         "Save to database complete. message ID: " + str(MESSAGE_ID)
                     )
                     MESSAGE_ID += 1
+
+    def stop_sdx_consumer(self):
+        """
+        Signal consumer thread to stop.
+        """
+        logger.info("[MQ] Stopping consumer thread.")
+        self._exit_event.set()
