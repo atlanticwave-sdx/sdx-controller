@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import atexit
 import logging
 import os
-import signal
 import threading
 from queue import Queue
 
@@ -16,12 +16,6 @@ from sdx_controller.utils.db_utils import DbUtils
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
-
-
-# TODO: this doesn't seem to work.
-def signal_handler(signum, frame):
-    logging.info("Running signal handler")
-    application.rpc_thread.stop_sdx_consumer()
 
 
 def create_app():
@@ -43,15 +37,12 @@ def create_app():
     db_instance = DbUtils()
     db_instance.initialize_db()
 
-    logging.info("Installing signal handler")
-    signal.signal(signal.SIGINT, signal_handler)
-
     topology_manager = TopologyManager()
     thread_queue = Queue()
-    rpc_consumer = RpcConsumer(thread_queue, "", topology_manager)
 
+    app.rpc_consumer = RpcConsumer(thread_queue, "", topology_manager)
     app.rpc_thread = threading.Thread(
-        target=rpc_consumer.start_sdx_consumer,
+        target=app.rpc_consumer.start_sdx_consumer,
         kwargs={"thread_queue": thread_queue, "db_instance": db_instance},
     )
 
@@ -62,6 +53,13 @@ def create_app():
 
 application = create_app()
 app = application.app
+
+
+@atexit.register
+def on_app_exit():
+    logging.info("Stopping RPC queue consumer")
+    application.rpc_consumer.stop_sdx_consumer()
+
 
 if __name__ == "__main__":
     app.run()
