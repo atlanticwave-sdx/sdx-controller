@@ -44,6 +44,7 @@ def create_app():
     app.rpc_thread = threading.Thread(
         target=app.rpc_consumer.start_sdx_consumer,
         kwargs={"thread_queue": thread_queue, "db_instance": db_instance},
+        daemon=True,
     )
 
     app.rpc_thread.start()
