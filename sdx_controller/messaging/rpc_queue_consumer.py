@@ -137,5 +137,6 @@ class RpcConsumer(object):
         """
         Signal consumer thread to stop.
         """
-        logger.info("[MQ] Stopping consumer thread.")
+        logger.info("[MQ] Stopping threads.")
+        self.channel.stop_consuming()
         self._exit_event.set()
