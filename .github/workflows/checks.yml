@@ -39,10 +39,12 @@ jobs:
         run: |
           python -m isort --check --profile black .
 
-      - name: Lint sdx-controller Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile
+      # # Disable hadolint check until
+      # # https://github.com/hadolint/hadolint/issues/943 is solved.
+      # - name: Lint sdx-controller Dockerfile
+      #   uses: hadolint/hadolint-action@v3.1.0
+      #   with:
+      #     dockerfile: Dockerfile
 
       - name: Lint bapm-server Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
