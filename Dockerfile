@@ -9,14 +9,16 @@ RUN apt-get update \
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
-
-RUN pip3 install --no-cache-dir -r requirements.txt
-
 WORKDIR /usr/src/app
 COPY . /usr/src/app
+
+# In order to make setuptools_scm work during container build, we
+# temporarily bind-mount .git.  Via
+# https://github.com/pypa/setuptools_scm/issues/77#issuecomment-844927695
+RUN --mount=source=.git,target=.git,type=bind \
+    pip install --no-cache-dir .[wsgi]
 
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "swagger_server"]
+CMD ["-m", "uvicorn", "sdx_controller.app:app"]
