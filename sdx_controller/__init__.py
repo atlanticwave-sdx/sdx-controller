@@ -16,6 +16,9 @@ LOG_FILE = os.environ.get("LOG_FILE")
 
 
 def create_rpc_thread(app):
+    """
+    Start a thread to get items off the message queue.
+    """
     topology_manager = TopologyManager()
     thread_queue = Queue()
 
@@ -30,6 +33,22 @@ def create_rpc_thread(app):
 
 
 def create_app(run_listener: bool = True):
+    """
+    Create a connexion app.
+
+    The object returned is a Connexion App, which in turn contains a
+    Flask app, that we can run either with Flask or WSGI server such
+    as uvicorn::
+
+        $ flask run sdx_server.app
+        $ uvicorn run sdx_server.app:app
+
+    We also create a thread that subscribes to our message queue.
+    Occasionally it might be useful not to start the thread (such as
+    when running the test suite, because currently our tests do not
+    use the message queue), and we might want to disable those
+    threads, which is when run_listener param might be useful.
+    """
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
