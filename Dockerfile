@@ -16,9 +16,9 @@ COPY . /usr/src/app
 # temporarily bind-mount .git.  Via
 # https://github.com/pypa/setuptools_scm/issues/77#issuecomment-844927695
 RUN --mount=source=.git,target=.git,type=bind \
-    pip install --no-cache-dir .
+    pip install --no-cache-dir .[wsgi]
 
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "swagger_server"]
+CMD ["-m", "uvicorn", "sdx_controller.app:app"]

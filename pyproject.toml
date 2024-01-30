@@ -48,6 +48,9 @@ lint = [
     "black == 23.*",
     "isort == 5.*",
 ]
+wsgi = [
+    "uvicorn"
+]
 
 [options.packages.find]
 where = "swagger_server"
