@@ -20,29 +20,6 @@ db_instance.initialize_db()
 connection_handler = ConnectionHandler(db_instance)
 
 
-def is_json(myjson):
-    try:
-        json.loads(myjson)
-    except ValueError:
-        return False
-    return True
-
-
-def find_between(s, first, last):
-    """
-    Find the substring of `s` that is betwen `first` and `last`.
-    """
-    if s is None or first is None or last is None:
-        return None
-
-    try:
-        start = s.index(first) + len(first)
-        end = s.index(last, start)
-        return s[start:end]
-    except ValueError:
-        return ""
-
-
 def delete_connection(connection_id):
     """
     Delete connection order by ID.
