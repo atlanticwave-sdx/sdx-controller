@@ -41,9 +41,6 @@ def create_app(run_listener: bool = True):
         "swagger.yaml", arguments={"title": "SDX-Controller"}, pythonic_params=True
     )
 
-    # Run swagger in a thread
-    # threading.Thread(target=lambda: app.run(port=8080)).start()
-
     # Get DB connection and tables set up.
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
