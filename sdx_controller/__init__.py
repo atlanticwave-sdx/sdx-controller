@@ -26,7 +26,7 @@ def create_rpc_thread(app):
         daemon=True,
     )
 
-    app.rpc_thread.start()
+    rpc_thread.start()
 
 
 def create_app(run_listener: bool = True):
@@ -49,6 +49,6 @@ def create_app(run_listener: bool = True):
     app.db_instance.initialize_db()
 
     if run_listener:
-        create_rpc_thread(app, app.db_instance)
+        create_rpc_thread(app)
 
     return app
