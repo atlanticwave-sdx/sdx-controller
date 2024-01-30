@@ -7,7 +7,7 @@ import unittest
 from flask import json
 
 from sdx_controller.models.connection import Connection  # noqa: E501
-from sdx_controller.test import BaseTestCase
+from sdx_controller.test import BaseTestCase, TestData
 
 BASE_PATH = "/SDX-Controller/1.0.0"
 
