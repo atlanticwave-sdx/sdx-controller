@@ -133,9 +133,9 @@ class RpcConsumer(object):
                     )
                     MESSAGE_ID += 1
 
-    def stop_sdx_consumer(self):
+    def stop_threads(self):
         """
-        Signal consumer thread to stop.
+        Signal threads that we're ready to stop.
         """
         logger.info("[MQ] Stopping threads.")
         self.channel.stop_consuming()
