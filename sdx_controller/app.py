@@ -1,5 +1,4 @@
 import atexit
-import logging
 
 from sdx_controller import create_app
 
@@ -15,7 +14,6 @@ def on_app_exit():
     We run a message queue consumer in a separate thread, and here we
     signal the thread that we're exiting.
     """
-    logging.info("Stopping RPC threads")
     application.rpc_consumer.stop_threads()
 
 
