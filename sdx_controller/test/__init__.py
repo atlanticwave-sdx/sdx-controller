@@ -1,7 +1,5 @@
-import logging
 import os
 
-import connexion
 from flask_testing import TestCase
 
 try:
