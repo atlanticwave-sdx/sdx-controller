@@ -3,6 +3,8 @@ import logging
 
 import connexion
 
+from flask import current_app
+
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
 
@@ -64,7 +66,9 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    reason, code = connection_handler.place_connection(body)
+    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+
+    reason, code = connection_handler.place_connection(current_app.te_manager, body)
     logger.info(f"place_connection result: reason='{reason}', code={code}")
 
     return reason, code
