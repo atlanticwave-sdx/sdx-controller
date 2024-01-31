@@ -80,12 +80,12 @@ class TestConnectionController(BaseTestCase):
             topology = json.loads(topology_file.read_text())
             self.te_manager.add_topology(topology)
 
-        request = json.loads(TestData.CONNECTION_REQ.read_text())
+        request = TestData.CONNECTION_REQ.read_text()
 
         response = self.client.open(
             f"{BASE_PATH}/connection",
             method="POST",
-            data=json.dumps(request),
+            data=request,
             content_type="application/json",
         )
 
