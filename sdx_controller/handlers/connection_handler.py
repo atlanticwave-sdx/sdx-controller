@@ -85,7 +85,9 @@ class ConnectionHandler:
         # leading up to this point were successful.
         return "Connection published", 200
 
-    def place_connection(self, connection_request: dict) -> Tuple[str, int]:
+    def place_connection(
+        self, temanager: TEManager, connection_request: dict
+    ) -> Tuple[str, int]:
         """
         Do the actual work of creating a connection.
 
