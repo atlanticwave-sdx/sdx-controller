@@ -4,8 +4,6 @@ import logging
 import connexion
 from flask import current_app
 
-from flask import current_app
-
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
 
