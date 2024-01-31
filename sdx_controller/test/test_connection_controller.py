@@ -91,9 +91,9 @@ class TestConnectionController(BaseTestCase):
 
         print(f"Response body is : {response.data.decode('utf-8')}")
 
-        # Expect 400 failure for now because TEManager is not properly
-        # set up within the handler yet.
-        self.assertStatus(response, 400)
+        # Expect 200 success because TEManager now should be properly
+        # set up with all the expected topology data.
+        self.assertStatus(response, 200)
 
 
 if __name__ == "__main__":
