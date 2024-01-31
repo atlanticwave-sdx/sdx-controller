@@ -98,7 +98,7 @@ class ConnectionHandler:
         Note that we can return early if things fail.  Return value is
         a tuple of the form (reason, HTTP code).
         """
-        num_domain_topos = 0
+        # num_domain_topos = 0
 
         # if self.db_instance.read_from_db("num_domain_topos"):
         #     num_domain_topos = self.db_instance.read_from_db("num_domain_topos")[
