@@ -66,6 +66,12 @@ def create_app(run_listener: bool = True):
     # Get a handle to PCE.
     app.te_manager = TEManager(topology_data=None)
 
+    # TODO: This is a hack, until we find a better way to get a handle
+    # to TEManager from Flask current_app, which are typically
+    # available to request handlers.  There must be a better way to
+    # pass this around.
+    app.app.te_manager = app.te_manager
+
     if run_listener:
         create_rpc_thread(app)
 
