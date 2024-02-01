@@ -86,7 +86,7 @@ class ConnectionHandler:
         return "Connection published", 200
 
     def place_connection(
-        self, temanager: TEManager, connection_request: dict
+        self, te_manager: TEManager, connection_request: dict
     ) -> Tuple[str, int]:
         """
         Do the actual work of creating a connection.
@@ -98,14 +98,14 @@ class ConnectionHandler:
         Note that we can return early if things fail.  Return value is
         a tuple of the form (reason, HTTP code).
         """
-        for num, val in enumerate(temanager.get_topology_map().values()):
+        for num, val in enumerate(te_manager.get_topology_map().values()):
             logger.info(f"TE topology #{num}: {val}")
 
-        graph = temanager.generate_graph_te()
+        graph = te_manager.generate_graph_te()
         if graph is None:
             return "Could not generate a graph", 400
 
-        traffic_matrix = temanager.generate_traffic_matrix(
+        traffic_matrix = te_manager.generate_traffic_matrix(
             connection_request=connection_request
         )
         if traffic_matrix is None:
@@ -120,7 +120,7 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        breakdown = temanager.generate_connection_breakdown(solution)
+        breakdown = te_manager.generate_connection_breakdown(solution)
         return self._send_breakdown_to_lc(breakdown, connection_request)
 
     def handle_link_failure(self, msg_json):
