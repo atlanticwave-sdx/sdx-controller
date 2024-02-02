@@ -1,6 +1,7 @@
 import atexit
 
 from asgiref.wsgi import WsgiToAsgi
+from flask import redirect
 
 from sdx_controller import create_app
 
@@ -22,6 +23,9 @@ app = application.app
 #
 asgi_app = WsgiToAsgi(app)
 
+@app.route("/", methods=["GET"])
+def index():
+    return redirect("/SDX-Controller/1.0.0/ui/")
 
 @atexit.register
 def on_app_exit():
