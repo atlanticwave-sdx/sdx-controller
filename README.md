@@ -140,7 +140,7 @@ $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
 $ pip3 install [--editable] .
 $ source .env
-$ python3 -m sdx_controller
+$ flask --app sdx_controller.app:app run --debug
 ```
 
 ### Test topology files and connection requests
