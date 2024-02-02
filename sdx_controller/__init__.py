@@ -37,11 +37,11 @@ def create_app(run_listener: bool = True):
     Create a connexion app.
 
     The object returned is a Connexion App, which in turn contains a
-    Flask app, that we can run either with Flask or WSGI server such
-    as uvicorn::
+    Flask app, that we can run either with Flask or an ASGI server
+    such as uvicorn::
 
-        $ flask run sdx_server.app
-        $ uvicorn run sdx_server.app:app
+        $ flask run sdx_server.app:app
+        $ uvicorn run sdx_server.app:asgi_app
 
     We also create a thread that subscribes to our message queue.
     Occasionally it might be useful not to start the thread (such as
