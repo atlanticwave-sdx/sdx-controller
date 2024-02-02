@@ -66,5 +66,7 @@ def create_app(run_listener: bool = True):
 
     if run_listener:
         create_rpc_thread(app)
+    else:
+        app.rpc_consumer = None
 
     return app

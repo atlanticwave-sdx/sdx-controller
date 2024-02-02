@@ -19,8 +19,9 @@ app = application.app
 # uvicorn or hypercorn), like so:
 #
 #     $ uvicorn sdx_controller.app:asgi_app --host 0.0.0.0 --port 8080
-# 
+#
 asgi_app = WsgiToAsgi(app)
+
 
 @atexit.register
 def on_app_exit():
@@ -30,7 +31,8 @@ def on_app_exit():
     We run a message queue consumer in a separate thread, and here we
     signal the thread that we're exiting.
     """
-    application.rpc_consumer.stop_threads()
+    if application.rpc_consumer:
+        application.rpc_consumer.stop_threads()
 
 
 if __name__ == "__main__":
