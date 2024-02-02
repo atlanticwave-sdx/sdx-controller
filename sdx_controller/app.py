@@ -4,8 +4,15 @@ from asgiref.wsgi import WsgiToAsgi
 
 from sdx_controller import create_app
 
+# This is a `connexion.apps.flask_app.FlaskApp` that we created using
+# connexion.App().
 application = create_app()
+
+# This is a `flask.app.Flask` object.
 app = application.app
+
+# We use WsgiToAsgi adapter so that we can use an ASGI server (such as
+# uvicorn or hypercorn).
 asgi_app = WsgiToAsgi(app)
 
 @atexit.register
