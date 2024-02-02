@@ -95,6 +95,42 @@ class TestConnectionController(BaseTestCase):
         # set up with all the expected topology data.
         self.assertStatus(response, 200)
 
+    def test_place_connection_with_three_topologies_added_in_sequence(self):
+        """
+        Test case for place_connection.
+
+        Place the same connection request while adding topologies.
+        """
+        for idx, topology_file in enumerate(
+            [
+                TestData.TOPOLOGY_FILE_AMLIGHT,
+                TestData.TOPOLOGY_FILE_SAX,
+                TestData.TOPOLOGY_FILE_ZAOXI,
+            ]
+        ):
+            topology = json.loads(topology_file.read_text())
+            self.te_manager.add_topology(topology)
+
+            request = TestData.CONNECTION_REQ.read_text()
+
+            response = self.client.open(
+                f"{BASE_PATH}/connection",
+                method="POST",
+                data=request,
+                content_type="application/json",
+            )
+
+            print(f"Response body is : {response.data.decode('utf-8')}")
+
+            if idx in [0, 1]:
+                # Expect 400 failure because TEManager do not have all
+                # the topologies yet.
+                self.assertStatus(response, 400)
+            if idx == 200:
+                # Expect 200 success now that TEManager should be set
+                # up with all the expected topology data.
+                self.assertStatus(response, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
