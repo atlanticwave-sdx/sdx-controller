@@ -21,4 +21,4 @@ RUN --mount=source=.git,target=.git,type=bind \
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "uvicorn", "sdx_controller.app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["-m", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]

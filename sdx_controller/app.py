@@ -8,10 +8,19 @@ from sdx_controller import create_app
 # connexion.App().
 application = create_app()
 
-# The application above contains a `flask.app.Flask` object.  We use
-# WsgiToAsgi adapter so that we can use an ASGI server (such as
-# uvicorn or hypercorn).
-app = WsgiToAsgi(application.app)
+# The application above contains a `flask.app.Flask` object.  We can
+# run the app using flask, like so:
+#
+#     $ flask --app sdx_controller.app:app run --debug
+#
+app = application.app
+
+# We use WsgiToAsgi adapter so that we can use an ASGI server (such as
+# uvicorn or hypercorn), like so:
+#
+#     $ uvicorn sdx_controller.app:asgi_app --host 0.0.0.0 --port 8080
+# 
+asgi_app = WsgiToAsgi(app)
 
 @atexit.register
 def on_app_exit():
