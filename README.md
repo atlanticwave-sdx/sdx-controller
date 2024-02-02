@@ -140,7 +140,7 @@ $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
 $ pip3 install [--editable] .
 $ source .env
-$ python3 -m sdx_controller
+$ flask --app sdx_controller.app:app run --debug
 ```
 
 ### Test topology files and connection requests
@@ -165,7 +165,7 @@ with Docker:
 
 ```console
 $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
-$ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
+$ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:7.0.5
 ```
 
 Some environment variables are expected to be set for the tests to

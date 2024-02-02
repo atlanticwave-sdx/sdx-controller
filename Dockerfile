@@ -19,4 +19,4 @@ RUN --mount=source=.git,target=.git,type=bind \
     pip install --no-cache-dir .[wsgi]
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "uvicorn", "sdx_controller.app:app", "--interface", "wsgi", "--port", "8080", "--host", "0.0.0.0"]
+CMD ["-m", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]
