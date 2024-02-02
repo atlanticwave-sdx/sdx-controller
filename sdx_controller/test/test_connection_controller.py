@@ -66,6 +66,46 @@ class TestConnectionController(BaseTestCase):
         # ingress port data, etc., for example.
         self.assertStatus(response, 400)
 
+    def __test_with_one_topology(self, topology_file):
+        """
+        A helper method to test place_connection() with just one topology.
+        """
+        topology = json.loads(topology_file.read_text())
+        self.te_manager.add_topology(topology)
+
+        request = TestData.CONNECTION_REQ.read_text()
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 400 failure, because TEManager do not have enough
+        # topology data.
+        self.assertStatus(response, 400)
+
+    def test_place_connection_with_amlight(self):
+        """
+        Test place_connection() with just Amlight topology.
+        """
+        self.__test_with_one_topology(TestData.TOPOLOGY_FILE_AMLIGHT)
+
+    def test_place_connection_with_sax(self):
+        """
+        Test place_connection() with just SAX topology.
+        """
+        self.__test_with_one_topology(TestData.TOPOLOGY_FILE_SAX)
+
+    def test_place_connection_with_zaoxi(self):
+        """
+        Test place_connection() with just ZAOXI topology.
+        """
+        self.__test_with_one_topology(TestData.TOPOLOGY_FILE_ZAOXI)
+
     def test_place_connection_with_three_topologies(self):
         """
         Test case for place_connection.
