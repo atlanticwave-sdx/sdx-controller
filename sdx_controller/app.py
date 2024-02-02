@@ -1,10 +1,12 @@
 import atexit
 
+from asgiref.wsgi import WsgiToAsgi
+
 from sdx_controller import create_app
 
 application = create_app()
 app = application.app
-
+asgi_app = WsgiToAsgi(app)
 
 @atexit.register
 def on_app_exit():
