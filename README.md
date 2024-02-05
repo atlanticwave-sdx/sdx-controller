@@ -72,21 +72,37 @@ $ sudo sh elastic-search-setup.sh
 
 ### Running with Docker Compose (recommended)
 
-A `docker-compose.yaml` is provided for bringing up run
-sdx-controller, bapm-server, and a MongoDB instance used by
-sdx-controller.  From the project root directory, do:
+A `compose.yaml` is provided for bringing up SDX Controller and a
+MongoDB instance, and a separate `compose.bapm.yml` is provided for
+bringing up bapm-server and a single-node ElasticSearch instance.
+
+To start/stop SDX Controller, from the project root directory, do:
 
 ```console
 $ source .env
 $ docker compose up --build
+$ docker compose down
 ```
 
 Navigate to http://localhost:8080/SDX-Controller/1.0.0/ui/ for testing
 the API.  The OpenAPI/Swagger definition should be available at
 http://localhost:8080/SDX-Controller/1.0.0/openapi.json.
 
-Use `docker compose down` to shut down the services.
+Similarly, to start/stop BAPM Server, do:
 
+```
+$ source .env
+$ docker compose -f compose.bapm.yml up --build
+$ docker compose -f compose.bapm.yml down
+```
+
+To start/stop all the services together:
+
+```
+$ source .env
+$ docker compose -f compose.yml -f compose.bapm.yml up --build
+$ docker compose -f compose.yml -f compose.bapm.yml down
+```
 
 #### Building the container images
 
@@ -122,9 +138,9 @@ directory:
 ```console
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
-$ pip3 install -r requirements.txt
+$ pip3 install [--editable] .
 $ source .env
-$ python3 -m swagger_server
+$ flask --app sdx_controller.app:app run --debug
 ```
 
 ### Test topology files and connection requests
@@ -149,7 +165,7 @@ with Docker:
 
 ```console
 $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
-$ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:3.7
+$ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:7.0.5
 ```
 
 Some environment variables are expected to be set for the tests to
