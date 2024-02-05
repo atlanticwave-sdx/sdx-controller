@@ -2,8 +2,8 @@
 import json
 import logging
 import os
-import time
 import threading
+import time
 from queue import Queue
 
 import pika
@@ -11,7 +11,6 @@ import pika
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
 
-MQ_HOST = os.environ.get("MQ_HOST")
 # subscribe to the corresponding queue
 SUB_QUEUE = os.environ.get("SUB_QUEUE")
 MQ_SRVC = os.environ.get("MQ_SRVC")
@@ -24,13 +23,14 @@ class RpcConsumer(object):
     def __init__(self, thread_queue, exchange_name, topology_manager):
         self.logger = logging.getLogger(__name__)
         SLEEP_TIME = 5
-        self.logger.info(' [*] Sleeping for %s seconds.', SLEEP_TIME)
+        self.logger.info(" [*] Sleeping for %s seconds.", SLEEP_TIME)
         time.sleep(SLEEP_TIME)
 
-        self.logger.info(' [*] Connecting to server ...')
+        self.logger.info(" [*] Connecting to server ...")
         credentials = pika.PlainCredentials(MQ_USER, MQ_PASS)
         self.connection = pika.BlockingConnection(
-                pika.ConnectionParameters(MQ_SRVC, 5672, '/', credentials))
+            pika.ConnectionParameters(MQ_SRVC, 5672, "/", credentials)
+        )
 
         self.channel = self.connection.channel()
         self.exchange_name = exchange_name
@@ -48,13 +48,14 @@ class RpcConsumer(object):
 
         self.logger = logging.getLogger(__name__)
         SLEEP_TIME = 5
-        self.logger.info(' [*] Sleeping for %s seconds.', SLEEP_TIME)
+        self.logger.info(" [*] Sleeping for %s seconds.", SLEEP_TIME)
         time.sleep(SLEEP_TIME)
 
-        self.logger.info(' [*] Connecting to server ...')
+        self.logger.info(" [*] Connecting to server ...")
         credentials = pika.PlainCredentials(MQ_USER, MQ_PASS)
         self.connection = pika.BlockingConnection(
-                pika.ConnectionParameters(MQ_SRVC, 5672, '/', credentials))
+            pika.ConnectionParameters(MQ_SRVC, 5672, "/", credentials)
+        )
 
         self.channel = self.connection.channel()
 
