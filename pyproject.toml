@@ -54,15 +54,15 @@ wsgi = [
 ]
 
 [options.packages.find]
-where = "sdx_controller"
+where = "swagger_server"
 
 [tool.setuptools]
-packages = ["sdx_controller", "bapm_server"]
+packages = ["swagger_server", "bapm_server"]
 
 [tool.setuptools_scm]
 # Write version info collected from git to a file.  This happens when
 # during package build step.
-write_to = "sdx_controller/_version.py"
+write_to = "swagger_server/_version.py"
 
 [tool.black]
 include = '\.py?$'
@@ -81,7 +81,7 @@ relative_files = true
 [tool.coverage.paths]
 source = [
     # In checkouts.
-    "sdx_controller/",
+    "swagger_server/",
     "bapm_server/",
     # In installed paths.
     "**/site-packages/",
