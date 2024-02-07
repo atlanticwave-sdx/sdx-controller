@@ -10,7 +10,7 @@ import pika
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
 
-MQ_HOST = os.environ.get("MQ_HOST")
+MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
 MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
