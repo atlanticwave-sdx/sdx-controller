@@ -16,7 +16,7 @@ MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 # subscribe to the corresponding queue
-SUB_QUEUE = os.environ.get("SUB_QUEUE")
+SUB_QUEUE = os.getenv("SUB_QUEUE")
 
 logger = logging.getLogger(__name__)
 
