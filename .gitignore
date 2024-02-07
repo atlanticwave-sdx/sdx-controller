@@ -136,4 +136,3 @@ dmypy.json
 /*.sqlite3-wal
 
 /db/*
-/sdx_controller/_version.py

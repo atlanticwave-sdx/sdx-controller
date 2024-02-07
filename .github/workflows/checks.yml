@@ -18,10 +18,10 @@ jobs:
     steps:
 
       - name: Check out sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.9"
           cache: "pip"  # cache pip dependencies
@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install black==24.* isort==5.*
+          python -m pip install black isort
 
       - name: Run "black --check"
         run: |
@@ -39,12 +39,10 @@ jobs:
         run: |
           python -m isort --check --profile black .
 
-      # # Disable hadolint check until
-      # # https://github.com/hadolint/hadolint/issues/943 is solved.
-      # - name: Lint sdx-controller Dockerfile
-      #   uses: hadolint/hadolint-action@v3.1.0
-      #   with:
-      #     dockerfile: Dockerfile
+      - name: Lint sdx-controller Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
 
       - name: Lint bapm-server Dockerfile
         uses: hadolint/hadolint-action@v3.1.0

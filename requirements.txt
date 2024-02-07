@@ -1,0 +1,8 @@
+jsonschema==3.2.0
+connexion[swagger-ui] >= 2.14.1
+python_dateutil >= 2.8
+setuptools >= 21.0.0
+pika >= 1.2.0
+dataset
+
+sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.3
