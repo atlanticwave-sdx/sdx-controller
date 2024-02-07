@@ -157,6 +157,7 @@ class ConnectionHandler:
 
         breakdown = temanager.generate_connection_breakdown(solution)
         self._send_breakdown_to_lc(breakdown, connection_request)
+        return self._send_breakdown_to_lc(breakdown, connection_request)
 
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
