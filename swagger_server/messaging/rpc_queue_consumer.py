@@ -12,7 +12,7 @@ from swagger_server.handlers.lc_message_handler import LcMessageHandler
 from swagger_server.utils.parse_helper import ParseHelper
 
 MQ_HOST = os.environ.get("MQ_HOST")
-MQ_PORT = os.environ.get("MQ_PORT")
+MQ_PORT = int(os.environ.get("MQ_PORT"))
 # subscribe to the corresponding queue
 SUB_QUEUE = os.environ.get("SUB_QUEUE")
 MQ_USER = os.environ.get("MQ_USER")
@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 class RpcConsumer(object):
     def __init__(self, thread_queue, exchange_name, topology_manager):
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.info(" [*] Connecting to server ...")
 
         credentials = pika.PlainCredentials(MQ_USER, MQ_PASS)
         self.connection = pika.BlockingConnection(
@@ -39,6 +42,8 @@ class RpcConsumer(object):
     def on_request(self, ch, method, props, message_body):
         response = message_body
         self._thread_queue.put(message_body)
+
+        self.logger.info(" [*] Connecting to server ...")
 
         credentials = pika.PlainCredentials(MQ_USER, MQ_PASS)
         self.connection = pika.BlockingConnection(
