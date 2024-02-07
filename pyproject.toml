@@ -1,9 +1,75 @@
+[build-system]
+requires = [
+    "setuptools >= 61.0",
+    "setuptools-scm >= 6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdx-controller"
+description = "AtlanticWave-SDX project's main controller"
+dynamic = [ "version" ]
+authors = [
+    { name = "Yufeng Xin", email = "yxin@renci.org" },
+    { name = "Cong Wang", email = "cwang@renci.org" },
+    { name = "Sajith Sasidharan", email = "sajith@renci.org" },
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "jsonschema == 3.2.0",
+    "connexion[swagger-ui] >= 2.14.1",
+    "asgiref >= 3.7.2",
+    "python_dateutil >= 2.8",
+    "setuptools >= 21.0.0",
+    "pika >= 1.2.0",
+    "dataset",
+    "pymongo > 3.0",
+    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.6.dev2",
+]
+
+[project.optional-dependencies]
+test = [
+    "flask_testing == 0.8.1",
+    "coverage >= 4.0.3",
+    "networkx == 2.8.8",
+    "pytest >= 7.2.0",
+    "pytest-cov >= 4.0.0",
+    "pluggy >= 0.3.1",
+    "py >= 1.4.31",
+    "randomize >= 0.13",
+]
+lint = [
+    "black == 23.*",
+    "isort == 5.*",
+]
+wsgi = [
+    "uvicorn"
+]
+
+[options.packages.find]
+where = "sdx_controller"
+
+[tool.setuptools]
+packages = ["sdx_controller", "bapm_server"]
+
+[tool.setuptools_scm]
+# Write version info collected from git to a file.  This happens when
+# during package build step.
+write_to = "sdx_controller/_version.py"
+
 [tool.black]
-src_paths = ["setup.py", "swagger_server", "bapm_server"]
+include = '\.py?$'
 
 [tool.isort]
 profile = "black"
-src_paths = ["setup.py", "swagger_server", "bapm_server"]
+src_paths = ["swagger_server", "bapm_server"]
 
 [tool.coverage.run]
 branch = true
@@ -15,11 +81,10 @@ relative_files = true
 [tool.coverage.paths]
 source = [
     # In checkouts.
-    "swagger_server/",
+    "sdx_controller/",
     "bapm_server/",
     # In installed paths.
     "**/site-packages/",
     # In tox environments.
     ".tox/**/site-packages/",
 ]
-
