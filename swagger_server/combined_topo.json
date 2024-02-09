@@ -20,7 +20,7 @@
                 "address": "Miami",
                 "latitude": 25.75633040531146,
                 "longitude": -80.37676058477908,
-                "ISO3166-2-lvl4": "US-MIA"
+                "iso3166_2_lvl4": "US-MIA"
             },
             "ports": [
                 {
@@ -73,7 +73,7 @@
                 "address": "BocaRaton",
                 "latitude": 26.381437356374075,
                 "longitude": -80.10225977485742,
-                "ISO3166-2-lvl4": "US-BC"
+                "iso3166_2_lvl4": "US-BC"
             },
             "ports": [
                 {
@@ -126,7 +126,7 @@
                 "address": "redclara",
                 "latitude": 30.34943181039702,
                 "longitude": -81.66666016473143,
-                "ISO3166-2-lvl4": "US-RC"
+                "iso3166_2_lvl4": "US-RC"
             },
             "ports": [
                 {
@@ -166,7 +166,7 @@
                 "address": "SaoPaulo",
                 "latitude": -23.5311561958366,
                 "longitude": -46.650271781410524,
-                "ISO3166-2-lvl4": "BR-SP"
+                "iso3166_2_lvl4": "BR-SP"
             },
             "ports": [
                 {
@@ -232,7 +232,7 @@
                 "address": "PanamaCity",
                 "latitude": 8.993040465928525,
                 "longitude": -79.4947050137491,
-                "ISO3166-2-lvl4": "US-PN"
+                "iso3166_2_lvl4": "US-PN"
             },
             "ports": [
                 {
@@ -298,7 +298,7 @@
                 "address": "Fortaleza",
                 "latitude": -3.73163824920348,
                 "longitude": -38.52443289673026,
-                "ISO3166-2-lvl4": "BR-FR"
+                "iso3166_2_lvl4": "BR-FR"
             },
             "ports": [
                 {
@@ -351,7 +351,7 @@
                 "address": "Santiago",
                 "latitude": -33.4507049233331,
                 "longitude": -70.64634765264213,
-                "ISO3166-2-lvl4": "CL-SN"
+                "iso3166_2_lvl4": "CL-SN"
             },
             "ports": [
                 {
@@ -391,7 +391,7 @@
                 "address": "Sangano",
                 "latitude": -9.533459658700743,
                 "longitude": 13.216709879405311,
-                "ISO3166-2-lvl4": "IT-SN"
+                "iso3166_2_lvl4": "IT-SN"
             },
             "ports": [
                 {
@@ -444,7 +444,7 @@
                 "address": "CapeTown",
                 "latitude": -3.73163824920348,
                 "longitude": -38.52443289673026,
-                "ISO3166-2-lvl4": "ZA-WC"
+                "iso3166_2_lvl4": "ZA-WC"
             },
             "ports": [
                 {
@@ -497,7 +497,7 @@
                 "address": "Karoo",
                 "latitude": -32.3632301851245,
                 "longitude": 22.541224555821298,
-                "ISO3166-2-lvl4": "ZA-KR"
+                "iso3166_2_lvl4": "ZA-KR"
             },
             "ports": [
                 {
