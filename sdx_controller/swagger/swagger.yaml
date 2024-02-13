@@ -532,6 +532,7 @@ components:
             address: address
             latitude: 0.80082819046101150206595775671303272247314453125
             longitude: 6.02745618307040320615897144307382404804229736328125
+            iso3166_2_lvl4: "US-MIA"
           id: id
           ports:
           - node: urn:sdx:port:amlight.net:Novi06
@@ -552,6 +553,7 @@ components:
             address: address
             latitude: 0.80082819046101150206595775671303272247314453125
             longitude: 6.02745618307040320615897144307382404804229736328125
+            iso3166_2_lvl4: "US-MIA"
           id: id
           ports:
           - node: urn:sdx:port:amlight.net:Novi06
@@ -628,6 +630,7 @@ components:
           address: address
           latitude: 0.80082819046101150206595775671303272247314453125
           longitude: 6.02745618307040320615897144307382404804229736328125
+          iso3166_2_lvl4: "US-MIA"
         id: id
         ports:
         - node: urn:sdx:port:amlight.net:Novi06
@@ -748,10 +751,13 @@ components:
           type: number
         longitude:
           type: number
+        iso3166_2_lvl4: 
+          type: string
       example:
         address: address
         latitude: 0.80082819046101150206595775671303272247314453125
         longitude: 6.02745618307040320615897144307382404804229736328125
+        iso3166_2_lvl4: "US-MIA"
     ApiResponse:
       type: object
       properties:
