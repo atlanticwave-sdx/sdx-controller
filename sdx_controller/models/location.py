@@ -122,7 +122,7 @@ class Location(Model):
 
 
         :return: The iso3166_2_lvl4 of this Location.
-        :rtype: float
+        :rtype: str
         """
         return self._iso3166_2_lvl4
 
@@ -132,7 +132,7 @@ class Location(Model):
 
 
         :param iso3166_2_lvl4: The iso3166_2_lvl4 of this Location.
-        :type iso3166_2_lvl4: float
+        :type iso3166_2_lvl4: str
         """
 
         self._iso3166_2_lvl4 = iso3166_2_lvl4
