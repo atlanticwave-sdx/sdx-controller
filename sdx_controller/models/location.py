@@ -16,7 +16,7 @@ class Location(Model):
     """
 
     def __init__(
-        self, address: str = None, latitude: float = None, longitude: float = None
+        self, address: str = None, latitude: float = None, longitude: float = None, iso3166_2_lvl4: str = None,
     ):  # noqa: E501
         """Location - a model defined in Swagger
 
@@ -26,17 +26,21 @@ class Location(Model):
         :type latitude: float
         :param longitude: The longitude of this Location.  # noqa: E501
         :type longitude: float
+        :param iso3166_2_lvl4: The iso3166_2_lvl4 code of this Location. # noqa: E501
+        :type iso3166_2_lvl4: str
         """
-        self.swagger_types = {"address": str, "latitude": float, "longitude": float}
+        self.swagger_types = {"address": str, "latitude": float, "longitude": float, "iso3166_2_lvl4": str}
 
         self.attribute_map = {
             "address": "address",
             "latitude": "latitude",
             "longitude": "longitude",
+            "iso3166_2_lvl4": "iso3166_2_lvl4",
         }
         self._address = address
         self._latitude = latitude
         self._longitude = longitude
+        self._iso3166_2_lvl4 = iso3166_2_lvl4
 
     @classmethod
     def from_dict(cls, dikt) -> "Location":
@@ -111,3 +115,25 @@ class Location(Model):
         """
 
         self._longitude = longitude
+
+    @property
+    def iso3166_2_lvl4(self) -> str:
+        """Gets the iso3166_2_lvl4 of this Location.
+
+
+        :return: The iso3166_2_lvl4 of this Location.
+        :rtype: float
+        """
+        return self._iso3166_2_lvl4
+
+    @iso3166_2_lvl4.setter
+    def iso3166_2_lvl4(self, iso3166_2_lvl4: str):
+        """Sets the iso3166_2_lvl4 of this Location.
+
+
+        :param iso3166_2_lvl4: The iso3166_2_lvl4 of this Location.
+        :type iso3166_2_lvl4: float
+        """
+
+        self._iso3166_2_lvl4 = iso3166_2_lvl4
+    
