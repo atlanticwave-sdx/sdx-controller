@@ -16,7 +16,11 @@ class Location(Model):
     """
 
     def __init__(
-        self, address: str = None, latitude: float = None, longitude: float = None, iso3166_2_lvl4: str = None,
+        self,
+        address: str = None,
+        latitude: float = None,
+        longitude: float = None,
+        iso3166_2_lvl4: str = None,
     ):  # noqa: E501
         """Location - a model defined in Swagger
 
@@ -29,7 +33,12 @@ class Location(Model):
         :param iso3166_2_lvl4: The iso3166_2_lvl4 code of this Location. # noqa: E501
         :type iso3166_2_lvl4: str
         """
-        self.swagger_types = {"address": str, "latitude": float, "longitude": float, "iso3166_2_lvl4": str}
+        self.swagger_types = {
+            "address": str,
+            "latitude": float,
+            "longitude": float,
+            "iso3166_2_lvl4": str,
+        }
 
         self.attribute_map = {
             "address": "address",
@@ -136,4 +145,3 @@ class Location(Model):
         """
 
         self._iso3166_2_lvl4 = iso3166_2_lvl4
-    
