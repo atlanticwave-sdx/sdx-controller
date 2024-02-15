@@ -157,6 +157,7 @@ repository:
 - [SAX topology][sax.json] ([raw][sax_raw])
 - [ZAOXI topology][zaoxi.json] ([raw][zaoxi_raw])
 - [Sample connection request][test_request] ([raw][test_request_raw])
+- [Sample AmLight topology with link failure][amlight_link_failure.json] ([raw][amlight_link_failure_raw])
 
 ## Running the test suite
 
@@ -210,3 +211,6 @@ $ tox
 
 [test_request]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/requests/test_request.json
 [test_request_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/requests/test_request.json
+
+[amlight_link_failure.json]: https://github.com/atlanticwave-sdx/datamodel/blob/main/src/sdx_datamodel/data/topologies/amlight_link_failure.json
+[amlight_link_failure_raw]: https://raw.githubusercontent.com/atlanticwave-sdx/datamodel/main/src/sdx_datamodel/data/topologies/amlight_link_failure.json
