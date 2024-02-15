@@ -157,6 +157,7 @@ repository:
 - [SAX topology][sax.json] ([raw][sax_raw])
 - [ZAOXI topology][zaoxi.json] ([raw][zaoxi_raw])
 - [Sample connection request][test_request] ([raw][test_request_raw])
+- [Sample topology request with link failure][amlight_link_failure.json] ([raw][amlight_link_failure_raw])
 
 ## Running the test suite
 
