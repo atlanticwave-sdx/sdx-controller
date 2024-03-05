@@ -168,6 +168,10 @@ $ pip install tox tox-docker
 $ tox
 ```
 
+If you want to examine Docker logs after the test suite has exited,
+you can run `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
+`docker logs <container-name>`.
+
 If you want to avoid tox and run [pytest] directly, that is possible
 too.  You will need to run MongoDB and RabbitMQ, which can be launched
 with Docker:
