@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install flake8 tox coveralls
+          python -m pip install flake8 .[test]
 
       - name: Lint with flake8
         run: |
@@ -70,9 +70,12 @@ jobs:
           # is is 88 chars wide.
           python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
-      - name: Test with tox
+      - name: Run tests
         run: |
-          python -m tox
+          # Run tests and collect coverage data.
+          python -m pytest
+          # Generate LCOV format coverage data for coveralls.
+          python -m coverage lcov -o coverage.lcov
         env:
           SDX_HOST: 'localhost'
           SDX_PORT: '8080'
@@ -86,12 +89,11 @@ jobs:
         timeout-minutes: 3
 
       - name: Send coverage data to coveralls.io
-        run: |
-          python -m coveralls --service=github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
-          COVERALLS_PARALLEL: true
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          file: coverage.lcov
+          parallel: true
 
   finalize:
     name: finalize

@@ -161,7 +161,19 @@ repository:
 
 ## Running the test suite
 
-Some of the tests expects MongoDB and RabbitMQ, which can be launched
+You will need [tox] and [tox-docker]:
+
+```console
+$ pip install tox tox-docker
+$ tox
+```
+
+If you want to examine Docker logs after the test suite has exited,
+you can run `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
+`docker logs <container-name>`.
+
+If you want to avoid tox and run [pytest] directly, that is possible
+too.  You will need to run MongoDB and RabbitMQ, which can be launched
 with Docker:
 
 ```console
@@ -175,19 +187,18 @@ edit it according to your environment, and make sure the env vars are
 present in your shell:
 
 ```console
+$ cp env.template .env 
+$ # and then edit .env to suit your environment
 $ source .env
-```
-
-And now run [tox]:
-
-```console
-$ tox
+$ pytest
 ```
 
 
 <!-- References -->
 
 [tox]: https://tox.wiki/en/latest/
+[tox-docker]: https://tox-docker.readthedocs.io/
+[pytest]: https://docs.pytest.org/
 
 [sdx-to-lc-img]: https://user-images.githubusercontent.com/29924060/139588273-100a0bb2-14ba-496f-aedf-a122b9793325.jpg
 [lc-to-sdx-img]: https://user-images.githubusercontent.com/29924060/139588283-2ea32803-92e3-4812-9e8a-3d829549ae40.jpg
