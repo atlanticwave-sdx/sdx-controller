@@ -71,6 +71,12 @@ include = '\.py?$'
 profile = "black"
 src_paths = ["sdx_controller", "bapm_server"]
 
+[tool.pytest.ini_options]
+addopts = "--cov=sdx_controller --cov=bapm_server --cov-report html --cov-report term-missing"
+testpaths = [
+    "sdx_controller/test"
+]
+
 [tool.coverage.run]
 branch = true
 omit = [ "sdx_controller/test/*" ]
