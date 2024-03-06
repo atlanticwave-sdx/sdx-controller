@@ -13,7 +13,6 @@ from sdx_controller import create_app
 
 
 class BaseTestCase(TestCase):
-
     def create_app(self):
         # Do not use the message queue if MQ_HOST is not set.  This is
         # a useful work-around when we do not want to spin up a
