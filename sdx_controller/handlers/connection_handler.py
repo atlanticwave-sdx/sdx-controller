@@ -120,7 +120,7 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        breakdown = temanager.generate_connection_breakdown(solution)
+        breakdown = te_manager.generate_connection_breakdown(solution)
         self._send_breakdown_to_lc(breakdown, connection_request)
         return "Successfully placed connection", 200
 
