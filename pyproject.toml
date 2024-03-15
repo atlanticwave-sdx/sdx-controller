@@ -31,7 +31,7 @@ dependencies = [
     "pika >= 1.2.0",
     "dataset",
     "pymongo > 3.0",
-    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.6.dev2",
+    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.6.dev3",
 ]
 
 [project.optional-dependencies]
@@ -70,6 +70,12 @@ include = '\.py?$'
 [tool.isort]
 profile = "black"
 src_paths = ["sdx_controller", "bapm_server"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=sdx_controller --cov=bapm_server --cov-report html --cov-report term-missing"
+testpaths = [
+    "sdx_controller/test"
+]
 
 [tool.coverage.run]
 branch = true

@@ -120,8 +120,14 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        breakdown = te_manager.generate_connection_breakdown(solution)
-        return self._send_breakdown_to_lc(breakdown, connection_request)
+        try:
+            breakdown = te_manager.generate_connection_breakdown(solution)
+            status, code = self._send_breakdown_to_lc(breakdown, connection_request)
+            logger.debug(f"Breakdown status: {status}, code: {code}")
+            return status, code
+        except Exception as e:
+            logger.debug(f"Error when generating/publishing breakdown: {e}")
+            return f"Error: {e}", 400
 
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
