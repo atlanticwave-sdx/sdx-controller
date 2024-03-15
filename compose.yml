@@ -21,11 +21,8 @@ services:
       - type: volume
         source: mongodb
         target: /data/db:Z
-    # healthcheck:
-    #   test: ["CMD", "mongo", "--eval", "db.version()"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 3
+    healthcheck:
+      test: ["CMD", "mongosh", "localhost:${MONGO_PORT}/test", "--quiet"]
 
   sdx-controller:
     image: sdx-controller
