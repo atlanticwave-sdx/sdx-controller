@@ -5,7 +5,7 @@ services:
   mongodb:
     # See https://hub.docker.com/_/mongo/ for documentation about
     # MongoDB Docker images.
-    image: mongo:7.0.5    
+    image: mongo:7.0.5
     ports:
       - ${MONGO_PORT}:${MONGO_PORT}
     environment:
@@ -21,11 +21,8 @@ services:
       - type: volume
         source: mongodb
         target: /data/db:Z
-    # healthcheck:
-    #   test: ["CMD", "mongo", "--eval", "db.version()"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 3
+    healthcheck:
+      test: ["CMD", "mongosh", "localhost:${MONGO_PORT}/test", "--quiet"]
 
   sdx-controller:
     image: sdx-controller
