@@ -85,7 +85,9 @@ class ConnectionHandler:
         # leading up to this point were successful.
         return "Connection published", 200
 
-    def place_connection(self, connection_request: dict) -> Tuple[str, int]:
+    def place_connection(
+        self, te_manager: TEManager, connection_request: dict
+    ) -> Tuple[str, int]:
         """
         Do the actual work of creating a connection.
 
@@ -96,51 +98,14 @@ class ConnectionHandler:
         Note that we can return early if things fail.  Return value is
         a tuple of the form (reason, HTTP code).
         """
-        num_domain_topos = 0
-
-        if self.db_instance.read_from_db("num_domain_topos"):
-            num_domain_topos = self.db_instance.read_from_db("num_domain_topos")[
-                "num_domain_topos"
-            ]
-
-        # Initializing TEManager with `None` topology data is a
-        # work-around for
-        # https://github.com/atlanticwave-sdx/sdx-controller/issues/145
-        temanager = TEManager(topology_data=None)
-        lc_domain_topo_dict = {}
-
-        # Read LC-1, LC-2, LC-3, and LC-4 topologies because of
-        # https://github.com/atlanticwave-sdx/sdx-controller/issues/152
-        for i in range(1, int(num_domain_topos) + 2):
-            lc = f"LC-{i}"
-            logger.debug(f"Reading {lc} from DB")
-            curr_topo = self.db_instance.read_from_db(lc)
-            if curr_topo is None:
-                logger.debug(f"Read {lc} from DB: {curr_topo}")
-                continue
-            else:
-                # Get the actual thing minus the Mongo ObjectID.
-                curr_topo_str = curr_topo.get(lc)
-                # Just log a substring, not the whole thing.
-                logger.debug(f"Read {lc} from DB: {curr_topo_str[0:50]}...")
-
-            curr_topo_json = json.loads(curr_topo_str)
-            lc_domain_topo_dict[curr_topo_json["domain_name"]] = curr_topo_json[
-                "lc_queue_name"
-            ]
-            logger.debug(
-                f"Adding #{i} topology {curr_topo_json.get('id')} to TEManager"
-            )
-            temanager.add_topology(curr_topo_json)
-
-        for num, val in enumerate(temanager.get_topology_map().values()):
+        for num, val in enumerate(te_manager.get_topology_map().values()):
             logger.info(f"TE topology #{num}: {val}")
 
-        graph = temanager.generate_graph_te()
+        graph = te_manager.generate_graph_te()
         if graph is None:
             return "Could not generate a graph", 400
 
-        traffic_matrix = temanager.generate_traffic_matrix(
+        traffic_matrix = te_manager.generate_traffic_matrix(
             connection_request=connection_request
         )
         if traffic_matrix is None:
@@ -155,9 +120,14 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 400
 
-        breakdown = temanager.generate_connection_breakdown(solution)
-        self._send_breakdown_to_lc(breakdown, connection_request)
-        return "Successfully placed connection", 200
+        try:
+            breakdown = te_manager.generate_connection_breakdown(solution)
+            status, code = self._send_breakdown_to_lc(breakdown, connection_request)
+            logger.debug(f"Breakdown status: {status}, code: {code}")
+            return status, code
+        except Exception as e:
+            logger.debug(f"Error when generating/publishing breakdown: {e}")
+            return f"Error: {e}", 400
 
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")

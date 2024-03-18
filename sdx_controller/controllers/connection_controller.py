@@ -2,6 +2,7 @@ import json
 import logging
 
 import connexion
+from flask import current_app
 
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
@@ -18,29 +19,6 @@ logger.setLevel(logging.DEBUG)
 db_instance = DbUtils()
 db_instance.initialize_db()
 connection_handler = ConnectionHandler(db_instance)
-
-
-def is_json(myjson):
-    try:
-        json.loads(myjson)
-    except ValueError:
-        return False
-    return True
-
-
-def find_between(s, first, last):
-    """
-    Find the substring of `s` that is betwen `first` and `last`.
-    """
-    if s is None or first is None or last is None:
-        return None
-
-    try:
-        start = s.index(first) + len(first)
-        end = s.index(last, start)
-        return s[start:end]
-    except ValueError:
-        return ""
 
 
 def delete_connection(connection_id):
@@ -87,7 +65,9 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    reason, code = connection_handler.place_connection(body)
+    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+
+    reason, code = connection_handler.place_connection(current_app.te_manager, body)
     logger.info(f"place_connection result: reason='{reason}', code={code}")
 
     return reason, code

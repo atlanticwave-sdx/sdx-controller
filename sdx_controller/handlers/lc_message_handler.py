@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class LcMessageHandler:
-    def __init__(self, db_instance, manager):
+    def __init__(self, db_instance, te_manager):
         self.db_instance = db_instance
-        self.manager = manager
+        self.te_manager = te_manager
         self.parse_helper = ParseHelper()
         self.connection_handler = ConnectionHandler(db_instance)
 
@@ -43,7 +43,7 @@ class LcMessageHandler:
         if domain_name in domain_list:
             logger.info("Updating topo")
             logger.debug(msg_json)
-            self.manager.update_topology(msg_json)
+            self.te_manager.update_topology(msg_json)
             if "link_failure" in msg_json:
                 logger.info("Processing link failure.")
                 self.connection_handler.handle_link_failure(msg_json)
@@ -53,7 +53,7 @@ class LcMessageHandler:
             self.db_instance.add_key_value_pair_to_db("domain_list", domain_list)
 
             logger.info("Adding topo")
-            self.manager.add_topology(msg_json)
+            self.te_manager.add_topology(msg_json)
 
             if self.db_instance.read_from_db("num_domain_topos") is None:
                 num_domain_topos = 1
@@ -71,7 +71,11 @@ class LcMessageHandler:
         db_key = "LC-" + str(num_domain_topos)
         self.db_instance.add_key_value_pair_to_db(db_key, json.dumps(msg_json))
 
-        latest_topo = json.dumps(self.manager.get_topology().to_dict())
+        # TODO: use TEManager API directly; but TEManager does not
+        # expose a `get_topology()` method yet.
+        latest_topo = json.dumps(
+            self.te_manager.topology_manager.get_topology().to_dict()
+        )
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db("latest_topo", latest_topo)
         logger.info("Save to database complete.")

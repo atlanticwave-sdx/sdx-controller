@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class RpcConsumer(object):
-    def __init__(self, thread_queue, exchange_name, topology_manager):
+    def __init__(self, thread_queue, exchange_name, te_manager):
         self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=MQ_HOST)
@@ -30,7 +30,7 @@ class RpcConsumer(object):
         self.channel.queue_declare(queue=SUB_QUEUE)
         self._thread_queue = thread_queue
 
-        self.manager = topology_manager
+        self.te_manager = te_manager
 
         self._exit_event = threading.Event()
 
@@ -61,11 +61,12 @@ class RpcConsumer(object):
     def start_sdx_consumer(self, thread_queue, db_instance):
         MESSAGE_ID = 0
         HEARTBEAT_ID = 0
-        rpc = RpcConsumer(thread_queue, "", self.manager)
+
+        rpc = RpcConsumer(thread_queue, "", self.te_manager)
         t1 = threading.Thread(target=rpc.start_consumer, args=(), daemon=True)
         t1.start()
 
-        lc_message_handler = LcMessageHandler(db_instance, self.manager)
+        lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
         parse_helper = ParseHelper()
 
         latest_topo = {}
@@ -103,7 +104,7 @@ class RpcConsumer(object):
                     # Get the actual thing minus the Mongo ObjectID.
                     topology = topology[db_key]
                     topo_json = json.loads(topology)
-                    self.manager.add_topology(topo_json)
+                    self.te_manager.add_topology(topo_json)
                     logger.debug(f"Read {db_key}: {topology}")
 
         while not self._exit_event.is_set():

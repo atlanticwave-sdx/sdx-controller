@@ -4,7 +4,7 @@ import threading
 from queue import Queue
 
 import connexion
-from sdx_pce.topology.manager import TopologyManager
+from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
 from sdx_controller.messaging.rpc_queue_consumer import RpcConsumer
@@ -19,10 +19,9 @@ def create_rpc_thread(app):
     """
     Start a thread to get items off the message queue.
     """
-    topology_manager = TopologyManager()
     thread_queue = Queue()
 
-    app.rpc_consumer = RpcConsumer(thread_queue, "", topology_manager)
+    app.rpc_consumer = RpcConsumer(thread_queue, "", app.te_manager)
     rpc_thread = threading.Thread(
         target=app.rpc_consumer.start_sdx_consumer,
         kwargs={"thread_queue": thread_queue, "db_instance": app.db_instance},
@@ -63,6 +62,15 @@ def create_app(run_listener: bool = True):
     # Get DB connection and tables set up.
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
+
+    # Get a handle to PCE.
+    app.te_manager = TEManager(topology_data=None)
+
+    # TODO: This is a hack, until we find a better way to get a handle
+    # to TEManager from Flask current_app, which are typically
+    # available to request handlers.  There must be a better way to
+    # pass this around.
+    app.app.te_manager = app.te_manager
 
     if run_listener:
         create_rpc_thread(app)
