@@ -139,7 +139,9 @@ class TestConnectionController(BaseTestCase):
         """
         Test case for place_connection.
 
-        Place the same connection request while adding topologies.
+        Keep placing the same connection request while adding
+        topologies.  The first few requests should fail, and the final
+        one eventually succeed.
         """
         for idx, topology_file in enumerate(
             [

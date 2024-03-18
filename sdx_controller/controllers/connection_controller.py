@@ -31,7 +31,11 @@ def delete_connection(connection_id):
 
     :rtype: None
     """
-    return "do some magic!"
+    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+
+    current_app.te_manager.unreserve_vlan(connection_id)
+
+    return "OK", 200
 
 
 def getconnection_by_id(connection_id):
