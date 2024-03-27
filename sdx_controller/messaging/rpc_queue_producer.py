@@ -7,14 +7,21 @@ import uuid
 
 import pika
 
-MQ_HOST = os.environ.get("MQ_HOST")
+MQ_HOST = os.getenv("MQ_HOST")
+MQ_PORT = os.getenv("MQ_PORT") or 5672
+MQ_USER = os.getenv("MQ_USER") or "guest"
+MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 
 class RpcProducer(object):
     def __init__(self, timeout, exchange_name, routing_key):
         self.logger = logging.getLogger(__name__)
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=MQ_HOST)
+            pika.ConnectionParameters(
+                host=MQ_HOST,
+                port=MQ_PORT,
+                credentials=pika.PlainCredentials(username=MQ_USER, password=MQ_PASS),
+            )
         )
 
         self.channel = self.connection.channel()
