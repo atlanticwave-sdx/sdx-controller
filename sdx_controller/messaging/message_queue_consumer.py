@@ -3,7 +3,10 @@ import os
 
 import pika
 
-MQ_HOST = os.environ.get("MQ_HOST")
+MQ_HOST = os.getenv("MQ_HOST")
+MQ_PORT = os.getenv("MQ_PORT") or 5672
+MQ_USER = os.getenv("MQ_USER") or "guest"
+MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 
 class MessageQueue:
@@ -21,8 +24,18 @@ class MetaClass(type):
 
 
 class RabbitMqServerConfigure(metaclass=MetaClass):
-    def __init__(self, host=MQ_HOST, queue="hello"):
+    def __init__(
+        self,
+        host=MQ_HOST,
+        port=MQ_PORT,
+        username=MQ_USER,
+        password=MQ_PASS,
+        queue="hello",
+    ):
         self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
         self.queue = queue
 
 
@@ -30,7 +43,14 @@ class rabbitmqServer:
     def __init__(self, server):
         self.server = server
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=self.server.host)
+            pika.ConnectionParameters(
+                host=self.server.host,
+                port=self.server.port,
+                credentials=pika.PlainCredentials(
+                    username=self.server.username,
+                    password=self.server.password,
+                ),
+            )
         )
         self._channel = self._connection.channel()
         self._tem = self._channel.queue_declare(queue=self.server.queue)
@@ -54,7 +74,13 @@ class rabbitmqServer:
 
 
 if __name__ == "__main__":
-    serverconfigure = RabbitMqServerConfigure(host=MQ_HOST, queue="hello")
+    serverconfigure = RabbitMqServerConfigure(
+        host=MQ_HOST,
+        port=MQ_PORT,
+        username=MQ_USER,
+        password=MQ_PASS,
+        queue="hello",
+    )
 
     server = rabbitmqServer(server=serverconfigure)
     server.startserver()
