@@ -31,9 +31,19 @@ def delete_connection(connection_id):
 
     :rtype: None
     """
-    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+    logger.info(
+        f"Handling delete (connecton id: {connection_id}) "
+        f"with te_manager: {current_app.te_manager}"
+    )
 
-    current_app.te_manager.unreserve_vlan(connection_id)
+    try:
+        # TODO: pce's unreserve_vlan() method silently returns even if the
+        # connection_id is not found.  This should in fact be an error.
+        #
+        # https://github.com/atlanticwave-sdx/pce/issues/180
+        current_app.te_manager.unreserve_vlan(connection_id)
+    except Exception as e:
+        logger.info(f"Delete failed (connection id: {connection_id}): {e}")
 
     return "OK", 200
 
