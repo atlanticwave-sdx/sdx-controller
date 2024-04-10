@@ -28,6 +28,52 @@ class TestConnectionController(BaseTestCase):
         )
         self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
 
+    def test_delete_connection_with_setup(self):
+        """
+        Test case for delete_connection()
+
+        Set up a connection request, get the connection ID from the
+        response, and then do `DELETE /connection/:connection_id`
+        """
+        # set up temanager connection first
+        for idx, topology_file in enumerate(
+            [
+                TestData.TOPOLOGY_FILE_AMLIGHT,
+                TestData.TOPOLOGY_FILE_SAX,
+                TestData.TOPOLOGY_FILE_ZAOXI,
+            ]
+        ):
+            topology = json.loads(topology_file.read_text())
+            self.te_manager.add_topology(topology)
+
+        request_body = TestData.CONNECTION_REQ.read_text()
+
+        connection_response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request_body,
+            content_type="application/json",
+        )
+
+        print(f"Response body: {connection_response.data.decode('utf-8')}")
+
+        # Expect 200 success because TEManager now should be properly
+        # set up with all the expected topology data.
+        self.assertStatus(connection_response, 200)
+
+        request_id = connection_response.get_json().get("request_id")
+        print(f"Deleting request_id: {request_id}")
+
+        delete_response = self.client.open(
+            f"{BASE_PATH}/connection/{request_id}",
+            method="DELETE",
+        )
+
+        self.assert200(
+            delete_response,
+            f"Response body is : {delete_response.data.decode('utf-8')}",
+        )
+
     def test_getconnection_by_id(self):
         """
         Test case for getconnection_by_id.
