@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 
 import connexion
 from flask import current_app
@@ -70,7 +71,9 @@ def place_connection(body):
 
     :rtype: Connection
     """
-    logger.info(f"Placing connection: {body}")
+    request_id = uuid.uuid4()
+    logger.info(f"Placing connection: request: {body}, request_id: {request_id}")
+
     if connexion.request.is_json:
         body = connexion.request.get_json()
         logger.info(f"Gathered connexion JSON: {body}")
@@ -79,9 +82,19 @@ def place_connection(body):
     db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
     logger.info("Saving to database complete.")
 
-    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+    logger.info(
+        f"Handling request {request_id} with te_manager: {current_app.te_manager}"
+    )
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
-    logger.info(f"place_connection result: reason='{reason}', code={code}")
+    logger.info(
+        f"place_connection result: request_id: {request_id} reason='{reason}', code={code}"
+    )
 
-    return reason, code
+    result = {
+        "request_id": request_id,
+        "status": "OK" if code == 200 else "Failure",
+        "reason": reason,
+    }
+
+    return result, code
