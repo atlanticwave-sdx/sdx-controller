@@ -15,9 +15,9 @@ BASE_PATH = "/SDX-Controller/1.0.0"
 class TestConnectionController(BaseTestCase):
     """ConnectionController integration test stubs"""
 
-    def test_delete_connection(self):
+    def test_delete_connection_no_setup(self):
         """
-        Test case for delete_connection.
+        Test case for delete_connection().
 
         Delete connection order by ID.
         """
