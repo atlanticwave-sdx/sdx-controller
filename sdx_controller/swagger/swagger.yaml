@@ -206,8 +206,8 @@ paths:
         explode: false
         schema:
           minimum: 1
-          type: integer
-          format: int64
+          type: string
+          format: uuid
       responses:
         "400":
           description: Invalid ID supplied
