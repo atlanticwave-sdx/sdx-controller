@@ -91,10 +91,10 @@ def place_connection(body):
         f"place_connection result: ID: {connection_id} reason='{reason}', code={code}"
     )
 
-    result = {
+    response = {
         "connection_id": connection_id,
         "status": "OK" if code == 200 else "Failure",
         "reason": reason,
     }
 
-    return result, code
+    return response, code
