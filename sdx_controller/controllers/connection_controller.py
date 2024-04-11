@@ -45,6 +45,7 @@ def delete_connection(connection_id):
         current_app.te_manager.unreserve_vlan(connection_id)
     except Exception as e:
         logger.info(f"Delete failed (connection id: {connection_id}): {e}")
+        return "Failed, reason: {e}", 500
 
     return "OK", 200
 
