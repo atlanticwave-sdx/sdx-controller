@@ -97,4 +97,15 @@ def place_connection(body):
         "reason": reason,
     }
 
+    # # TODO: our response is supposed to be shaped just like request
+    # # ('#/components/schemas/connection'), and in that case the below
+    # # code would be a quick implementation.
+    # #
+    # # https://github.com/atlanticwave-sdx/sdx-controller/issues/251
+    # response = body
+
+    # response["id"] = connection_id
+    # response["status"] = "success" if code == 200 else "failure"
+    # response["reason"] = reason # `reason` is not present in schema though.
+
     return response, code
