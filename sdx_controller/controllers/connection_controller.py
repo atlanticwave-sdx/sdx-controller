@@ -37,6 +37,12 @@ def delete_connection(connection_id):
         f"with te_manager: {current_app.te_manager}"
     )
 
+    # # This lookup does not seem to return anything yet.
+    # value = db_instance.read_from_db(f"{connection_id}")
+    # print(f"value: {value}")
+    # if not value:
+    #     return "Not found", 404
+
     try:
         # TODO: pce's unreserve_vlan() method silently returns even if the
         # connection_id is not found.  This should in fact be an error.
