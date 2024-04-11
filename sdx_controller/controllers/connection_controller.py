@@ -37,7 +37,9 @@ def delete_connection(connection_id):
         f"with te_manager: {current_app.te_manager}"
     )
 
-    # # This lookup does not seem to return anything yet.
+    # # Looking up by UUID do not seem work yet.  Will address in
+    # # https://github.com/atlanticwave-sdx/sdx-controller/issues/252.
+    #
     # value = db_instance.read_from_db(f"{connection_id}")
     # print(f"value: {value}")
     # if not value:
