@@ -39,7 +39,7 @@ class TestTopologyController(BaseTestCase):
 
         Finds topology version
         """
-        query_string = [("topology_id", "topology_id_example")]
+        query_string = [("topology_id", "test:topology:test_topology.net")]
         response = self.client.open(
             "/SDX-Controller/1.0.0/topology/version",
             method="GET",

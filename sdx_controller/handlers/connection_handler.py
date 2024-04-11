@@ -65,7 +65,7 @@ class ConnectionHandler:
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
             domain_name = (
-                self.parse_helper.find_between(domain, "topology:", ".net")
+                self.parse_helper.find_domain_name(domain, ":")
                 or f"{domain}"
             )
             exchange_name = "connection"
