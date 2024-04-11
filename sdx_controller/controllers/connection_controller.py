@@ -71,8 +71,8 @@ def place_connection(body):
 
     :rtype: Connection
     """
-    request_id = uuid.uuid4()
-    logger.info(f"Placing connection: request: {body}, request_id: {request_id}")
+    connection_id = uuid.uuid4()
+    logger.info(f"Placing connection request: {body}, ID: {connection_id}")
 
     if connexion.request.is_json:
         body = connexion.request.get_json()
@@ -83,16 +83,16 @@ def place_connection(body):
     logger.info("Saving to database complete.")
 
     logger.info(
-        f"Handling request {request_id} with te_manager: {current_app.te_manager}"
+        f"Handling request {connection_id} with te_manager: {current_app.te_manager}"
     )
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
     logger.info(
-        f"place_connection result: request_id: {request_id} reason='{reason}', code={code}"
+        f"place_connection result: ID: {connection_id} reason='{reason}', code={code}"
     )
 
     result = {
-        "request_id": request_id,
+        "connection_id": connection_id,
         "status": "OK" if code == 200 else "Failure",
         "reason": reason,
     }

@@ -57,15 +57,13 @@ class TestConnectionController(BaseTestCase):
 
         print(f"Response body: {connection_response.data.decode('utf-8')}")
 
-        # Expect 200 success because TEManager now should be properly
-        # set up with all the expected topology data.
         self.assertStatus(connection_response, 200)
 
-        request_id = connection_response.get_json().get("request_id")
-        print(f"Deleting request_id: {request_id}")
+        connection_id = connection_response.get_json().get("connection_id")
+        print(f"Deleting request_id: {connection_id}")
 
         delete_response = self.client.open(
-            f"{BASE_PATH}/connection/{request_id}",
+            f"{BASE_PATH}/connection/{connection_id}",
             method="DELETE",
         )
 
