@@ -12,7 +12,7 @@ class ParseHelper:
             return False
         return True
 
-    def find_domain_name(topology_id, delimiter):
+    def find_domain_name(self, topology_id, delimiter):
         """
         Find domain name from topology id.
         Topology IDs are expected to be of the format
