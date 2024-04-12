@@ -48,7 +48,11 @@ class RpcConsumer(object):
         self._thread_queue.put(message_body)
 
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=MQ_HOST)
+            pika.ConnectionParameters(
+                host=MQ_HOST,
+                port=MQ_PORT,
+                credentials=pika.PlainCredentials(username=MQ_USER, password=MQ_PASS),
+            )
         )
         self.channel = self.connection.channel()
 
