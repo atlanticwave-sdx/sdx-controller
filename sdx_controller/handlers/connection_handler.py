@@ -103,7 +103,7 @@ class ConnectionHandler:
 
         graph = te_manager.generate_graph_te()
         if graph is None:
-            return "Could not generate a graph", 200
+            return "Could not generate a graph", 500
 
         traffic_matrix = te_manager.generate_traffic_matrix(
             connection_request=connection_request
