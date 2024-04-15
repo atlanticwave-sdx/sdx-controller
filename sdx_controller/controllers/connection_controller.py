@@ -65,9 +65,14 @@ def place_connection(body):
     logger.info(f"Gathered connexion JSON: {body}")
 
     logger.info("Placing connection. Saving to database.")
-    db_instance.add_key_value_pair_to_db(
-        body["id"] if "id" in body else str(uuid.uuid4()), json.dumps(body)
-    )
+
+    if "id" in body:
+        connection_id = body["id"]
+    else:
+        connection_id = uuid.uuid4()
+        body["id"] = connection_id
+
+    db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
 
     logger.info(f"Handling request with te_manager: {current_app.te_manager}")
