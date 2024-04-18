@@ -150,6 +150,44 @@ class TestConnectionController(BaseTestCase):
         """
         self.__test_with_one_topology(TestData.TOPOLOGY_FILE_ZAOXI)
 
+    def test_place_connection_no_id(self):
+        """
+        Test place_connection() with a request that has no ID field.
+        """
+        # Remove ID
+        request = json.loads(TestData.CONNECTION_REQ.read_text())
+        request.pop("id")
+        request = json.dumps(request)
+
+        print(f"request: {request} {type(request)}")
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request,
+            content_type="application/json",
+        )
+
+        print(f"response: {response}")
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect a 400 response because the required ID field is
+        # missing from the request.
+        self.assertStatus(response, 400)
+
+        # JSON response should have a body like:
+        #
+        # {
+        #   "detail": "'id' is a required property",
+        #   "status": 400,
+        #   "title": "Bad Request",
+        #   "type": "about:blank"
+        # }
+
+        response = response.get_json()
+        self.assertEqual(response["status"], 400)
+        self.assertEqual(response["detail"], "'id' is a required property")
+
     def test_place_connection_with_three_topologies(self):
         """
         Test case for place_connection.
