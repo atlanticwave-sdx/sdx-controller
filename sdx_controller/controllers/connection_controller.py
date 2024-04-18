@@ -1,6 +1,5 @@
 import json
 import logging
-import uuid
 
 import connexion
 from flask import current_app
@@ -89,11 +88,7 @@ def place_connection(body):
 
     logger.info("Placing connection. Saving to database.")
 
-    if "id" in body:
-        connection_id = body["id"]
-    else:
-        connection_id = uuid.uuid4()
-        body["id"] = connection_id
+    connection_id = body["id"]
 
     db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
