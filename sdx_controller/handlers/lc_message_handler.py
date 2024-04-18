@@ -30,7 +30,7 @@ class LcMessageHandler:
         logger.debug("Processing LC message: lc_queue_name:")
         logger.debug(lc_queue_name)
 
-        domain_name = self.parse_helper.find_between(msg_id, "topology:", ".net")
+        domain_name = self.parse_helper.find_domain_name(msg_id, ":")
         msg_json["domain_name"] = domain_name
 
         db_msg_id = str(msg_id) + "-" + str(msg_version)

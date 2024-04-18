@@ -12,10 +12,11 @@ class ParseHelper:
             return False
         return True
 
-    def find_between(self, s, first, last):
-        try:
-            start = s.index(first) + len(first)
-            end = s.index(last, start)
-            return s[start:end]
-        except ValueError:
-            return ""
+    def find_domain_name(self, topology_id, delimiter):
+        """
+        Find domain name from topology id.
+        Topology IDs are expected to be of the format
+        "urn:ogf:network:sdx:topology:zaoxi.net"
+        """
+        *_, domain_name = topology_id.split(delimiter)
+        return domain_name
