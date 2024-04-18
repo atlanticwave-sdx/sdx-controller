@@ -80,15 +80,22 @@ def place_connection(body):
 
     :rtype: Connection
     """
-    connection_id = uuid.uuid4()
-    logger.info(f"Placing connection request: {body}, ID: {connection_id}")
+    logger.info(f"Placing connection: {body}")
+    if not connexion.request.is_json:
+        return "Request body must be JSON", 400
 
-    if connexion.request.is_json:
-        body = connexion.request.get_json()
-        logger.info(f"Gathered connexion JSON: {body}")
+    body = connexion.request.get_json()
+    logger.info(f"Gathered connexion JSON: {body}")
 
     logger.info("Placing connection. Saving to database.")
-    db_instance.add_key_value_pair_to_db("connection_data", json.dumps(body))
+
+    if "id" in body:
+        connection_id = body["id"]
+    else:
+        connection_id = uuid.uuid4()
+        body["id"] = connection_id
+
+    db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
 
     logger.info(
