@@ -1,6 +1,5 @@
 import json
 import logging
-import uuid
 
 import connexion
 from flask import current_app
@@ -32,7 +31,30 @@ def delete_connection(connection_id):
 
     :rtype: None
     """
-    return "do some magic!"
+    logger.info(
+        f"Handling delete (connecton id: {connection_id}) "
+        f"with te_manager: {current_app.te_manager}"
+    )
+
+    # # Looking up by UUID do not seem work yet.  Will address in
+    # # https://github.com/atlanticwave-sdx/sdx-controller/issues/252.
+    #
+    # value = db_instance.read_from_db(f"{connection_id}")
+    # print(f"value: {value}")
+    # if not value:
+    #     return "Not found", 404
+
+    try:
+        # TODO: pce's unreserve_vlan() method silently returns even if the
+        # connection_id is not found.  This should in fact be an error.
+        #
+        # https://github.com/atlanticwave-sdx/pce/issues/180
+        current_app.te_manager.unreserve_vlan(connection_id)
+    except Exception as e:
+        logger.info(f"Delete failed (connection id: {connection_id}): {e}")
+        return "Failed, reason: {e}", 500
+
+    return "OK", 200
 
 
 def getconnection_by_id(connection_id):
@@ -66,18 +88,35 @@ def place_connection(body):
 
     logger.info("Placing connection. Saving to database.")
 
-    if "id" in body:
-        connection_id = body["id"]
-    else:
-        connection_id = uuid.uuid4()
-        body["id"] = connection_id
+    connection_id = body["id"]
 
     db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
 
-    logger.info(f"Handling request with te_manager: {current_app.te_manager}")
+    logger.info(
+        f"Handling request {connection_id} with te_manager: {current_app.te_manager}"
+    )
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
-    logger.info(f"place_connection result: reason='{reason}', code={code}")
+    logger.info(
+        f"place_connection result: ID: {connection_id} reason='{reason}', code={code}"
+    )
 
-    return reason, code
+    response = {
+        "connection_id": connection_id,
+        "status": "OK" if code == 200 else "Failure",
+        "reason": reason,
+    }
+
+    # # TODO: our response is supposed to be shaped just like request
+    # # ('#/components/schemas/connection'), and in that case the below
+    # # code would be a quick implementation.
+    # #
+    # # https://github.com/atlanticwave-sdx/sdx-controller/issues/251
+    # response = body
+
+    # response["id"] = connection_id
+    # response["status"] = "success" if code == 200 else "failure"
+    # response["reason"] = reason # `reason` is not present in schema though.
+
+    return response, code

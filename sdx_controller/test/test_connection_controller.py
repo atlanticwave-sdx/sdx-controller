@@ -15,9 +15,9 @@ BASE_PATH = "/SDX-Controller/1.0.0"
 class TestConnectionController(BaseTestCase):
     """ConnectionController integration test stubs"""
 
-    def test_delete_connection(self):
+    def test_delete_connection_no_setup(self):
         """
-        Test case for delete_connection.
+        Test case for delete_connection().
 
         Delete connection order by ID.
         """
@@ -27,6 +27,50 @@ class TestConnectionController(BaseTestCase):
             method="DELETE",
         )
         self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
+
+    def test_delete_connection_with_setup(self):
+        """
+        Test case for delete_connection()
+
+        Set up a connection request, get the connection ID from the
+        response, and then do `DELETE /connection/:connection_id`
+        """
+        # set up temanager connection first
+        for idx, topology_file in enumerate(
+            [
+                TestData.TOPOLOGY_FILE_AMLIGHT,
+                TestData.TOPOLOGY_FILE_SAX,
+                TestData.TOPOLOGY_FILE_ZAOXI,
+            ]
+        ):
+            topology = json.loads(topology_file.read_text())
+            self.te_manager.add_topology(topology)
+
+        request_body = TestData.CONNECTION_REQ.read_text()
+
+        connection_response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request_body,
+            content_type="application/json",
+        )
+
+        print(f"Response body: {connection_response.data.decode('utf-8')}")
+
+        self.assertStatus(connection_response, 200)
+
+        connection_id = connection_response.get_json().get("connection_id")
+        print(f"Deleting request_id: {connection_id}")
+
+        delete_response = self.client.open(
+            f"{BASE_PATH}/connection/{connection_id}",
+            method="DELETE",
+        )
+
+        self.assert200(
+            delete_response,
+            f"Response body is : {delete_response.data.decode('utf-8')}",
+        )
 
     def test_getconnection_by_id(self):
         """
@@ -106,6 +150,44 @@ class TestConnectionController(BaseTestCase):
         """
         self.__test_with_one_topology(TestData.TOPOLOGY_FILE_ZAOXI)
 
+    def test_place_connection_no_id(self):
+        """
+        Test place_connection() with a request that has no ID field.
+        """
+        # Remove ID
+        request = json.loads(TestData.CONNECTION_REQ.read_text())
+        request.pop("id")
+        request = json.dumps(request)
+
+        print(f"request: {request} {type(request)}")
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request,
+            content_type="application/json",
+        )
+
+        print(f"response: {response}")
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect a 400 response because the required ID field is
+        # missing from the request.
+        self.assertStatus(response, 400)
+
+        # JSON response should have a body like:
+        #
+        # {
+        #   "detail": "'id' is a required property",
+        #   "status": 400,
+        #   "title": "Bad Request",
+        #   "type": "about:blank"
+        # }
+
+        response = response.get_json()
+        self.assertEqual(response["status"], 400)
+        self.assertEqual(response["detail"], "'id' is a required property")
+
     def test_place_connection_with_three_topologies(self):
         """
         Test case for place_connection.
@@ -139,7 +221,9 @@ class TestConnectionController(BaseTestCase):
         """
         Test case for place_connection.
 
-        Place the same connection request while adding topologies.
+        Keep placing the same connection request while adding
+        topologies.  The first few requests should fail, and the final
+        one eventually succeed.
         """
         for idx, topology_file in enumerate(
             [
