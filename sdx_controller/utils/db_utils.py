@@ -54,5 +54,5 @@ class DbUtils(object):
         key = str(key)
         return self.sdxdb[self.db_name][self.config_table_name].find_one(
             {key: {"$exists": 1}},
-            {'_id': False},
+            {"_id": False},
         )
