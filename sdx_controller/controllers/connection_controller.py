@@ -67,9 +67,9 @@ def getconnection_by_id(connection_id):
     :rtype: Connection
     """
     value = db_instance.read_from_db(f"{connection_id}")
-    if value:
-        value.pop("_id", None)
-    return value
+    if not value:
+        return "Connection not found", 404
+    return json.loads(value[connection_id])
 
 
 def place_connection(body):
