@@ -87,7 +87,7 @@ class TestConnectionController(BaseTestCase):
         # The connection_id we've supplied above should not exist.
         # TODO: test for existing connection_id.  See
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
-        self.assertStatus(response, 204)
+        self.assertStatus(response, 404)
 
     def test_place_connection_no_topology(self):
         """
@@ -254,6 +254,15 @@ class TestConnectionController(BaseTestCase):
                 # Expect 200 success now that TEManager should be set
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
+
+    def test_z100_getconnection_by_id_success(self):
+        """Test case for getconnection_by_id existing connection."""
+        connection_id = "test-connection-request"
+        response = self.client.open(
+            f"{BASE_PATH}/connection/{connection_id}",
+            method="GET",
+        )
+        self.assertStatus(response, 200)
 
 
 if __name__ == "__main__":
