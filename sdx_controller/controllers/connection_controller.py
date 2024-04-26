@@ -67,6 +67,7 @@ def getconnection_by_id(connection_id):
     :rtype: Connection
     """
     value = db_instance.read_from_db(f"{connection_id}")
+    value.pop("_id", None)
     return value
 
 

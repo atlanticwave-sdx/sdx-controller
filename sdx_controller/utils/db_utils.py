@@ -53,6 +53,5 @@ class DbUtils(object):
     def read_from_db(self, key):
         key = str(key)
         return self.sdxdb[self.db_name][self.config_table_name].find_one(
-            {key: {"$exists": 1}},
-            {"_id": False},
+            {key: {"$exists": 1}}
         )
