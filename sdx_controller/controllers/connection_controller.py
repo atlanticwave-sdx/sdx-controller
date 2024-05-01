@@ -72,6 +72,16 @@ def getconnection_by_id(connection_id):
     return json.loads(value[connection_id])
 
 
+def getconnections():  # noqa: E501
+    """List all connections
+
+    connection details # noqa: E501
+
+
+    :rtype: Connection
+    """
+    return 'do some magic!'
+
 def place_connection(body):
     """
     Place an connection request from the SDX-Controller.
