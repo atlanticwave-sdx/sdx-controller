@@ -176,7 +176,7 @@ paths:
                 $ref: '#/components/schemas/connection'
         "404":
           description: no connections found
-      x-openapi-router-controller: swagger_server.controllers.connection_controller
+      x-openapi-router-controller: sdx_controller.controllers.connection_controller
   /connection/{connection_id}:
     get:
       tags:
