@@ -21,7 +21,7 @@ class TestConnectionController(BaseTestCase):
 
         Delete connection order by ID.
         """
-        connection_id = 2
+        connection_id = "285eea4b-1e86-4d54-bd75-f14b8cb4a63a"
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
             method="DELETE",
@@ -78,7 +78,7 @@ class TestConnectionController(BaseTestCase):
 
         Find connection by ID.
         """
-        connection_id = 10
+        connection_id = "285eea4b-1e86-4d54-bd75-f14b8cb4a63a"
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
@@ -257,7 +257,7 @@ class TestConnectionController(BaseTestCase):
 
     def test_z100_getconnection_by_id_success(self):
         """Test case for getconnection_by_id existing connection."""
-        connection_id = "test-connection-request"
+        connection_id = "285eea4b-1e86-4d54-bd75-f14b8cb4a63a"
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
