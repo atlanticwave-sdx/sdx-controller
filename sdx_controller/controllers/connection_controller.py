@@ -3,6 +3,7 @@ import logging
 
 import connexion
 from flask import current_app
+from uuid import UUID
 
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
@@ -19,6 +20,29 @@ logger.setLevel(logging.DEBUG)
 db_instance = DbUtils()
 db_instance.initialize_db()
 connection_handler = ConnectionHandler(db_instance)
+
+
+def _is_valid_uuid(uuid_to_test, version=4):
+    """
+    Check if uuid_to_test is a valid UUID.
+
+     Returns
+    -------
+    `True` if uuid_to_test is a valid UUID, otherwise `False`.
+
+     Examples
+    --------
+    $ is_valid_uuid('c9bf9e57-1685-4c89-bafb-ff5af830be8a')
+    True
+    $ is_valid_uuid('c9bf9e58')
+    False
+    """
+
+    try:
+        uuid_obj = UUID(uuid_to_test, version=version)
+    except ValueError:
+        return False
+    return str(uuid_obj) == uuid_to_test
 
 
 def delete_connection(connection_id):
@@ -91,6 +115,9 @@ def place_connection(body):
     logger.info("Placing connection. Saving to database.")
 
     connection_id = body["id"]
+
+    if not _is_valid_uuid(connection_id):
+        return "connection_id must be UUID", 400
 
     db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
