@@ -1,9 +1,9 @@
 import json
 import logging
+from uuid import UUID
 
 import connexion
 from flask import current_app
-from uuid import UUID
 
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
