@@ -77,10 +77,13 @@ def getconnections():  # noqa: E501
 
     connection details # noqa: E501
 
-
     :rtype: Connection
     """
-    return 'do some magic!'
+    values = db_instance.get_all_entries_in_collection("connections")
+    if not values:
+        return "No connection was found", 404
+    
+    return values
 
 def place_connection(body):
     """

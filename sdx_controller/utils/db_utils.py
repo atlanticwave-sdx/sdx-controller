@@ -2,6 +2,7 @@ import logging
 import os
 
 import pymongo
+import json
 
 
 COLLECTION_NAMES = ["topologies", "connections", "domains"]
@@ -45,19 +46,24 @@ class DbUtils(object):
         obj = self.read_from_db(collection, key)
         if obj is None:
             # self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
-            return self.sdxdb[self.db_name][collection].insert_one(
+            return self.sdxdb[collection].insert_one(
                 {key: value}
             )
 
         query = {"_id": obj["_id"]}
         # self.logger.debug(f"Updating DB entry {key}:{value}.")
-        result = self.sdxdb[self.db_name][collection].replace_one(
+        result = self.sdxdb[collection].replace_one(
             query, {key: value}
         )
         return result
 
     def read_from_db(self, collection, key):
         key = str(key)
-        return self.sdxdb[self.db_name][collection].find_one(
+        return self.sdxdb[collection].find_one(
             {key: {"$exists": 1}}
         )
+
+    def get_all_entries_in_collection(self, collection):
+        db_collection = self.sdxdb[collection]
+        all_entries = list(db_collection.find({}))
+        return all_entries
