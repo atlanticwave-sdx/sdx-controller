@@ -29,10 +29,10 @@ class ConnectionHandler:
             return "Could not break down the solution", 400
 
         link_connections_dict_json = (
-            self.db_instance.read_from_db("link_connections_dict")[
+            self.db_instance.read_from_db("connections", "link_connections_dict")[
                 "link_connections_dict"
             ]
-            if self.db_instance.read_from_db("link_connections_dict")
+            if self.db_instance.read_from_db("connections", "link_connections_dict")
             else None
         )
 
@@ -57,7 +57,7 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].append(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
-                    "link_connections_dict", json.dumps(link_connections_dict)
+                    "connections", "link_connections_dict", json.dumps(link_connections_dict)
                 )
 
             logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
@@ -129,7 +129,7 @@ class ConnectionHandler:
     def handle_link_failure(self, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
         link_connections_dict_str = self.db_instance.read_from_db(
-            "link_connections_dict"
+            "connections", "link_connections_dict"
         )
 
         if (
@@ -166,5 +166,5 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].append(connection)
 
         self.db_instance.add_key_value_pair_to_db(
-            "link_connections_dict", json.dumps(link_connections_dict)
+            "connections", "link_connections_dict", json.dumps(link_connections_dict)
         )

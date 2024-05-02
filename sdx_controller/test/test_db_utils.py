@@ -35,7 +35,7 @@ class DbUtilsTests(unittest.TestCase):
     def test_db_updates(self):
         # Set up the necessary environment variables.
         os.environ["DB_NAME"] = self.env.get("DB_NAME")
-        os.environ["DB_CONFIG_TABLE_NAME"] = self.env.get("DB_CONFIG_TABLE_NAME")
+        os.environ["DB_CONFIG_TABLE_NAME"] = "topologies"
         os.environ["MONGODB_CONNSTRING"] = self.env.get("MONGODB_CONNSTRING")
 
         dbutils = DbUtils()
@@ -44,14 +44,14 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting empty strings as key:value
         key = ""
         val = ""
-        res = dbutils.add_key_value_pair_to_db(key, val)
+        res = dbutils.add_key_value_pair_to_db(self.env.get("DB_CONFIG_TABLE_NAME"), key, val)
         self.assertTrue(
             isinstance(res, pymongo.results.InsertOneResult)
             or isinstance(res, pymongo.results.UpdateResult)
         )
 
         # Try reading back
-        res = dbutils.read_from_db(key)
+        res = dbutils.read_from_db(self.env.get("DB_CONFIG_TABLE_NAME"), key)
         self.assertEqual(res.get(key), val)
 
         res = dbutils.sdxdb[self.env.get("DB_CONFIG_TABLE_NAME")].delete_one({key: val})
@@ -59,14 +59,14 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting non-empty strings as key:value
         key = "test-key"
         val = "test-val"
-        res = dbutils.add_key_value_pair_to_db(key, val)
+        res = dbutils.add_key_value_pair_to_db(self.env.get("DB_CONFIG_TABLE_NAME"), key, val)
         self.assertTrue(
             isinstance(res, pymongo.results.InsertOneResult)
             or isinstance(res, pymongo.results.UpdateResult)
         )
 
         # Try reading back
-        res = dbutils.read_from_db(key)
+        res = dbutils.read_from_db(self.env.get("DB_CONFIG_TABLE_NAME"), key)
         self.assertEqual(res.get(key), val)
 
         res = dbutils.sdxdb[self.env.get("DB_CONFIG_TABLE_NAME")].delete_one({key: val})

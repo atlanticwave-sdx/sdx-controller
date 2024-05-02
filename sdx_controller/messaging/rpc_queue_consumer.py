@@ -85,15 +85,13 @@ class RpcConsumer(object):
         latest_topo = {}
         domain_list = []
         num_domain_topos = 0
-        # For testing
-        # db_instance.add_key_value_pair_to_db("link_connections_dict", {})
 
         # This part reads from DB when SDX controller initially starts.
         # It looks for domain_list, and num_domain_topos, if they are already in DB,
         # Then use the existing ones from DB.
-        domain_list_from_db = db_instance.read_from_db("domain_list")
-        latest_topo_from_db = db_instance.read_from_db("latest_topo")
-        num_domain_topos_from_db = db_instance.read_from_db("num_domain_topos")
+        domain_list_from_db = db_instance.read_from_db("domains", "domain_list")
+        latest_topo_from_db = db_instance.read_from_db("topologies", "latest_topo")
+        num_domain_topos_from_db = db_instance.read_from_db("topologies", "num_domain_topos")
 
         if domain_list_from_db:
             domain_list = domain_list_from_db["domain_list"]
@@ -111,7 +109,7 @@ class RpcConsumer(object):
             logger.debug(num_domain_topos)
             for topo in range(1, num_domain_topos + 2):
                 db_key = f"LC-{topo}"
-                topology = db_instance.read_from_db(db_key)
+                topology = db_instance.read_from_db("topologies", db_key)
 
                 if topology:
                     # Get the actual thing minus the Mongo ObjectID.
@@ -140,12 +138,7 @@ class RpcConsumer(object):
                         )
                     else:
                         logger.info("got message from MQ: " + str(msg))
-                else:
-                    db_instance.add_key_value_pair_to_db(str(MESSAGE_ID), msg)
-                    logger.debug(
-                        "Save to database complete. message ID: " + str(MESSAGE_ID)
-                    )
-                    MESSAGE_ID += 1
+                
 
     def stop_threads(self):
         """
