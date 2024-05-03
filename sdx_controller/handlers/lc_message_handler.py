@@ -50,7 +50,9 @@ class LcMessageHandler:
         # Add new topology
         else:
             domain_list.append(domain_name)
-            self.db_instance.add_key_value_pair_to_db("domains", "domain_list", domain_list)
+            self.db_instance.add_key_value_pair_to_db(
+                "domains", "domain_list", domain_list
+            )
 
             logger.info("Adding topo")
             self.te_manager.add_topology(msg_json)
@@ -69,7 +71,9 @@ class LcMessageHandler:
 
         logger.info("Adding topo to db.")
         db_key = "LC-" + str(num_domain_topos)
-        self.db_instance.add_key_value_pair_to_db("topologies", db_key, json.dumps(msg_json))
+        self.db_instance.add_key_value_pair_to_db(
+            "topologies", db_key, json.dumps(msg_json)
+        )
 
         # TODO: use TEManager API directly; but TEManager does not
         # expose a `get_topology()` method yet.
@@ -77,5 +81,7 @@ class LcMessageHandler:
             self.te_manager.topology_manager.get_topology().to_dict()
         )
         # use 'latest_topo' as PK to save latest topo to db
-        self.db_instance.add_key_value_pair_to_db("topologies", "latest_topo", latest_topo)
+        self.db_instance.add_key_value_pair_to_db(
+            "topologies", "latest_topo", latest_topo
+        )
         logger.info("Save to database complete.")

@@ -84,6 +84,7 @@ def getconnections():  # noqa: E501
         return "No connection was found", 404
     return values
 
+
 def place_connection(body):
     """
     Place an connection request from the SDX-Controller.

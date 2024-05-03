@@ -91,7 +91,9 @@ class RpcConsumer(object):
         # Then use the existing ones from DB.
         domain_list_from_db = db_instance.read_from_db("domains", "domain_list")
         latest_topo_from_db = db_instance.read_from_db("topologies", "latest_topo")
-        num_domain_topos_from_db = db_instance.read_from_db("topologies", "num_domain_topos")
+        num_domain_topos_from_db = db_instance.read_from_db(
+            "topologies", "num_domain_topos"
+        )
 
         if domain_list_from_db:
             domain_list = domain_list_from_db["domain_list"]
@@ -138,7 +140,6 @@ class RpcConsumer(object):
                         )
                     else:
                         logger.info("got message from MQ: " + str(msg))
-                
 
     def stop_threads(self):
         """

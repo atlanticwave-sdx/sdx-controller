@@ -7,6 +7,7 @@ import json
 
 COLLECTION_NAMES = ["topologies", "connections", "domains", "links"]
 
+
 class DbUtils(object):
     def __init__(self):
         self.db_name = os.environ.get("DB_NAME")
@@ -38,7 +39,7 @@ class DbUtils(object):
         for name in COLLECTION_NAMES:
             if name not in self.sdxdb.list_collection_names():
                 self.sdxdb.create_collection(name)
-    
+
         self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, collection, key, value):
@@ -46,22 +47,16 @@ class DbUtils(object):
         obj = self.read_from_db(collection, key)
         if obj is None:
             # self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
-            return self.sdxdb[collection].insert_one(
-                {key: value}
-            )
+            return self.sdxdb[collection].insert_one({key: value})
 
         query = {"_id": obj["_id"]}
         # self.logger.debug(f"Updating DB entry {key}:{value}.")
-        result = self.sdxdb[collection].replace_one(
-            query, {key: value}
-        )
+        result = self.sdxdb[collection].replace_one(query, {key: value})
         return result
 
     def read_from_db(self, collection, key):
         key = str(key)
-        return self.sdxdb[collection].find_one(
-            {key: {"$exists": 1}}
-        )
+        return self.sdxdb[collection].find_one({key: {"$exists": 1}})
 
     def get_all_entries_in_collection(self, collection):
         db_collection = self.sdxdb[collection]

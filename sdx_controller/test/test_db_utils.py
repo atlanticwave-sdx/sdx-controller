@@ -44,7 +44,9 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting empty strings as key:value
         key = ""
         val = ""
-        res = dbutils.add_key_value_pair_to_db(self.env.get("DB_CONFIG_TABLE_NAME"), key, val)
+        res = dbutils.add_key_value_pair_to_db(
+            self.env.get("DB_CONFIG_TABLE_NAME"), key, val
+        )
         self.assertTrue(
             isinstance(res, pymongo.results.InsertOneResult)
             or isinstance(res, pymongo.results.UpdateResult)
@@ -59,7 +61,9 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting non-empty strings as key:value
         key = "test-key"
         val = "test-val"
-        res = dbutils.add_key_value_pair_to_db(self.env.get("DB_CONFIG_TABLE_NAME"), key, val)
+        res = dbutils.add_key_value_pair_to_db(
+            self.env.get("DB_CONFIG_TABLE_NAME"), key, val
+        )
         self.assertTrue(
             isinstance(res, pymongo.results.InsertOneResult)
             or isinstance(res, pymongo.results.UpdateResult)
