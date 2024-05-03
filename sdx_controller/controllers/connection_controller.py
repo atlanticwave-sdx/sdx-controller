@@ -82,7 +82,6 @@ def getconnections():  # noqa: E501
     values = db_instance.get_all_entries_in_collection("connections")
     if not values:
         return "No connection was found", 404
-    
     return values
 
 def place_connection(body):

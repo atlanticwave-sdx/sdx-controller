@@ -5,7 +5,7 @@ import pymongo
 import json
 
 
-COLLECTION_NAMES = ["topologies", "connections", "domains"]
+COLLECTION_NAMES = ["topologies", "connections", "domains", "links"]
 
 class DbUtils(object):
     def __init__(self):
@@ -65,5 +65,6 @@ class DbUtils(object):
 
     def get_all_entries_in_collection(self, collection):
         db_collection = self.sdxdb[collection]
-        all_entries = list(db_collection.find({}))
+        # MongoDB has an ObjectId for each item, so need to exclude the ObjectIds
+        all_entries = list(db_collection.find({}, {"_id": 0}))
         return all_entries
