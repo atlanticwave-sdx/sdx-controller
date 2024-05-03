@@ -1,9 +1,8 @@
+import json
 import logging
 import os
 
 import pymongo
-import json
-
 
 COLLECTION_NAMES = ["topologies", "connections", "domains", "links"]
 
