@@ -66,10 +66,23 @@ def getconnection_by_id(connection_id):
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db(f"{connection_id}")
+    value = db_instance.read_from_db("connections", f"{connection_id}")
     if not value:
         return "Connection not found", 404
     return json.loads(value[connection_id])
+
+
+def getconnections():  # noqa: E501
+    """List all connections
+
+    connection details # noqa: E501
+
+    :rtype: Connection
+    """
+    values = db_instance.get_all_entries_in_collection("connections")
+    if not values:
+        return "No connection was found", 404
+    return values
 
 
 def place_connection(body):
@@ -92,7 +105,7 @@ def place_connection(body):
 
     connection_id = body["id"]
 
-    db_instance.add_key_value_pair_to_db(connection_id, json.dumps(body))
+    db_instance.add_key_value_pair_to_db("connections", connection_id, json.dumps(body))
     logger.info("Saving to database complete.")
 
     logger.info(

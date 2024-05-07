@@ -157,6 +157,28 @@ paths:
         "400":
           description: Invalid Connection
       x-openapi-router-controller: sdx_controller.controllers.connection_controller
+  /connections:
+    get:
+      tags:
+      - connection
+      summary: List all connections
+      description: connection details
+      operationId: getconnections
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/connection'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/connection'
+        "404":
+          description: no connections found
+      x-openapi-router-controller: sdx_controller.controllers.connection_controller
   /connection/{connection_id}:
     get:
       tags:

@@ -46,7 +46,6 @@ services:
       - MQ_HOST=${MQ_HOST}
       - SUB_QUEUE=${SUB_QUEUE}
       - DB_NAME=${DB_NAME}
-      - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
 
 volumes:
   mongodb:
