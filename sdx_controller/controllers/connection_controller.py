@@ -82,7 +82,11 @@ def getconnections():  # noqa: E501
     values = db_instance.get_all_entries_in_collection("connections")
     if not values:
         return "No connection was found", 404
-    return values
+    return_values = {}
+    for connection in values:
+        connection_id = next(iter(connection))
+        return_values[connection_id] = json.loads(connection[connection_id])
+    return return_values
 
 
 def place_connection(body):
