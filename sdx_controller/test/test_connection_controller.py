@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import unittest
+from unittest.mock import patch
 
 from flask import json
 
@@ -263,6 +264,26 @@ class TestConnectionController(BaseTestCase):
             method="GET",
         )
         self.assertStatus(response, 200)
+
+    @patch("sdx_controller.utils.db_utils.DbUtils.get_all_entries_in_collection")
+    def test_z105_getconnections_fail(self, mock_get_all_entries):
+        """Test case for getconnections."""
+        mock_get_all_entries.return_value = {}
+        response = self.client.open(
+            f"{BASE_PATH}/connections",
+            method="GET",
+        )
+        self.assertStatus(response, 404)
+
+    def test_z105_getconnections_success(self):
+        """Test case for getconnections."""
+        response = self.client.open(
+            f"{BASE_PATH}/connections",
+            method="GET",
+        )
+        self.assertStatus(response, 200)
+
+        assert len(response.json) == 1
 
 
 if __name__ == "__main__":

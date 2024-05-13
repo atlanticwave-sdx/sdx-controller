@@ -60,5 +60,5 @@ class DbUtils(object):
     def get_all_entries_in_collection(self, collection):
         db_collection = self.sdxdb[collection]
         # MongoDB has an ObjectId for each item, so need to exclude the ObjectIds
-        all_entries = list(db_collection.find({}, {"_id": 0}))
+        all_entries = db_collection.find({}, {"_id": 0})
         return all_entries
