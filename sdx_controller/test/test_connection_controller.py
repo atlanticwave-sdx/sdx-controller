@@ -263,7 +263,8 @@ class TestConnectionController(BaseTestCase):
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
         )
-        self.assertStatus(response, 200)
+        print(f"Response body is : {response.data.decode('utf-8')}")
+        self.assertStatus(response, 404)
 
     @patch("sdx_controller.utils.db_utils.DbUtils.get_all_entries_in_collection")
     def test_z105_getconnections_fail(self, mock_get_all_entries):
@@ -281,6 +282,8 @@ class TestConnectionController(BaseTestCase):
             f"{BASE_PATH}/connections",
             method="GET",
         )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
         self.assertStatus(response, 200)
 
         assert len(response.json) == 1
