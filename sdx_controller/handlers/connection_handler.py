@@ -118,7 +118,7 @@ class ConnectionHandler:
             return "Could not solve the request", 400
 
         try:
-            breakdown = te_manager.generate_connection_breakdown(solution)
+            breakdown = te_manager.generate_connection_breakdown(solution,connection_request)
             status, code = self._send_breakdown_to_lc(breakdown, connection_request)
             logger.debug(f"Breakdown status: {status}, code: {code}")
             return status, code
