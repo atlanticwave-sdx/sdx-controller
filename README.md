@@ -161,16 +161,33 @@ repository:
 
 ## Running the test suite
 
+### With tox
+
 You will need [tox] and [tox-docker]:
 
 ```console
+$ python3 -m venv venv --upgrade-deps
+$ source ./venv/bin/activate
 $ pip install tox tox-docker
+```
+
+Once you have `tox` and `tox-docker` installed, you can run tests:
+
+```console
 $ tox
 ```
 
+You can also run a single test:
+
+```console
+$ tox -- -s sdx_controller/test/test_connection_controller.py::TestConnectionController::test_getconnection_by_id
+```
+
 If you want to examine Docker logs after the test suite has exited,
-you can run `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
+run tests with `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
 `docker logs <container-name>`.
+
+### With pytest
 
 If you want to avoid tox and run [pytest] directly, that is possible
 too.  You will need to run MongoDB and RabbitMQ, which can be launched

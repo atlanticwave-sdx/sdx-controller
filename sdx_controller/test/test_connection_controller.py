@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import unittest
+import uuid
 from unittest.mock import patch
 
 from flask import json
@@ -29,14 +30,10 @@ class TestConnectionController(BaseTestCase):
         )
         self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
 
-    def test_delete_connection_with_setup(self):
+    def __add_the_three_topologies(self):
         """
-        Test case for delete_connection()
-
-        Set up a connection request, get the connection ID from the
-        response, and then do `DELETE /connection/:connection_id`
+        A helper to add the three known topologies.
         """
-        # set up temanager connection first
         for idx, topology_file in enumerate(
             [
                 TestData.TOPOLOGY_FILE_AMLIGHT,
@@ -46,6 +43,16 @@ class TestConnectionController(BaseTestCase):
         ):
             topology = json.loads(topology_file.read_text())
             self.te_manager.add_topology(topology)
+
+    def test_delete_connection_with_setup(self):
+        """
+        Test case for delete_connection()
+
+        Set up a connection request, get the connection ID from the
+        response, and then do `DELETE /connection/:connection_id`
+        """
+        # set up temanager connection first
+        self.__add_the_three_topologies()
 
         request_body = TestData.CONNECTION_REQ.read_text()
 
@@ -195,13 +202,7 @@ class TestConnectionController(BaseTestCase):
 
         Place a connection request when some topologies are known.
         """
-        for topology_file in [
-            TestData.TOPOLOGY_FILE_AMLIGHT,
-            TestData.TOPOLOGY_FILE_SAX,
-            TestData.TOPOLOGY_FILE_ZAOXI,
-        ]:
-            topology = json.loads(topology_file.read_text())
-            self.te_manager.add_topology(topology)
+        self.__add_the_three_topologies()
 
         request = TestData.CONNECTION_REQ.read_text()
 
@@ -256,15 +257,53 @@ class TestConnectionController(BaseTestCase):
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
 
-    def test_z100_getconnection_by_id_success(self):
-        """Test case for getconnection_by_id existing connection."""
-        connection_id = "test-connection-request"
+    def test_z100_getconnection_by_id_expect_404(self):
+        """
+        Test getconnection_by_id with a non-existent connection ID.
+        """
+        # Generate a random ID.
+        connection_id = uuid.uuid4()
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
         )
+
         print(f"Response body is : {response.data.decode('utf-8')}")
+
         self.assertStatus(response, 404)
+
+    def test_z100_getconnection_by_id_expect_200(self):
+        """
+        Test getconnection_by_id with a non-existent connection ID.
+        """
+
+        self.__add_the_three_topologies()
+
+        request_body = TestData.CONNECTION_REQ.read_text()
+
+        post_response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request_body,
+            content_type="application/json",
+        )
+
+        print(f"Response body: {post_response.data.decode('utf-8')}")
+
+        self.assertStatus(post_response, 200)
+
+        connection_id = post_response.get_json().get("connection_id")
+        print(f"Got connection_id: {connection_id}")
+
+        # Now try `GET /connection/{connection_id}`
+        get_response = self.client.open(
+            f"{BASE_PATH}/connection/{connection_id}",
+            method="GET",
+        )
+
+        print(f"Response body: {get_response.data.decode('utf-8')}")
+
+        self.assertStatus(get_response, 200)
 
     @patch("sdx_controller.utils.db_utils.DbUtils.get_all_entries_in_collection")
     def test_z105_getconnections_fail(self, mock_get_all_entries):

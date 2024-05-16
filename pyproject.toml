@@ -46,7 +46,7 @@ test = [
     "randomize >= 0.13",
 ]
 lint = [
-    "black == 23.*",
+    "black == 24.*",
     "isort == 5.*",
 ]
 wsgi = [

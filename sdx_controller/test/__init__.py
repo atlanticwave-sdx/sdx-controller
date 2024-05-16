@@ -20,9 +20,10 @@ class BaseTestCase(TestCase):
         # doesn't use a message queue right now.
         app = create_app(run_listener=True if os.getenv("MQ_HOST") else False)
 
-        # We need a handle to the TEManager instance in tests, but
-        # accessing it this way feels like a work-around. There must
-        # be a better way to get a handle to TEManager.
+        # TODO: We need a handle to the TEManager instance in tests,
+        # so we add a handle here, although doing it this way feels
+        # like a work-around.  There must be a better way to get a
+        # handle to TEManager?
         self.te_manager = app.te_manager
 
         return app.app
