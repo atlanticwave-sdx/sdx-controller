@@ -207,7 +207,7 @@ present in your shell:
 $ cp env.template .env 
 $ # and then edit .env to suit your environment
 $ source .env
-$ pytest```console
+$ pytest
 ```
 
 
