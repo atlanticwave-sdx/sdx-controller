@@ -268,6 +268,8 @@ class TestConnectionController(BaseTestCase):
             method="GET",
         )
 
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
         self.assertStatus(response, 404)
 
     def test_z100_getconnection_by_id_expect_200(self):
