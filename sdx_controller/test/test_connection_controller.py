@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import unittest
+import uuid
 from unittest.mock import patch
 
 from flask import json
@@ -256,14 +257,16 @@ class TestConnectionController(BaseTestCase):
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
 
-    def test_z100_getconnection_by_id_success(self):
-        """Test case for getconnection_by_id existing connection."""
-        connection_id = "test-connection-request"
+    def test_z100_getconnection_by_id_expect_404(self):
+        """
+        Test getconnection_by_id with a non-existent connection ID.
+        """
+        connection_id = uuid.uuid4()
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
         )
-        self.assertStatus(response, 200)
+        self.assertStatus(response, 404)
 
     @patch("sdx_controller.utils.db_utils.DbUtils.get_all_entries_in_collection")
     def test_z105_getconnections_fail(self, mock_get_all_entries):
