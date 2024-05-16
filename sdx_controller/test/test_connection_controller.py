@@ -261,6 +261,7 @@ class TestConnectionController(BaseTestCase):
         """
         Test getconnection_by_id with a non-existent connection ID.
         """
+        # Generate a random ID.
         connection_id = uuid.uuid4()
         response = self.client.open(
             f"{BASE_PATH}/connection/{connection_id}",
