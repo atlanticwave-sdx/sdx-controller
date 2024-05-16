@@ -30,14 +30,10 @@ class TestConnectionController(BaseTestCase):
         )
         self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
 
-    def test_delete_connection_with_setup(self):
+    def __add_the_three_topologies(self):
         """
-        Test case for delete_connection()
-
-        Set up a connection request, get the connection ID from the
-        response, and then do `DELETE /connection/:connection_id`
+        A helper to add the three known topologies.
         """
-        # set up temanager connection first
         for idx, topology_file in enumerate(
             [
                 TestData.TOPOLOGY_FILE_AMLIGHT,
@@ -47,6 +43,16 @@ class TestConnectionController(BaseTestCase):
         ):
             topology = json.loads(topology_file.read_text())
             self.te_manager.add_topology(topology)
+
+    def test_delete_connection_with_setup(self):
+        """
+        Test case for delete_connection()
+
+        Set up a connection request, get the connection ID from the
+        response, and then do `DELETE /connection/:connection_id`
+        """
+        # set up temanager connection first
+        self.__add_the_three_topologies()
 
         request_body = TestData.CONNECTION_REQ.read_text()
 
@@ -196,13 +202,7 @@ class TestConnectionController(BaseTestCase):
 
         Place a connection request when some topologies are known.
         """
-        for topology_file in [
-            TestData.TOPOLOGY_FILE_AMLIGHT,
-            TestData.TOPOLOGY_FILE_SAX,
-            TestData.TOPOLOGY_FILE_ZAOXI,
-        ]:
-            topology = json.loads(topology_file.read_text())
-            self.te_manager.add_topology(topology)
+        self.__add_the_three_topologies()
 
         request = TestData.CONNECTION_REQ.read_text()
 
