@@ -267,6 +267,7 @@ class TestConnectionController(BaseTestCase):
             f"{BASE_PATH}/connection/{connection_id}",
             method="GET",
         )
+
         self.assertStatus(response, 404)
 
     def test_z100_getconnection_by_id_expect_200(self):
@@ -318,6 +319,8 @@ class TestConnectionController(BaseTestCase):
             f"{BASE_PATH}/connections",
             method="GET",
         )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
         self.assertStatus(response, 200)
 
         assert len(response.json) == 1
