@@ -161,7 +161,7 @@ repository:
 
 ## Running the test suite
 
-### With tox and tox-docker
+### With tox
 
 You will need [tox] and [tox-docker]:
 
