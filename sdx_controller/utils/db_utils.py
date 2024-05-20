@@ -53,7 +53,9 @@ class DbUtils(object):
 
     def read_from_db(self, collection, key):
         key = str(key)
-        return self.sdxdb[collection].find_one({key: {"$exists": 1}, "deleted": {"$ne": True}})
+        return self.sdxdb[collection].find_one(
+            {key: {"$exists": 1}, "deleted": {"$ne": True}}
+        )
 
     def get_all_entries_in_collection(self, collection):
         db_collection = self.sdxdb[collection]
