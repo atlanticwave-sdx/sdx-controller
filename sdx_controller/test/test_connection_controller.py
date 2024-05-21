@@ -28,7 +28,7 @@ class TestConnectionController(BaseTestCase):
             f"{BASE_PATH}/connection/{connection_id}",
             method="DELETE",
         )
-        self.assert200(response, f"Response body is : {response.data.decode('utf-8')}")
+        self.assert404(response, f"Response body is : {response.data.decode('utf-8')}")
 
     def __add_the_three_topologies(self):
         """

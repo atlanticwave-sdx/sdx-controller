@@ -45,20 +45,31 @@ class DbUtils(object):
         key = str(key)
         obj = self.read_from_db(collection, key)
         if obj is None:
-            # self.logger.debug(f"Adding key value pair {key}:{value} to DB.")
             return self.sdxdb[collection].insert_one({key: value})
 
         query = {"_id": obj["_id"]}
-        # self.logger.debug(f"Updating DB entry {key}:{value}.")
         result = self.sdxdb[collection].replace_one(query, {key: value})
         return result
 
     def read_from_db(self, collection, key):
         key = str(key)
-        return self.sdxdb[collection].find_one({key: {"$exists": 1}})
+        return self.sdxdb[collection].find_one(
+            {key: {"$exists": 1}, "deleted": {"$ne": True}}
+        )
 
     def get_all_entries_in_collection(self, collection):
         db_collection = self.sdxdb[collection]
         # MongoDB has an ObjectId for each item, so need to exclude the ObjectIds
         all_entries = db_collection.find({}, {"_id": 0})
         return all_entries
+
+    def mark_deleted(self, collection, key):
+        db_collection = self.sdxdb[collection]
+        key = str(key)
+        item_to_delete = self.read_from_db(collection, key)
+        if item_to_delete is None:
+            return False
+        filter = {"_id": item_to_delete["_id"]}
+        update = {"$set": {"deleted": True}}
+        db_collection.update_one(filter, update)
+        return True
