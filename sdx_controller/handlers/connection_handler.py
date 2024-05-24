@@ -18,8 +18,9 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
-    def remove_connection(self, connection):
+    def remove_connection(self, current_app, connection_id):
         # call pce to remove connection
+        current_app.te_manager.unreserve_vlan(connection_id)
         pass
 
     def _send_breakdown_to_lc(self, breakdown, connection_request):
