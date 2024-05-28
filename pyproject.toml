@@ -53,9 +53,6 @@ wsgi = [
     "uvicorn"
 ]
 
-[options.packages.find]
-where = "swagger_server"
-
 [tool.setuptools]
 packages = ["sdx_controller", "bapm_server"]
 
