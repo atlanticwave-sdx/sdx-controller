@@ -103,11 +103,9 @@ jobs:
     name: finalize
     needs: test
     runs-on: ubuntu-latest
-    container: python:3-slim
+    if: ${{ always() }}
     steps:
       - name: Indicate completion to coveralls.io
-        run: |
-          pip --no-cache-dir install --upgrade coveralls
-          python -m coveralls --service=github --finish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
