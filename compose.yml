@@ -6,8 +6,8 @@ services:
     # See https://hub.docker.com/_/mongo/ for documentation about
     # MongoDB Docker images.
     image: mongo:7.0.11
-    ports:
-      - ${MONGO_PORT}:${MONGO_PORT}
+    expose:
+      - ${MONGO_PORT}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
