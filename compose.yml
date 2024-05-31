@@ -5,9 +5,9 @@ services:
   mongodb:
     # See https://hub.docker.com/_/mongo/ for documentation about
     # MongoDB Docker images.
-    image: mongo:7.0.5
-    ports:
-      - ${MONGO_PORT}:${MONGO_PORT}
+    image: mongo:7.0.11
+    expose:
+      - ${MONGO_PORT}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -28,7 +28,7 @@ services:
     image: sdx-controller
     depends_on:
       mongodb:
-        # Anther condition is `service_healthy`, and it will require
+        # Another condition is `service_healthy`, and it will require
         # the `healthcheck` above.
         condition: service_started
     tty: true
@@ -40,9 +40,9 @@ services:
       # the same MONGODB_CONNSTRING variable from .env here, because
       # that is helpful for running unit/integration tests.
       - MONGODB_CONNSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:${MONGO_PORT}/
+      - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
       - SDX_HOST=${SDX_HOST}
       - SDX_PORT=${SDX_PORT}
-      - SDX_VERSION=${SDX_VERSION}
       - MQ_HOST=${MQ_HOST}
       - SUB_QUEUE=${SUB_QUEUE}
       - DB_NAME=${DB_NAME}

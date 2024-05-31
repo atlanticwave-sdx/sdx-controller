@@ -30,7 +30,7 @@ jobs:
           - 15672:15672
 
       mongodb:
-        image: mongo:7.0.5
+        image: mongo:7.0.11
         ports:
           - 27017:27017
         env:
@@ -80,7 +80,6 @@ jobs:
         env:
           SDX_HOST: 'localhost'
           SDX_PORT: '8080'
-          SDX_VERSION: '1.0.0'
           SDX_NAME: 'sdx-controller-test'
           MQ_HOST: 'localhost'
           MQ_PORT: '5672'
