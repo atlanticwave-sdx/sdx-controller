@@ -30,7 +30,7 @@ jobs:
           - 15672:15672
 
       mongodb:
-        image: mongo:7.0.5
+        image: mongo:7.0.11
         ports:
           - 27017:27017
         env:
