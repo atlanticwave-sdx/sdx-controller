@@ -43,7 +43,6 @@ services:
       - DB_CONFIG_TABLE_NAME=${DB_CONFIG_TABLE_NAME}
       - SDX_HOST=${SDX_HOST}
       - SDX_PORT=${SDX_PORT}
-      - SDX_VERSION=${SDX_VERSION}
       - MQ_HOST=${MQ_HOST}
       - SUB_QUEUE=${SUB_QUEUE}
       - DB_NAME=${DB_NAME}
