@@ -64,14 +64,17 @@ class ConnectionHandler:
             exchange_name = "connection"
 
             logger.debug(
-                f"Publishing '{link}' with exchange_name: {exchange_name}, "
+                f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
-
+            mq_link = {
+                'operation': operation,
+                'link': link
+            }
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
-            producer.call(json.dumps(link))
+            producer.call(json.dumps(mq_link))
             producer.stop_keep_alive()
 
         # We will get to this point only if all the previous steps
