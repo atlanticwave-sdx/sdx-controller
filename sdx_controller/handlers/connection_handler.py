@@ -18,12 +18,7 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
-    def remove_connection(self, current_app, connection_id):
-        # call pce to remove connection
-        current_app.te_manager.unreserve_vlan(connection_id)
-        pass
-
-    def _send_breakdown_to_lc(self, breakdown, connection_request):
+    def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
         logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
@@ -122,11 +117,25 @@ class ConnectionHandler:
             breakdown = te_manager.generate_connection_breakdown(
                 solution, connection_request
             )
-            status, code = self._send_breakdown_to_lc(breakdown, connection_request)
-            logger.debug(f"Breakdown status: {status}, code: {code}")
+            self.db_instance.add_key_value_pair_to_db("breakdowns", connection_request["id"], breakdown)
+            status, code = self._send_breakdown_to_lc(breakdown, "post", connection_request)
+            logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
             logger.debug(f"Error when generating/publishing breakdown: {e}")
+            return f"Error: {e}", 400
+        
+    def remove_connection(self, current_app, connection_id) -> Tuple[str, int]:
+        # call pce to remove connection
+        current_app.te_manager.unreserve_vlan(connection_id)
+        breakdown = self.db_instance.read_from_db("breakdowns", connection_id)
+        connection_request = self.db_instance.read_from_db("connections", connection_id)
+        try:
+            status, code = self._send_breakdown_to_lc(breakdown, "delete", connection_request)
+            logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
+            return status, code
+        except Exception as e:
+            logger.debug(f"Error when removing breakdown: {e}")
             return f"Error: {e}", 400
 
     def handle_link_failure(self, msg_json):
