@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bullseye
+FROM python:3.9-slim-bullseye AS sdx-builder-image
 
 RUN apt-get update \
     && apt-get -y upgrade \
@@ -17,6 +17,12 @@ COPY . /usr/src/app
 # https://github.com/pypa/setuptools_scm/issues/77#issuecomment-844927695
 RUN --mount=source=.git,target=.git,type=bind \
     pip install --no-cache-dir .[wsgi]
+
+# The final image.
+FROM python:3.9-slim-bullseye AS sdx-runtime-image
+
+WORKDIR /usr/src/app
+COPY --from=sdx-builder-image /usr/src/app /usr/src/app
 
 EXPOSE 8080
 
