@@ -9,7 +9,6 @@ RUN apt-get update \
 
 WORKDIR /usr/src/app
 
-WORKDIR /usr/src/app
 COPY . /usr/src/app
 
 # In order to make setuptools_scm work during container build, we
