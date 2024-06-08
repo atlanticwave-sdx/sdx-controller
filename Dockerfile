@@ -26,7 +26,6 @@ RUN --mount=source=.git,target=.git,type=bind \
 # The final image.
 FROM python:3.9-slim-bullseye AS sdx-runtime-image
 
-WORKDIR /usr/src/app
 COPY --from=sdx-builder-image /opt/venv /opt/venv
 
 # Make sure we use the venv.
