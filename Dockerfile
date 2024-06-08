@@ -1,3 +1,9 @@
+# We specify a multi-stage build here.  Some of the packages we use
+# need a compiler to install, but not at runtime.  Using a multi-stage
+# build results in smaller final images, since we won't be install
+# things we don't need in them.
+
+# The builder image.
 FROM python:3.9-slim-bullseye AS sdx-builder-image
 
 RUN apt-get update \
