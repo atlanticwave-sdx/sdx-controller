@@ -9,6 +9,12 @@ RUN apt-get update \
 
 WORKDIR /usr/src/app
 
+# create a venv.
+RUN python -m venv /opt/venv --upgrade-deps
+
+# Make sure we use the venv.
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY . /usr/src/app
 
 # In order to make setuptools_scm work during container build, we
@@ -21,7 +27,10 @@ RUN --mount=source=.git,target=.git,type=bind \
 FROM python:3.9-slim-bullseye AS sdx-runtime-image
 
 WORKDIR /usr/src/app
-COPY --from=sdx-builder-image /usr/src/app /usr/src/app
+COPY --from=sdx-builder-image /opt/venv /opt/venv
+
+# Make sure we use the venv.
+ENV PATH="/opt/venv/bin:$PATH"
 
 EXPOSE 8080
 
