@@ -67,10 +67,7 @@ class ConnectionHandler:
                 f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
-            mq_link = {
-                'operation': operation,
-                'link': link
-            }
+            mq_link = {"operation": operation, "link": link}
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
@@ -120,21 +117,31 @@ class ConnectionHandler:
             breakdown = te_manager.generate_connection_breakdown(
                 solution, connection_request
             )
-            self.db_instance.add_key_value_pair_to_db("breakdowns", connection_request["id"], breakdown)
-            status, code = self._send_breakdown_to_lc(breakdown, "post", connection_request)
+            self.db_instance.add_key_value_pair_to_db(
+                "breakdowns", connection_request["id"], breakdown
+            )
+            status, code = self._send_breakdown_to_lc(
+                breakdown, "post", connection_request
+            )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
             logger.debug(f"Error when generating/publishing breakdown: {e}")
             return f"Error: {e}", 400
-        
+
     def remove_connection(self, current_app, connection_id) -> Tuple[str, int]:
         current_app.te_manager.unreserve_vlan(connection_id)
-        breakdown = self.db_instance.read_from_db("breakdowns", connection_id)[connection_id]
-        connection_request = self.db_instance.read_from_db("connections", connection_id)[connection_id]
+        breakdown = self.db_instance.read_from_db("breakdowns", connection_id)[
+            connection_id
+        ]
+        connection_request = self.db_instance.read_from_db(
+            "connections", connection_id
+        )[connection_id]
 
         try:
-            status, code = self._send_breakdown_to_lc(breakdown, "delete", connection_request)
+            status, code = self._send_breakdown_to_lc(
+                breakdown, "delete", connection_request
+            )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
