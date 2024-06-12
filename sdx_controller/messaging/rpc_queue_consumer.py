@@ -75,8 +75,7 @@ class RpcConsumer(object):
         MESSAGE_ID = 0
         HEARTBEAT_ID = 0
 
-        rpc = RpcConsumer(thread_queue, "", self.te_manager)
-        t1 = threading.Thread(target=rpc.start_consumer, args=(), daemon=True)
+        t1 = threading.Thread(target=self.start_consumer, args=(), daemon=True)
         t1.start()
 
         lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
