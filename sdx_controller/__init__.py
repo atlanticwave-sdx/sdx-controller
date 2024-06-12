@@ -25,8 +25,7 @@ def create_rpc_thread(app):
 
     # This will spawn a thread.
     app.rpc_consumer.start_sdx_consumer(
-        thread_queue=thread_queue,
-        db_instance=app.db_instance
+        thread_queue=thread_queue, db_instance=app.db_instance
     )
 
 
