@@ -77,6 +77,13 @@ class TopicQueueProducer(object):
             exchange=self.exchange_name, exchange_type="topic"
         )
 
+        self.logger.info(
+            f"Publishing link: {body}, "
+            f"MQ_HOST: {MQ_HOST}, MQ_PORT: {MQ_PORT}, "
+            f"exchange_name: {self.exchange_name}, "
+            f"routing_key: {self.routing_key}"
+        )
+
         self.channel.basic_publish(
             exchange=self.exchange_name, routing_key=self.routing_key, body=str(body)
         )
