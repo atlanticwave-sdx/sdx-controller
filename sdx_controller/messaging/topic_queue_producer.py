@@ -87,7 +87,6 @@ class TopicQueueProducer(object):
         self.channel.basic_publish(
             exchange=self.exchange_name, routing_key=self.routing_key, body=str(body)
         )
-
         return "Success"
 
 

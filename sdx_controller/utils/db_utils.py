@@ -4,7 +4,7 @@ import os
 
 import pymongo
 
-COLLECTION_NAMES = ["topologies", "connections", "domains", "links"]
+COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links"]
 
 
 class DbUtils(object):
