@@ -207,6 +207,15 @@ present in your shell:
 $ cp env.template .env 
 $ # and then edit .env to suit your environment
 $ source .env
+```
+
+And now, activate a virtual environment, install the requirements, and
+then run `pytest`:
+
+```
+$ python3 -m venv venv --upgrade-deps
+$ source ./venv/bin/activate
+$ pip3 install --editable .[test]
 $ pytest
 ```
 
