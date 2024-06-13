@@ -168,7 +168,7 @@ You will need [tox] and [tox-docker]:
 ```console
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
-$ pip install tox tox-docker
+$ pip install 'tox>=4' 'tox-docker>=5'
 ```
 
 Once you have `tox` and `tox-docker` installed, you can run tests:
