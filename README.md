@@ -178,10 +178,11 @@ Once you have `tox` and `tox-docker` installed, you can run tests:
 $ tox
 ```
 
-You can also run a single test:
+You can also run a single test, and optionally, print logs on the
+console:
 
 ```console
-$ tox -- -s sdx_controller/test/test_connection_controller.py::TestConnectionController::test_getconnection_by_id
+$ tox -- -s --log-cli-level=INFO sdx_controller/test/test_connection_controller.py::TestConnectionController::test_getconnection_by_id
 ```
 
 If you want to examine Docker logs after the test suite has exited,
