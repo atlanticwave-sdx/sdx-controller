@@ -28,12 +28,19 @@ class DbUtils(object):
         if mongo_port is None:
             raise Exception("MONGO_PORT environment variable is not set")
 
-        mongo_connstring = f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:{mongo_port}/"
-
-        self.mongo_client = pymongo.MongoClient(mongo_connstring)
-
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
+
+        mongo_connstring = (
+            f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:{mongo_port}/"
+        )
+
+        # Log DB URI, without a password.
+        self.logger.info(
+            f"[DB] Using mongodb://{mongo_user}@{mongo_host}:{mongo_port}/"
+        )
+
+        self.mongo_client = pymongo.MongoClient(mongo_connstring)
 
     def initialize_db(self):
         self.logger.debug(f"Trying to load {self.db_name} from DB")
