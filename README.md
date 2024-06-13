@@ -163,7 +163,8 @@ repository:
 
 ### With tox
 
-You will need [tox] and [tox-docker]:
+You will need Docker installed and running. You will also need [tox]
+and [tox-docker]:
 
 ```console
 $ python3 -m venv venv --upgrade-deps
@@ -190,8 +191,7 @@ run tests with `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
 ### With pytest
 
 If you want to avoid tox and run [pytest] directly, that is possible
-too.  You will need to run MongoDB and RabbitMQ, which can be launched
-with Docker:
+too.  You will need to run RabbitMQ and MongoDB, with Docker perhaps:
 
 ```console
 $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
