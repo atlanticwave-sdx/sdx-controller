@@ -17,9 +17,19 @@ class DbUtils(object):
         # if self.config_table_name is None:
         #     raise Exception("DB_CONFIG_TABLE_NAME environ variable is not set")
 
-        mongo_connstring = os.environ.get("MONGODB_CONNSTRING")
-        if mongo_connstring is None:
-            raise Exception("MONGODB_CONNSTRING environment variable is not set")
+        mongo_user = os.getenv("MONGO_USER") or "guest"
+        mongo_pass = os.getenv("MONGO_PASS") or "guest"
+        mongo_host = os.getenv("MONGO_HOST")
+        mongo_port = os.getenv("MONGO_PORT")
+
+        if mongo_host is None:
+            raise Exception("MONGO_HOST environment variable is not set")
+
+        if mongo_port is None:
+            raise Exception("MONGO_PORT environment variable is not set")
+
+        mongo_connstring = f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:{mongo_port}/"
+
         self.mongo_client = pymongo.MongoClient(mongo_connstring)
 
         self.logger = logging.getLogger(__name__)
