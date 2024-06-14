@@ -31,7 +31,8 @@ services:
     tty: true
     build: ./bapm_server
     environment:
-      - ES_HOST=${ES_HOST}
+      # Connect to the elasticsearch service above.
+      - ES_HOST=elasticsearch
       - ES_PORT=${ES_PORT}
       - BAPM_MQ_HOST=${BAPM_MQ_HOST}
       - BAPM_EXCHANGE=${BAPM_EXCHANGE}
