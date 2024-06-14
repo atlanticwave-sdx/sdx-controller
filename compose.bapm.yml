@@ -6,8 +6,8 @@ services:
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
     # for a more elaborate setup.
     image: elasticsearch:8.11.3
-    ports:
-      - ${ES_PORT}:${ES_PORT}
+    expose:
+      - ${ES_PORT}
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
