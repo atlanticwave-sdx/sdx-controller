@@ -25,6 +25,8 @@ class RpcConsumer(object):
     def __init__(self, thread_queue, exchange_name, te_manager):
         self.logger = logging.getLogger(__name__)
 
+        self.logger.info(f"[MQ] Using amqp://{MQ_USER}@{MQ_HOST}:{MQ_PORT}")
+
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=MQ_HOST,

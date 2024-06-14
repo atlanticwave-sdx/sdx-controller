@@ -26,7 +26,11 @@ class DbUtilsTests(unittest.TestCase):
         # Set up the necessary environment variables.
         os.environ["DB_NAME"] = self.env.get("DB_NAME")
         os.environ["DB_CONFIG_TABLE_NAME"] = self.env.get("DB_CONFIG_TABLE_NAME")
-        os.environ["MONGODB_CONNSTRING"] = self.env.get("MONGODB_CONNSTRING")
+
+        os.environ["MONGO_HOST"] = self.env.get("MONGO_HOST")
+        os.environ["MONGO_PORT"] = self.env.get("MONGO_PORT")
+        os.environ["MONGO_USER"] = self.env.get("MONGO_USER")
+        os.environ["MONGO_PASS"] = self.env.get("MONGO_PASS")
 
         # This should not raise an exception.
         dbutils = DbUtils()
@@ -36,7 +40,11 @@ class DbUtilsTests(unittest.TestCase):
         # Set up the necessary environment variables.
         os.environ["DB_NAME"] = self.env.get("DB_NAME")
         os.environ["DB_CONFIG_TABLE_NAME"] = "topologies"
-        os.environ["MONGODB_CONNSTRING"] = self.env.get("MONGODB_CONNSTRING")
+
+        os.environ["MONGO_HOST"] = self.env.get("MONGO_HOST")
+        os.environ["MONGO_PORT"] = self.env.get("MONGO_PORT")
+        os.environ["MONGO_USER"] = self.env.get("MONGO_USER")
+        os.environ["MONGO_PASS"] = self.env.get("MONGO_PASS")
 
         dbutils = DbUtils()
         dbutils.initialize_db()

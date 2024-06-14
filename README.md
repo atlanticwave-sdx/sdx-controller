@@ -163,12 +163,13 @@ repository:
 
 ### With tox
 
-You will need [tox] and [tox-docker]:
+You will need Docker installed and running. You will also need [tox]
+and [tox-docker]:
 
 ```console
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
-$ pip install tox tox-docker
+$ pip install 'tox>=4' 'tox-docker>=5'
 ```
 
 Once you have `tox` and `tox-docker` installed, you can run tests:
@@ -177,10 +178,11 @@ Once you have `tox` and `tox-docker` installed, you can run tests:
 $ tox
 ```
 
-You can also run a single test:
+You can also run a single test, and optionally, print logs on the
+console:
 
 ```console
-$ tox -- -s sdx_controller/test/test_connection_controller.py::TestConnectionController::test_getconnection_by_id
+$ tox -- -s --log-cli-level=INFO sdx_controller/test/test_connection_controller.py::TestConnectionController::test_getconnection_by_id
 ```
 
 If you want to examine Docker logs after the test suite has exited,
@@ -190,8 +192,7 @@ run tests with `tox --docker-dont-stop [mongo|rabbitmq]`, and then use
 ### With pytest
 
 If you want to avoid tox and run [pytest] directly, that is possible
-too.  You will need to run MongoDB and RabbitMQ, which can be launched
-with Docker:
+too.  You will need to run RabbitMQ and MongoDB, with Docker perhaps:
 
 ```console
 $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
@@ -207,6 +208,15 @@ present in your shell:
 $ cp env.template .env 
 $ # and then edit .env to suit your environment
 $ source .env
+```
+
+And now, activate a virtual environment, install the requirements, and
+then run `pytest`:
+
+```
+$ python3 -m venv venv --upgrade-deps
+$ source ./venv/bin/activate
+$ pip3 install --editable .[test]
 $ pytest
 ```
 
