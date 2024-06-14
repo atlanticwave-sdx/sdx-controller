@@ -49,13 +49,14 @@ def delete_connection(connection_id):
         # connection_id is not found.  This should in fact be an error.
         #
         # https://github.com/atlanticwave-sdx/pce/issues/180
-        current_app.te_manager.unreserve_vlan(connection_id)
-        deleted = db_instance.mark_deleted("connections", f"{connection_id}")
-        if not deleted:
+        connection = db_instance.read_from_db("connections", f"{connection_id}")
+        if not connection:
             return "Did not find connection", 404
+        connection_handler.remove_connection(current_app, connection_id)
+        db_instance.mark_deleted("connections", f"{connection_id}")
     except Exception as e:
         logger.info(f"Delete failed (connection id: {connection_id}): {e}")
-        return "Failed, reason: {e}", 500
+        return f"Failed, reason: {e}", 500
 
     return "OK", 200
 
