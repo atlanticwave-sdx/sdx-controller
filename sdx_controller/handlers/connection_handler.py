@@ -129,8 +129,8 @@ class ConnectionHandler:
             logger.debug(f"Error when generating/publishing breakdown: {e}")
             return f"Error: {e}", 400
 
-    def remove_connection(self, current_app, connection_id) -> Tuple[str, int]:
-        current_app.te_manager.unreserve_vlan(connection_id)
+    def remove_connection(self, te_manager, connection_id) -> Tuple[str, int]:
+        te_manager.unreserve_vlan(connection_id)
         breakdown = self.db_instance.read_from_db("breakdowns", connection_id)[
             connection_id
         ]
@@ -148,7 +148,7 @@ class ConnectionHandler:
             logger.debug(f"Error when removing breakdown: {e}")
             return f"Error: {e}", 400
 
-    def handle_link_failure(self, msg_json):
+    def handle_link_failure(self, te_manager, msg_json):
         logger.debug("---Handling connections that contain failed link.---")
         link_connections_dict_str = self.db_instance.read_from_db(
             "links", "link_connections_dict"
@@ -180,11 +180,13 @@ class ConnectionHandler:
                 logger.debug("Found failed link record!")
                 connections = link_connections_dict[simple_link]
                 for index, connection in enumerate(connections):
-                    self.remove_connection(connection)
+                    if "id" not in connection:
+                        continue
+                    self.remove_connection(te_manager, connection["id"])
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    self.place_connection(connection)
+                    self.place_connection(te_manager, connection)
                     link_connections_dict[simple_link].append(connection)
 
         self.db_instance.add_key_value_pair_to_db(

@@ -51,7 +51,7 @@ def create_app(run_listener: bool = True):
     if LOG_FILE:
         logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
 
     app = connexion.App(__name__, specification_dir="./swagger/")
     app.app.json_encoder = encoder.JSONEncoder

@@ -1,11 +1,13 @@
 import json
 import logging
 import os
-
+import logging
 import pymongo
 
 COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links"]
 
+pymongo_logger = logging.getLogger('pymongo')
+pymongo_logger.setLevel(logging.INFO)
 
 class DbUtils(object):
     def __init__(self):
