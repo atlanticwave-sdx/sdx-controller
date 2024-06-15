@@ -42,7 +42,7 @@ class LcMessageHandler:
             self.te_manager.update_topology(msg_json)
             if "link_failure" in msg_json:
                 logger.info("Processing link failure.")
-                self.connection_handler.handle_link_failure(msg_json)
+                self.connection_handler.handle_link_failure(self.te_manager, msg_json)
         # Add new topology
         else:
             domain_list.append(domain_name)

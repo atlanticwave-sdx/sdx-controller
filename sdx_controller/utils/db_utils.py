@@ -6,6 +6,9 @@ import pymongo
 
 COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links"]
 
+pymongo_logger = logging.getLogger("pymongo")
+pymongo_logger.setLevel(logging.INFO)
+
 
 class DbUtils(object):
     def __init__(self):
@@ -90,3 +93,8 @@ class DbUtils(object):
         update = {"$set": {"deleted": True}}
         db_collection.update_one(filter, update)
         return True
+
+    def delete_one_entry(self, collection, key):
+        key = str(key)
+        db_collection = self.sdxdb[collection]
+        db_collection.delete_one({key: {"$exists": True}})

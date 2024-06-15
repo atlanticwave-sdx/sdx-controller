@@ -52,7 +52,7 @@ def delete_connection(connection_id):
         connection = db_instance.read_from_db("connections", f"{connection_id}")
         if not connection:
             return "Did not find connection", 404
-        connection_handler.remove_connection(current_app, connection_id)
+        connection_handler.remove_connection(current_app.te_manager, connection_id)
         db_instance.mark_deleted("connections", f"{connection_id}")
     except Exception as e:
         logger.info(f"Delete failed (connection id: {connection_id}): {e}")
