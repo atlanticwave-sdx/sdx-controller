@@ -92,7 +92,7 @@ class ConnectionHandler:
         a tuple of the form (reason, HTTP code).
         """
         for num, val in enumerate(te_manager.get_topology_map().values()):
-            logger.info(f"TE topology #{num}: {val}")
+            logger.debug(f"TE topology #{num}: {val}")
 
         graph = te_manager.generate_graph_te()
         if graph is None:
@@ -189,6 +189,7 @@ class ConnectionHandler:
                     self.place_connection(te_manager, connection)
                     link_connections_dict[simple_link].append(connection)
 
+        self.db_instance.delete_one_entry("links", "link_connections_dict")
         self.db_instance.add_key_value_pair_to_db(
             "links", "link_connections_dict", json.dumps(link_connections_dict)
         )
