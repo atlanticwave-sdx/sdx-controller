@@ -118,7 +118,7 @@ $ docker build -t bapm-server .
 To run sdx-controller alone:
 
 ```console
-$ docker run -p 8080:8080 sdx-controller --env-file=.env
+$ docker run --env-file=.env -p 8080:8080 sdx-controller
 ```
 
 ### Running with Python
