@@ -257,6 +257,27 @@ class TestConnectionController(BaseTestCase):
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
 
+    def test_place_connection_v2_with_three_topologies(self):
+        """
+        Test case for connection request format v2.
+        """
+        self.__add_the_three_topologies()
+
+        request = TestData.CONNECTION_REQ_V2.read_text()
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 200 success because TEManager now should be properly
+        # set up with all the expected topology data.
+        self.assertStatus(response, 200)
+
     def test_z100_getconnection_by_id_expect_404(self):
         """
         Test getconnection_by_id with a non-existent connection ID.
