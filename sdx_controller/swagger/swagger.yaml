@@ -488,15 +488,12 @@ components:
       required:
       - description
       - endpoints
-      - id
       - name
       - notifications
       - qos_metrics
       - scheduling
       type: object
       properties:
-        id:
-          type: string
         name:
           type: string
         endpoints:
