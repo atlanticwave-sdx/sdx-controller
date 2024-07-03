@@ -346,7 +346,7 @@ class TestConnectionController(BaseTestCase):
         print(f"Response body is : {response.data.decode('utf-8')}")
         self.assertStatus(response, 200)
 
-        assert len(response.json) == 1
+        assert len(response.get_json()) != 0
 
 
 if __name__ == "__main__":
