@@ -502,18 +502,21 @@ components:
         endpoints:
           type: array
           items:
-            $ref: '#/components/schemas/port'
+            type: object
+            properties:
+              port_id:
+                type: string
+              vlan:
+                type: string
         description:
           type: string
         notifications:
           type: array
           items:
             type: object
-            additionalProperties:
-              type: object
-              properties:
-                email:
-                  type: string
+            properties:
+              email:
+                type: string
         scheduling:
           $ref: '#/components/schemas/connection_scheduling'
         qos_metrics:
