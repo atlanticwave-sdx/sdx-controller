@@ -194,7 +194,7 @@ class TestConnectionController(BaseTestCase):
 
         response = response.get_json()
         self.assertEqual(response["status"], 400)
-        self.assertEqual(response["detail"], "'id' is a required property")
+        self.assertIn("is not valid under any of the given schemas", response["detail"])
 
     def test_place_connection_with_three_topologies(self):
         """

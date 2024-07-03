@@ -156,8 +156,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/connection'
-                # - $ref: 'connection_v2.yml'
-                # - $ref: '#/components/schemas/connection_v2'
         "400":
           description: Invalid Connection
       x-openapi-router-controller: sdx_controller.controllers.connection_controller
