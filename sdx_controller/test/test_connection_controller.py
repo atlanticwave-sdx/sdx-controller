@@ -276,7 +276,10 @@ class TestConnectionController(BaseTestCase):
 
         # Expect 200 success because TEManager now should be properly
         # set up with all the expected topology data.
-        self.assertStatus(response, 200)
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.get_json().get("reason"), "Could not generate a traffic matrix"
+        )
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
