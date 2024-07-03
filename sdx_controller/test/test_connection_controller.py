@@ -265,10 +265,21 @@ class TestConnectionController(BaseTestCase):
 
         request = TestData.CONNECTION_REQ_V2.read_text()
 
+        # The example connection request ("test-l2vpn-p2p-v2.json")
+        # carries an ID field for testing purposes, but the actual v2
+        # format does not have an ID field.  So we remove the ID from
+        # the request.
+        request_json = json.loads(request)
+        original_request_id = request_json.pop("id")
+        print(f"original_request_id: {original_request_id}")
+
+        new_request = json.dumps(request_json)
+        print(f"new_request: {new_request}")
+
         response = self.client.open(
             f"{BASE_PATH}/connection",
             method="POST",
-            data=request,
+            data=new_request,
             content_type="application/json",
         )
 
