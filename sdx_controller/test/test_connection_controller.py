@@ -285,12 +285,19 @@ class TestConnectionController(BaseTestCase):
 
         print(f"Response body is : {response.data.decode('utf-8')}")
 
-        # Expect 200 success because TEManager now should be properly
-        # set up with all the expected topology data.
+        # Normally we could expect 200 success because at this point
+        # TEManager should be properly set up with all the expected
+        # topology data.  However here we're not able to offer a
+        # solution with the new connection request format yet.
         self.assertStatus(response, 400)
         self.assertEqual(
             response.get_json().get("reason"), "Could not generate a traffic matrix"
         )
+
+        # Returned connection ID should be different from the original
+        # request ID.
+        connection_id = response.get_json().get("connection_id")
+        self.assertNotEqual(connection_id, original_request_id)
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
