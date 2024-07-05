@@ -292,6 +292,10 @@ class TestConnectionController(BaseTestCase):
         # solution with the new connection request format yet.
         self.assertStatus(response, 400)
         self.assertEqual(
+            response.get_json().get("status"),
+            "Failure",
+        )
+        self.assertEqual(
             response.get_json().get("reason"), "Could not generate a traffic matrix"
         )
 
@@ -327,9 +331,14 @@ class TestConnectionController(BaseTestCase):
         print(f"Response body is : {response.data.decode('utf-8')}")
 
         self.assertStatus(response, 200)
-        # self.assertEqual(
-        #     response.get_json().get("reason"), "Could not generate a traffic matrix"
-        # )
+        self.assertEqual(
+            response.get_json().get("status"),
+            "OK",
+        )
+        self.assertEqual(
+            response.get_json().get("reason"),
+            "Connection published",
+        )
 
         # Returned connection ID should be different from the original
         # request ID.
