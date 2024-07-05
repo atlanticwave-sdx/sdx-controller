@@ -264,6 +264,7 @@ class TestConnectionController(BaseTestCase):
         """
         self.__add_the_three_topologies()
 
+        # No solution for this request.
         request = TestData.CONNECTION_REQ_V2_L2VPN_P2P.read_text()
 
         # The example connection request ("test-l2vpn-p2p-v2.json")
@@ -286,10 +287,8 @@ class TestConnectionController(BaseTestCase):
 
         print(f"Response body is : {response.data.decode('utf-8')}")
 
-        # Normally we could expect 200 success because at this point
-        # TEManager should be properly set up with all the expected
-        # topology data.  However here we're not able to offer a
-        # solution with the new connection request format yet.
+        # Expect a 400 response because PCE would not be able to find
+        # a solution for the connection request.
         self.assertStatus(response, 400)
         self.assertEqual(
             response.get_json().get("status"),
@@ -311,6 +310,7 @@ class TestConnectionController(BaseTestCase):
         """
         self.__add_the_three_topologies()
 
+        # There should be solution for this request.
         request = TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text()
 
         # Remove any existing request ID.
@@ -330,6 +330,8 @@ class TestConnectionController(BaseTestCase):
 
         print(f"Response body is : {response.data.decode('utf-8')}")
 
+        # Expect a 200 response because PCE should be able to find a
+        # solution for the connection request.
         self.assertStatus(response, 200)
         self.assertEqual(
             response.get_json().get("status"),
