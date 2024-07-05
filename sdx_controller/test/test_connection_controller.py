@@ -36,12 +36,13 @@ class TestConnectionController(BaseTestCase):
         """
         for idx, topology_file in enumerate(
             [
-                TestData.TOPOLOGY_FILE_AMLIGHT,
+                TestData.TOPOLOGY_FILE_AMLIGHT_USER_PORT,
                 TestData.TOPOLOGY_FILE_SAX,
                 TestData.TOPOLOGY_FILE_ZAOXI,
             ]
         ):
             topology = json.loads(topology_file.read_text())
+            print(f"Adding topology: {topology.get('id')}")
             self.te_manager.add_topology(topology)
 
     def test_delete_connection_with_setup(self):
