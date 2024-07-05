@@ -37,4 +37,7 @@ class TestData:
 
     REQUESTS_DIR = files("sdx_datamodel") / "data" / "requests"
     CONNECTION_REQ = REQUESTS_DIR / "test_request.json"
-    CONNECTION_REQ_V2 = REQUESTS_DIR / "test-l2vpn-p2p-v2.json"
+    CONNECTION_REQ_V2_L2VPN_P2P = REQUESTS_DIR / "test-l2vpn-p2p-v2.json"
+    CONNECTION_REQ_V2_AMLIGHT_ZAOXI = (
+        REQUESTS_DIR / "test_request-amlight_zaoxi-p2p-v2.json"
+    )

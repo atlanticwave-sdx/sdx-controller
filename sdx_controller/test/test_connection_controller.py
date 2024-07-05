@@ -257,13 +257,13 @@ class TestConnectionController(BaseTestCase):
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
 
-    def test_place_connection_v2_with_three_topologies(self):
+    def test_place_connection_v2_with_three_topologies_400_response(self):
         """
         Test case for connection request format v2.
         """
         self.__add_the_three_topologies()
 
-        request = TestData.CONNECTION_REQ_V2.read_text()
+        request = TestData.CONNECTION_REQ_V2_L2VPN_P2P.read_text()
 
         # The example connection request ("test-l2vpn-p2p-v2.json")
         # carries an ID field for testing purposes, but the actual v2
@@ -293,6 +293,42 @@ class TestConnectionController(BaseTestCase):
         self.assertEqual(
             response.get_json().get("reason"), "Could not generate a traffic matrix"
         )
+
+        # Returned connection ID should be different from the original
+        # request ID.
+        connection_id = response.get_json().get("connection_id")
+        self.assertNotEqual(connection_id, original_request_id)
+
+    def test_place_connection_v2_with_three_topologies_200_response(self):
+        """
+        Test case for connection request format v2.  This request
+        should be able to find a path.
+        """
+        self.__add_the_three_topologies()
+
+        request = TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text()
+
+        # Remove any existing request ID.
+        request_json = json.loads(request)
+        original_request_id = request_json.pop("id")
+        print(f"original_request_id: {original_request_id}")
+
+        new_request = json.dumps(request_json)
+        print(f"new_request: {new_request}")
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=new_request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        self.assertStatus(response, 200)
+        # self.assertEqual(
+        #     response.get_json().get("reason"), "Could not generate a traffic matrix"
+        # )
 
         # Returned connection ID should be different from the original
         # request ID.
