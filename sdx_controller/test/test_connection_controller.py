@@ -36,12 +36,13 @@ class TestConnectionController(BaseTestCase):
         """
         for idx, topology_file in enumerate(
             [
-                TestData.TOPOLOGY_FILE_AMLIGHT,
+                TestData.TOPOLOGY_FILE_AMLIGHT_USER_PORT,
                 TestData.TOPOLOGY_FILE_SAX,
                 TestData.TOPOLOGY_FILE_ZAOXI,
             ]
         ):
             topology = json.loads(topology_file.read_text())
+            print(f"Adding topology: {topology.get('id')}")
             self.te_manager.add_topology(topology)
 
     def test_delete_connection_with_setup(self):
@@ -194,7 +195,7 @@ class TestConnectionController(BaseTestCase):
 
         response = response.get_json()
         self.assertEqual(response["status"], 400)
-        self.assertEqual(response["detail"], "'id' is a required property")
+        self.assertIn("is not valid under any of the given schemas", response["detail"])
 
     def test_place_connection_with_three_topologies(self):
         """
@@ -256,6 +257,95 @@ class TestConnectionController(BaseTestCase):
                 # Expect 200 success now that TEManager should be set
                 # up with all the expected topology data.
                 self.assertStatus(response, 200)
+
+    def test_place_connection_v2_with_three_topologies_400_response(self):
+        """
+        Test case for connection request format v2.
+        """
+        self.__add_the_three_topologies()
+
+        # No solution for this request.
+        request = TestData.CONNECTION_REQ_V2_L2VPN_P2P.read_text()
+
+        # The example connection request ("test-l2vpn-p2p-v2.json")
+        # carries an ID field for testing purposes, but the actual v2
+        # format does not have an ID field.  So we remove the ID from
+        # the request.
+        request_json = json.loads(request)
+        original_request_id = request_json.pop("id")
+        print(f"original_request_id: {original_request_id}")
+
+        new_request = json.dumps(request_json)
+        print(f"new_request: {new_request}")
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=new_request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect a 400 response because PCE would not be able to find
+        # a solution for the connection request.
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.get_json().get("status"),
+            "Failure",
+        )
+        self.assertEqual(
+            response.get_json().get("reason"), "Could not generate a traffic matrix"
+        )
+
+        # Returned connection ID should be different from the original
+        # request ID.
+        connection_id = response.get_json().get("connection_id")
+        self.assertNotEqual(connection_id, original_request_id)
+
+    def test_place_connection_v2_with_three_topologies_200_response(self):
+        """
+        Test case for connection request format v2.  This request
+        should be able to find a path.
+        """
+        self.__add_the_three_topologies()
+
+        # There should be solution for this request.
+        request = TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text()
+
+        # Remove any existing request ID.
+        request_json = json.loads(request)
+        original_request_id = request_json.pop("id")
+        print(f"original_request_id: {original_request_id}")
+
+        new_request = json.dumps(request_json)
+        print(f"new_request: {new_request}")
+
+        response = self.client.open(
+            f"{BASE_PATH}/connection",
+            method="POST",
+            data=new_request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect a 200 response because PCE should be able to find a
+        # solution for the connection request.
+        self.assertStatus(response, 200)
+        self.assertEqual(
+            response.get_json().get("status"),
+            "OK",
+        )
+        self.assertEqual(
+            response.get_json().get("reason"),
+            "Connection published",
+        )
+
+        # Returned connection ID should be different from the original
+        # request ID.
+        connection_id = response.get_json().get("connection_id")
+        self.assertNotEqual(connection_id, original_request_id)
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
@@ -325,7 +415,7 @@ class TestConnectionController(BaseTestCase):
         print(f"Response body is : {response.data.decode('utf-8')}")
         self.assertStatus(response, 200)
 
-        assert len(response.json) == 1
+        assert len(response.get_json()) != 0
 
 
 if __name__ == "__main__":

@@ -145,7 +145,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/connection'
+              oneOf:
+                - $ref: '#/components/schemas/connection'
+                - $ref: '#/components/schemas/connection_v2'
         required: true
       responses:
         "200":
@@ -482,6 +484,155 @@ components:
         version: 1
       xml:
         name: Connection
+    connection_v2:
+      required:
+      - description
+      - endpoints
+      - name
+      - notifications
+      - qos_metrics
+      - scheduling
+      type: object
+      properties:
+        name:
+          type: string
+        endpoints:
+          type: array
+          items:
+            type: object
+            properties:
+              port_id:
+                type: string
+              vlan:
+                type: string
+        description:
+          type: string
+        notifications:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+        scheduling:
+          $ref: '#/components/schemas/connection_scheduling'
+        qos_metrics:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/connection_qos_metrics'
+        paths:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          description: Connection Status
+          enum:
+          - success
+          - fail
+          - scheduled
+          - provisioining
+        complete:
+          type: boolean
+          default: false
+        quantity:
+          type: integer
+          format: int32
+        multi_path:
+          type: boolean
+        preempt:
+          type: boolean
+        backup_path_type:
+          type: string
+          enum:
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+        exclusive_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        inclusive_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+      example:
+        name: new-connection
+        endpoints:
+        - port_id: urn:sdx:port:ampath.net:Ampath3:50
+          vlan: "777"
+        - port_id: urn:sdx:port:sax.net:Sax01:41
+          vlan: 55:90
+        - port_id: urn:sdx:port:ampath.net:Ampath3:50
+          vlan: untagged
+        description: a test circuit
+        scheduling:
+          start_time: 2024-06-24T01:00:00.000Z
+          end_time: 2024-06-26T01:00:00.000Z
+        qos_metrics:
+          min_bw:
+            value: 12
+            strict: true
+          max_delay:
+            value: 4
+            strict: false
+          max_number_oxps:
+            value: 7
+            strict: true
+        notifications:
+        - email: muhaziz@fiu.edu
+      xml:
+        name: Connection
+    connection_scheduling:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+    connection_qos_unit:
+      type: object
+      properties:
+        value:
+          type: integer
+        strict:
+          type: boolean
+    connection_qos_metrics:
+      type: object
+      properties:
+        min_bw:
+          $ref: '#/components/schemas/connection_qos_unit'
+        max_delay:
+          $ref: '#/components/schemas/connection_qos_unit'
+        max_number_oxps:
+          $ref: '#/components/schemas/connection_qos_unit'
+        bandwidth_measured:
+          maximum: 1000000
+          minimum: 1
+          type: number
+        latency_measured:
+          maximum: 1000000
+          minimum: 1
+          type: number
+        packetloss_required:
+          maximum: 100
+          minimum: 0
+          type: number
+        packetloss_measured:
+          maximum: 100
+          minimum: 0
+          type: number
+        availability_required:
+          maximum: 100
+          minimum: 0
+          type: number
+        availability_measured:
+          maximum: 100
+          minimum: 0
+          type: number       
     User:
       type: object
       properties:

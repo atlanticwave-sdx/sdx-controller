@@ -34,6 +34,11 @@ class TestData:
     TOPOLOGY_FILE_ZAOXI = TOPOLOGY_DIR / "zaoxi.json"
     TOPOLOGY_FILE_SAX = TOPOLOGY_DIR / "sax.json"
     TOPOLOGY_FILE_AMLIGHT = TOPOLOGY_DIR / "amlight.json"
+    TOPOLOGY_FILE_AMLIGHT_USER_PORT = TOPOLOGY_DIR / "amlight_user_port.json"
 
     REQUESTS_DIR = files("sdx_datamodel") / "data" / "requests"
     CONNECTION_REQ = REQUESTS_DIR / "test_request.json"
+    CONNECTION_REQ_V2_L2VPN_P2P = REQUESTS_DIR / "test-l2vpn-p2p-v2.json"
+    CONNECTION_REQ_V2_AMLIGHT_ZAOXI = (
+        REQUESTS_DIR / "test_request-amlight_zaoxi-p2p-v2.json"
+    )
