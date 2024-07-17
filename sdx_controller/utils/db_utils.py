@@ -10,6 +10,7 @@ COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links
 pymongo_logger = logging.getLogger("pymongo")
 pymongo_logger.setLevel(logging.INFO)
 
+
 def obfuscate_password_in_uri(uri: str) -> str:
     """
     Replace password field in URIs with a `*`, for logging.
@@ -19,6 +20,7 @@ def obfuscate_password_in_uri(uri: str) -> str:
         return uri.replace(parts.password, "*")
     else:
         return uri
+
 
 class DbUtils(object):
     def __init__(self):
