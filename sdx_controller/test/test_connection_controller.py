@@ -68,7 +68,7 @@ class TestConnectionController(BaseTestCase):
 
         self.assertStatus(connection_response, 200)
 
-        connection_id = connection_response.get_json().get("connection_id")
+        connection_id = connection_response.get_json().get("service_id")
         print(f"Deleting request_id: {connection_id}")
 
         delete_response = self.client.open(
@@ -300,7 +300,7 @@ class TestConnectionController(BaseTestCase):
 
         # Returned connection ID should be different from the original
         # request ID.
-        connection_id = response.get_json().get("connection_id")
+        connection_id = response.get_json().get("service_id")
         self.assertNotEqual(connection_id, original_request_id)
 
     def test_place_connection_v2_with_three_topologies_200_response(self):
@@ -344,7 +344,7 @@ class TestConnectionController(BaseTestCase):
 
         # Returned connection ID should be different from the original
         # request ID.
-        connection_id = response.get_json().get("connection_id")
+        connection_id = response.get_json().get("service_id")
         self.assertNotEqual(connection_id, original_request_id)
 
     def test_z100_getconnection_by_id_expect_404(self):
@@ -382,7 +382,7 @@ class TestConnectionController(BaseTestCase):
 
         self.assertStatus(post_response, 200)
 
-        connection_id = post_response.get_json().get("connection_id")
+        connection_id = post_response.get_json().get("service_id")
         print(f"Got connection_id: {connection_id}")
 
         # Now try `GET /connection/{connection_id}`

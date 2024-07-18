@@ -132,7 +132,7 @@ def place_connection(body):
     )
 
     response = {
-        "connection_id": connection_id,
+        "service_id": connection_id,
         "status": "OK" if code == 200 else "Failure",
         "reason": reason,
     }
