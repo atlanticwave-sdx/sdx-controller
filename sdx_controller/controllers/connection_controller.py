@@ -127,9 +127,11 @@ def place_connection(body):
     )
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
-    
+
     if code == 200:
-        db_instance.add_key_value_pair_to_db("connections", connection_id, json.dumps(body))
+        db_instance.add_key_value_pair_to_db(
+            "connections", connection_id, json.dumps(body)
+        )
 
     logger.info(
         f"place_connection result: ID: {connection_id} reason='{reason}', code={code}"
