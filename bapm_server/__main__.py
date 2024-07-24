@@ -44,7 +44,7 @@ def start_consumer(thread_queue, es):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     es = Elasticsearch([{"host": ES_HOST, "port": ES_PORT}])
 
