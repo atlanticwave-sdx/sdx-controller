@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
@@ -126,7 +127,8 @@ class ConnectionHandler:
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
-            logger.debug(f"Error when generating/publishing breakdown: {e}")
+            err = traceback.format_exc().replace("\n", ", ")
+            logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
             return f"Error: {e}", 400
 
     def remove_connection(self, te_manager, connection_id) -> Tuple[str, int]:
