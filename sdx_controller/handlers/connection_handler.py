@@ -1,7 +1,7 @@
 import json
 import logging
-from typing import Tuple
 import traceback
+from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
