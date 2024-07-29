@@ -31,7 +31,7 @@ dependencies = [
     "pika >= 1.2.0",
     "dataset",
     "pymongo > 3.0",
-    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@2.0.6.rc2",
+    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@main",
 ]
 
 [project.optional-dependencies]
