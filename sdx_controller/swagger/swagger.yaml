@@ -486,12 +486,8 @@ components:
         name: Connection
     connection_v2:
       required:
-      - description
       - endpoints
       - name
-      - notifications
-      - qos_metrics
-      - scheduling
       type: object
       properties:
         name:
