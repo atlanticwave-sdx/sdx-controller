@@ -40,9 +40,12 @@ class LcMessageHandler:
             logger.info("Updating topo")
             logger.debug(msg_json)
             self.te_manager.update_topology(msg_json)
-            if "link_failure" in msg_json:
+            failed_links = self.te_manager.get_failed_links()
+            if failed_links:
                 logger.info("Processing link failure.")
-                self.connection_handler.handle_link_failure(self.te_manager, msg_json)
+                self.connection_handler.handle_link_failure(
+                    self.te_manager, failed_links
+                )
         # Add new topology
         else:
             domain_list.append(domain_name)
