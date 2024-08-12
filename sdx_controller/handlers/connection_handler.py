@@ -38,6 +38,7 @@ class ConnectionHandler:
         else:
             link_connections_dict = {}
 
+        interdomain_a, interdomain_b = None, None
         for domain, link in breakdown.items():
             port_list = []
             for key in link.keys():
@@ -50,12 +51,50 @@ class ConnectionHandler:
                 if simple_link not in link_connections_dict:
                     link_connections_dict[simple_link] = []
 
-                if connection_request not in link_connections_dict[simple_link]:
+                if (
+                    operation == "post"
+                    and connection_request not in link_connections_dict[simple_link]
+                ):
                     link_connections_dict[simple_link].append(connection_request)
+
+                if (
+                    operation == "delete"
+                    and connection_request in link_connections_dict[simple_link]
+                ):
+                    link_connections_dict[simple_link].remove(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
                     "links", "link_connections_dict", json.dumps(link_connections_dict)
                 )
+
+            if interdomain_a:
+                interdomain_b = link.get("uni_a", {}).get("port_id")
+            else:
+                interdomain_a = link.get("uni_z", {}).get("port_id")
+
+            if interdomain_a and interdomain_b:
+                simple_link = SimpleLink([interdomain_a, interdomain_b]).to_string()
+
+                if simple_link not in link_connections_dict:
+                    link_connections_dict[simple_link] = []
+
+                if (
+                    operation == "post"
+                    and connection_request not in link_connections_dict[simple_link]
+                ):
+                    link_connections_dict[simple_link].append(connection_request)
+
+                if (
+                    operation == "delete"
+                    and connection_request in link_connections_dict[simple_link]
+                ):
+                    link_connections_dict[simple_link].remove(connection_request)
+
+                self.db_instance.add_key_value_pair_to_db(
+                    "links", "link_connections_dict", json.dumps(link_connections_dict)
+                )
+
+                interdomain_a = link.get("uni_z", {}).get("port_id")
 
             logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
 
@@ -142,7 +181,7 @@ class ConnectionHandler:
 
         try:
             status, code = self._send_breakdown_to_lc(
-                breakdown, "delete", connection_request
+                breakdown, "delete", json.loads(connection_request)
             )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
@@ -150,7 +189,7 @@ class ConnectionHandler:
             logger.debug(f"Error when removing breakdown: {e}")
             return f"Error: {e}", 400
 
-    def handle_link_failure(self, te_manager, msg_json):
+    def handle_link_failure(self, te_manager, failed_links):
         logger.debug("---Handling connections that contain failed link.---")
         link_connections_dict_str = self.db_instance.read_from_db(
             "links", "link_connections_dict"
@@ -167,14 +206,16 @@ class ConnectionHandler:
             link_connections_dict_str["link_connections_dict"]
         )
 
-        for link in msg_json["link_failure"]:
+        for link in failed_links:
+            logger.info(f"Handling link failure on {link['id']} ({link['ports']})")
             port_list = []
             if "ports" not in link:
                 continue
             for port in link["ports"]:
-                if "id" not in port:
+                port_id = port if isinstance(port, str) else port.get("id")
+                if not port_id:
                     continue
-                port_list.append(port["id"])
+                port_list.append(port_id)
 
             simple_link = SimpleLink(port_list).to_string()
 
@@ -182,6 +223,9 @@ class ConnectionHandler:
                 logger.debug("Found failed link record!")
                 connections = link_connections_dict[simple_link]
                 for index, connection in enumerate(connections):
+                    logger.info(
+                        f"Connection {connection['id']} affected by link {link['id']}"
+                    )
                     if "id" not in connection:
                         continue
                     self.remove_connection(te_manager, connection["id"])
@@ -189,9 +233,3 @@ class ConnectionHandler:
                     logger.debug("Removed connection:")
                     logger.debug(connection)
                     self.place_connection(te_manager, connection)
-                    link_connections_dict[simple_link].append(connection)
-
-        self.db_instance.delete_one_entry("links", "link_connections_dict")
-        self.db_instance.add_key_value_pair_to_db(
-            "links", "link_connections_dict", json.dumps(link_connections_dict)
-        )

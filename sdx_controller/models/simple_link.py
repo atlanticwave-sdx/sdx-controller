@@ -3,7 +3,7 @@ from typing import List
 
 class SimpleLink:
     def __init__(self, ports: List[str]):
-        self._ports = ports
+        self.ports = ports
 
     @property
     def ports(self) -> List[str]:
