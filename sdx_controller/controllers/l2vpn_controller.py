@@ -157,17 +157,28 @@ def place_connection(body):
     return response, code
 
 
-def patch_connection(connection_id):  # noqa: E501
+def patch_connection(connection_id, body=None):  # noqa: E501
     """Edit and change an existing L2vpn connection by ID from the SDX-Controller
 
      # noqa: E501
 
     :param service_id: ID of l2vpn connection that needs to be changed
-    :type service_id: dict | bytes
+    :type service_id: dict | bytes'
+    :param body:
+    :type body: dict | bytes
 
     :rtype: Connection
     """
     value = db_instance.read_from_db("connections", f"{connection_id}")
     if not value:
         return "Connection not found", 404
+
+    logger.info(f"Changed connection: {body}")
+    if not connexion.request.is_json:
+        return "Request body must be JSON", 400
+
+    body = L2vpnServiceIdBody.from_dict(connexion.request.get_json())  # noqa: E501
+
+    logger.info(f"Gathered connexion JSON: {body}")
+
     return json.loads(value[connection_id])

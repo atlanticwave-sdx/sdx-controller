@@ -244,13 +244,16 @@ paths:
         in: path
         description: ID of l2vpn connection that needs to be changed
         required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
         content:
           application/json:
             schema:
-              oneOf:
-              - $ref: '#/components/schemas/connection'
-              - $ref: '#/components/schemas/connection_v2'
-              x-content-type: application/json
+              $ref: '#/components/schemas/l2vpn_service_id_body'
       responses:
         "200":
           description: successful operation
@@ -953,6 +956,10 @@ components:
         message:
           type: string
     l2vpn_body:
+      oneOf:
+      - $ref: '#/components/schemas/connection'
+      - $ref: '#/components/schemas/connection_v2'
+    l2vpn_service_id_body:
       oneOf:
       - $ref: '#/components/schemas/connection'
       - $ref: '#/components/schemas/connection_v2'
