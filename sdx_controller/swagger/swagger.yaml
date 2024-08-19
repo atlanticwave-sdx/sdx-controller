@@ -1,15 +1,18 @@
 openapi: 3.0.0
 info:
   title: SDX-Controller
-  description: "You can find\nout more about Swagger at\n[http://swagger.io](http://swagger.io)\
-    \ or on\n[irc.freenode.net, #swagger](http://swagger.io/irc/).\n"
+  description: |
+    You can find
+    out more about Swagger at
+    [http://swagger.io](http://swagger.io) or on
+    [irc.freenode.net, #swagger](http://swagger.io/irc/).
   termsOfService: http://swagger.io/terms/
   contact:
     email: yxin@renci.org
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
+  version: 2.0.0-oas3
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
@@ -79,10 +82,6 @@ paths:
                 $ref: '#/components/schemas/topology'
         "400":
           description: Invalid id value
-      # security:
-      # - topology_auth:
-      #   - write:topology
-      #   - read:topology
       x-openapi-router-controller: sdx_controller.controllers.topology_controller
   /topology/grenml:
     get:
@@ -134,20 +133,40 @@ paths:
         "404":
           description: Link not found
       x-openapi-router-controller: sdx_controller.controllers.link_controller
-  /connection:
+  /l2vpn:
+    get:
+      tags:
+      - l2vpn
+      summary: List all l2vpn connections
+      description: connection details
+      operationId: getconnections
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/connection'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/connection'
+        "404":
+          description: no connections found
+      x-openapi-router-controller: sdx_controller.controllers.connection_controller
     post:
       tags:
-      - connection
-      summary: Place an connection request from the SDX-Controller
+      - l2vpn
+      summary: Place an L2vpn connection request from the SDX-Controller
       operationId: place_connection
       requestBody:
         description: order placed for creating a connection
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/connection'
-                - $ref: '#/components/schemas/connection_v2'
+              $ref: '#/components/schemas/l2vpn_body'
         required: true
       responses:
         "200":
@@ -159,39 +178,17 @@ paths:
         "400":
           description: Invalid Connection
       x-openapi-router-controller: sdx_controller.controllers.connection_controller
-  /connections:
+  /l2vpn/{service_id}:
     get:
       tags:
-      - connection
-      summary: List all connections
-      description: connection details
-      operationId: getconnections
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/connection'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/connection'
-        "404":
-          description: no connections found
-      x-openapi-router-controller: sdx_controller.controllers.connection_controller
-  /connection/{connection_id}:
-    get:
-      tags:
-      - connection
-      summary: Find connection by ID
+      - l2vpn
+      summary: Find l2vpn connection by ID
       description: connection details
       operationId: getconnection_by_id
       parameters:
-      - name: connection_id
+      - name: service_id
         in: path
-        description: ID of connection that needs to be fetched
+        description: ID of l2vpn connection that needs to be fetched
         required: true
         style: simple
         explode: false
@@ -215,12 +212,12 @@ paths:
       x-openapi-router-controller: sdx_controller.controllers.connection_controller
     delete:
       tags:
-      - connection
+      - l2vpn
       summary: Delete connection order by ID
       description: delete a connection
       operationId: delete_connection
       parameters:
-      - name: connection_id
+      - name: service_id
         in: path
         description: ID of the connection that needs to be deleted
         required: true
@@ -459,12 +456,12 @@ components:
           type: boolean
           default: false
       example:
-        start_time: 2000-01-23T04:56:07.000+00:00
+        start_time: 2000-01-23T04:56:07.000Z
         quantity: 0
         name: name
-        end_time: 2000-01-23T04:56:07.000+00:00
+        end_time: 2000-01-23T04:56:07.000Z
         id: id
-        egress_port: 
+        egress_port:
           node: urn:sdx:port:amlight.net:Novi06
           name: urn:sdx:port:amlight.net:Novi06:10
           short_name: "10"
@@ -480,7 +477,7 @@ components:
           status: up
         complete: false
         status: success
-        timestamp: 2000-01-23T04:56:07+00:00
+        timestamp: 2000-01-23T04:56:07.000Z
         version: 1
       xml:
         name: Connection
@@ -495,21 +492,13 @@ components:
         endpoints:
           type: array
           items:
-            type: object
-            properties:
-              port_id:
-                type: string
-              vlan:
-                type: string
+            $ref: '#/components/schemas/connection_v2_endpoints'
         description:
           type: string
         notifications:
           type: array
           items:
-            type: object
-            properties:
-              email:
-                type: string
+            $ref: '#/components/schemas/connection_v2_notifications'
         scheduling:
           $ref: '#/components/schemas/connection_scheduling'
         qos_metrics:
@@ -628,7 +617,7 @@ components:
         availability_measured:
           maximum: 100
           minimum: 0
-          type: number       
+          type: number
     User:
       type: object
       properties:
@@ -698,9 +687,9 @@ components:
           short_name: Novi06
           location:
             address: address
-            latitude: 0.80082819046101150206595775671303272247314453125
-            longitude: 6.02745618307040320615897144307382404804229736328125
-            iso3166_2_lvl4: "US-MIA"
+            latitude: 0.8008281904610115
+            longitude: 6.027456183070403
+            iso3166_2_lvl4: US-MIA
           id: id
           ports:
           - node: urn:sdx:port:amlight.net:Novi06
@@ -719,9 +708,9 @@ components:
           short_name: Novi06
           location:
             address: address
-            latitude: 0.80082819046101150206595775671303272247314453125
-            longitude: 6.02745618307040320615897144307382404804229736328125
-            iso3166_2_lvl4: "US-MIA"
+            latitude: 0.8008281904610115
+            longitude: 6.027456183070403
+            iso3166_2_lvl4: US-MIA
           id: id
           ports:
           - node: urn:sdx:port:amlight.net:Novi06
@@ -736,30 +725,30 @@ components:
             id: id
             state: enabled
             status: up
-        timestamp: 2000-01-23T04:56:07.000+00:00
+        timestamp: 2000-01-23T04:56:07.000Z
         name: amLight
         links:
-        - residual_bandwidth: 596213.79545492655597627162933349609375
-          packet_loss: 23.0213588693476509661195450462400913238525390625
-          bandwidth: 146582.15146899645333178341388702392578125
-          latency: 563738.10192566714249551296234130859375
+        - residual_bandwidth: 596213.7954549266
+          packet_loss: 23.02135886934765
+          bandwidth: 146582.15146899645
+          latency: 563738.1019256671
           name: miami-Boca.amLight.sdx
           short_name: Miami-BocaRaton
           id: id
-          availability: 70.61401241503108394681476056575775146484375
+          availability: 70.61401241503108
           state: enabled
           ports:
           - null
           - null
           status: up
-        - residual_bandwidth: 596213.79545492655597627162933349609375
-          packet_loss: 23.0213588693476509661195450462400913238525390625
-          bandwidth: 146582.15146899645333178341388702392578125
-          latency: 563738.10192566714249551296234130859375
+        - residual_bandwidth: 596213.7954549266
+          packet_loss: 23.02135886934765
+          bandwidth: 146582.15146899645
+          latency: 563738.1019256671
           name: miami-Boca.amLight.sdx
           short_name: Miami-BocaRaton
           id: id
-          availability: 70.61401241503108394681476056575775146484375
+          availability: 70.61401241503108
           state: enabled
           ports:
           - null
@@ -796,9 +785,9 @@ components:
         short_name: Novi06
         location:
           address: address
-          latitude: 0.80082819046101150206595775671303272247314453125
-          longitude: 6.02745618307040320615897144307382404804229736328125
-          iso3166_2_lvl4: "US-MIA"
+          latitude: 0.8008281904610115
+          longitude: 6.027456183070403
+          iso3166_2_lvl4: US-MIA
         id: id
         ports:
         - node: urn:sdx:port:amlight.net:Novi06
@@ -861,14 +850,14 @@ components:
           type: string
           example: up
       example:
-        residual_bandwidth: 596213.79545492655597627162933349609375
-        packet_loss: 23.0213588693476509661195450462400913238525390625
-        bandwidth: 146582.15146899645333178341388702392578125
-        latency: 563738.10192566714249551296234130859375
+        residual_bandwidth: 596213.7954549266
+        packet_loss: 23.02135886934765
+        bandwidth: 146582.15146899645
+        latency: 563738.1019256671
         name: miami-Boca.amLight.sdx
         short_name: Miami-BocaRaton
         id: id
-        availability: 70.61401241503108394681476056575775146484375
+        availability: 70.61401241503108
         state: enabled
         ports:
         - null
@@ -919,13 +908,13 @@ components:
           type: number
         longitude:
           type: number
-        iso3166_2_lvl4: 
+        iso3166_2_lvl4:
           type: string
       example:
         address: address
-        latitude: 0.80082819046101150206595775671303272247314453125
-        longitude: 6.02745618307040320615897144307382404804229736328125
-        iso3166_2_lvl4: "US-MIA"
+        latitude: 0.8008281904610115
+        longitude: 6.027456183070403
+        iso3166_2_lvl4: US-MIA
     ApiResponse:
       type: object
       properties:
@@ -935,6 +924,22 @@ components:
         type:
           type: string
         message:
+          type: string
+    l2vpn_body:
+      oneOf:
+      - $ref: '#/components/schemas/connection'
+      - $ref: '#/components/schemas/connection_v2'
+    connection_v2_endpoints:
+      type: object
+      properties:
+        port_id:
+          type: string
+        vlan:
+          type: string
+    connection_v2_notifications:
+      type: object
+      properties:
+        email:
           type: string
   requestBodies:
     topology:

@@ -33,7 +33,7 @@ def delete_connection(connection_id):
     :rtype: None
     """
     logger.info(
-        f"Handling delete (connecton id: {connection_id}) "
+        f"Handling delete (service id: {connection_id}) "
         f"with te_manager: {current_app.te_manager}"
     )
 
