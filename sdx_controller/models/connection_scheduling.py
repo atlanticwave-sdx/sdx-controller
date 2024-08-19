@@ -1,12 +1,12 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
 from datetime import date, datetime  # noqa: F401
+from typing import Dict, List  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from sdx_controller.models.base_model_ import Model
 from sdx_controller import util
+from sdx_controller.models.base_model_ import Model
 
 
 class ConnectionScheduling(Model):
@@ -14,7 +14,10 @@ class ConnectionScheduling(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, start_time: datetime=None, end_time: datetime=None):  # noqa: E501
+
+    def __init__(
+        self, start_time: datetime = None, end_time: datetime = None
+    ):  # noqa: E501
         """ConnectionScheduling - a model defined in Swagger
 
         :param start_time: The start_time of this ConnectionScheduling.  # noqa: E501
@@ -22,20 +25,14 @@ class ConnectionScheduling(Model):
         :param end_time: The end_time of this ConnectionScheduling.  # noqa: E501
         :type end_time: datetime
         """
-        self.swagger_types = {
-            'start_time': datetime,
-            'end_time': datetime
-        }
+        self.swagger_types = {"start_time": datetime, "end_time": datetime}
 
-        self.attribute_map = {
-            'start_time': 'start_time',
-            'end_time': 'end_time'
-        }
+        self.attribute_map = {"start_time": "start_time", "end_time": "end_time"}
         self._start_time = start_time
         self._end_time = end_time
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionScheduling':
+    def from_dict(cls, dikt) -> "ConnectionScheduling":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -1,17 +1,25 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
 from datetime import date, datetime  # noqa: F401
+from typing import Dict, List  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from sdx_controller.models.base_model_ import Model
-from sdx_controller.models.connection_qos_metrics import ConnectionQosMetrics  # noqa: F401,E501
-from sdx_controller.models.connection_scheduling import ConnectionScheduling  # noqa: F401,E501
-from sdx_controller.models.connection_v2_endpoints import ConnectionV2Endpoints  # noqa: F401,E501
-from sdx_controller.models.connection_v2_notifications import ConnectionV2Notifications  # noqa: F401,E501
-from sdx_controller.models.link import Link  # noqa: F401,E501
 from sdx_controller import util
+from sdx_controller.models.base_model_ import Model
+from sdx_controller.models.connection_qos_metrics import (  # noqa: F401,E501
+    ConnectionQosMetrics,
+)
+from sdx_controller.models.connection_scheduling import (  # noqa: F401,E501
+    ConnectionScheduling,
+)
+from sdx_controller.models.connection_v2_endpoints import (  # noqa: F401,E501
+    ConnectionV2Endpoints,
+)
+from sdx_controller.models.connection_v2_notifications import (  # noqa: F401,E501
+    ConnectionV2Notifications,
+)
+from sdx_controller.models.link import Link  # noqa: F401,E501
 
 
 class ConnectionV2(Model):
@@ -19,7 +27,25 @@ class ConnectionV2(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, endpoints: List[ConnectionV2Endpoints]=None, description: str=None, notifications: List[ConnectionV2Notifications]=None, scheduling: ConnectionScheduling=None, qos_metrics: Dict[str, ConnectionQosMetrics]=None, paths: List[str]=None, status: str=None, complete: bool=False, quantity: int=None, multi_path: bool=None, preempt: bool=None, backup_path_type: str=None, exclusive_links: List[Link]=None, inclusive_links: List[Link]=None):  # noqa: E501
+
+    def __init__(
+        self,
+        name: str = None,
+        endpoints: List[ConnectionV2Endpoints] = None,
+        description: str = None,
+        notifications: List[ConnectionV2Notifications] = None,
+        scheduling: ConnectionScheduling = None,
+        qos_metrics: Dict[str, ConnectionQosMetrics] = None,
+        paths: List[str] = None,
+        status: str = None,
+        complete: bool = False,
+        quantity: int = None,
+        multi_path: bool = None,
+        preempt: bool = None,
+        backup_path_type: str = None,
+        exclusive_links: List[Link] = None,
+        inclusive_links: List[Link] = None,
+    ):  # noqa: E501
         """ConnectionV2 - a model defined in Swagger
 
         :param name: The name of this ConnectionV2.  # noqa: E501
@@ -54,39 +80,39 @@ class ConnectionV2(Model):
         :type inclusive_links: List[Link]
         """
         self.swagger_types = {
-            'name': str,
-            'endpoints': List[ConnectionV2Endpoints],
-            'description': str,
-            'notifications': List[ConnectionV2Notifications],
-            'scheduling': ConnectionScheduling,
-            'qos_metrics': Dict[str, ConnectionQosMetrics],
-            'paths': List[str],
-            'status': str,
-            'complete': bool,
-            'quantity': int,
-            'multi_path': bool,
-            'preempt': bool,
-            'backup_path_type': str,
-            'exclusive_links': List[Link],
-            'inclusive_links': List[Link]
+            "name": str,
+            "endpoints": List[ConnectionV2Endpoints],
+            "description": str,
+            "notifications": List[ConnectionV2Notifications],
+            "scheduling": ConnectionScheduling,
+            "qos_metrics": Dict[str, ConnectionQosMetrics],
+            "paths": List[str],
+            "status": str,
+            "complete": bool,
+            "quantity": int,
+            "multi_path": bool,
+            "preempt": bool,
+            "backup_path_type": str,
+            "exclusive_links": List[Link],
+            "inclusive_links": List[Link],
         }
 
         self.attribute_map = {
-            'name': 'name',
-            'endpoints': 'endpoints',
-            'description': 'description',
-            'notifications': 'notifications',
-            'scheduling': 'scheduling',
-            'qos_metrics': 'qos_metrics',
-            'paths': 'paths',
-            'status': 'status',
-            'complete': 'complete',
-            'quantity': 'quantity',
-            'multi_path': 'multi_path',
-            'preempt': 'preempt',
-            'backup_path_type': 'backup_path_type',
-            'exclusive_links': 'exclusive_links',
-            'inclusive_links': 'inclusive_links'
+            "name": "name",
+            "endpoints": "endpoints",
+            "description": "description",
+            "notifications": "notifications",
+            "scheduling": "scheduling",
+            "qos_metrics": "qos_metrics",
+            "paths": "paths",
+            "status": "status",
+            "complete": "complete",
+            "quantity": "quantity",
+            "multi_path": "multi_path",
+            "preempt": "preempt",
+            "backup_path_type": "backup_path_type",
+            "exclusive_links": "exclusive_links",
+            "inclusive_links": "inclusive_links",
         }
         self._name = name
         self._endpoints = endpoints
@@ -105,7 +131,7 @@ class ConnectionV2(Model):
         self._inclusive_links = inclusive_links
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionV2':
+    def from_dict(cls, dikt) -> "ConnectionV2":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -134,7 +160,9 @@ class ConnectionV2(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `name`, must not be `None`"
+            )  # noqa: E501
 
         self._name = name
 
@@ -157,7 +185,9 @@ class ConnectionV2(Model):
         :type endpoints: List[ConnectionV2Endpoints]
         """
         if endpoints is None:
-            raise ValueError("Invalid value for `endpoints`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `endpoints`, must not be `None`"
+            )  # noqa: E501
 
         self._endpoints = endpoints
 
@@ -289,8 +319,9 @@ class ConnectionV2(Model):
         allowed_values = ["success", "fail", "scheduled", "provisioining"]  # noqa: E501
         if status not in allowed_values:
             raise ValueError(
-                "Invalid value for `status` ({0}), must be one of {1}"
-                .format(status, allowed_values)
+                "Invalid value for `status` ({0}), must be one of {1}".format(
+                    status, allowed_values
+                )
             )
 
         self._status = status
@@ -400,8 +431,9 @@ class ConnectionV2(Model):
         allowed_values = ["0", "1", "2", "3"]  # noqa: E501
         if backup_path_type not in allowed_values:
             raise ValueError(
-                "Invalid value for `backup_path_type` ({0}), must be one of {1}"
-                .format(backup_path_type, allowed_values)
+                "Invalid value for `backup_path_type` ({0}), must be one of {1}".format(
+                    backup_path_type, allowed_values
+                )
             )
 
         self._backup_path_type = backup_path_type

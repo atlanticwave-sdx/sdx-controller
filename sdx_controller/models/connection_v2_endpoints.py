@@ -1,12 +1,12 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
 from datetime import date, datetime  # noqa: F401
+from typing import Dict, List  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from sdx_controller.models.base_model_ import Model
 from sdx_controller import util
+from sdx_controller.models.base_model_ import Model
 
 
 class ConnectionV2Endpoints(Model):
@@ -14,7 +14,8 @@ class ConnectionV2Endpoints(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, port_id: str=None, vlan: str=None):  # noqa: E501
+
+    def __init__(self, port_id: str = None, vlan: str = None):  # noqa: E501
         """ConnectionV2Endpoints - a model defined in Swagger
 
         :param port_id: The port_id of this ConnectionV2Endpoints.  # noqa: E501
@@ -22,20 +23,14 @@ class ConnectionV2Endpoints(Model):
         :param vlan: The vlan of this ConnectionV2Endpoints.  # noqa: E501
         :type vlan: str
         """
-        self.swagger_types = {
-            'port_id': str,
-            'vlan': str
-        }
+        self.swagger_types = {"port_id": str, "vlan": str}
 
-        self.attribute_map = {
-            'port_id': 'port_id',
-            'vlan': 'vlan'
-        }
+        self.attribute_map = {"port_id": "port_id", "vlan": "vlan"}
         self._port_id = port_id
         self._vlan = vlan
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionV2Endpoints':
+    def from_dict(cls, dikt) -> "ConnectionV2Endpoints":
         """Returns the dict as a model
 
         :param dikt: A dict.

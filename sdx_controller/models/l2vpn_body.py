@@ -1,12 +1,12 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
 from datetime import date, datetime  # noqa: F401
+from typing import Dict, List  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from sdx_controller.models.base_model_ import Model
 from sdx_controller import util
+from sdx_controller.models.base_model_ import Model
 
 
 class L2vpnBody(Model):
@@ -14,18 +14,15 @@ class L2vpnBody(Model):
 
     Do not edit the class manually.
     """
+
     def __init__(self):  # noqa: E501
-        """L2vpnBody - a model defined in Swagger
+        """L2vpnBody - a model defined in Swagger"""
+        self.swagger_types = {}
 
-        """
-        self.swagger_types = {
-        }
-
-        self.attribute_map = {
-        }
+        self.attribute_map = {}
 
     @classmethod
-    def from_dict(cls, dikt) -> 'L2vpnBody':
+    def from_dict(cls, dikt) -> "L2vpnBody":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -1,12 +1,12 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
 from datetime import date, datetime  # noqa: F401
+from typing import Dict, List  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from sdx_controller.models.base_model_ import Model
 from sdx_controller import util
+from sdx_controller.models.base_model_ import Model
 
 
 class ConnectionV2Notifications(Model):
@@ -14,23 +14,20 @@ class ConnectionV2Notifications(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, email: str=None):  # noqa: E501
+
+    def __init__(self, email: str = None):  # noqa: E501
         """ConnectionV2Notifications - a model defined in Swagger
 
         :param email: The email of this ConnectionV2Notifications.  # noqa: E501
         :type email: str
         """
-        self.swagger_types = {
-            'email': str
-        }
+        self.swagger_types = {"email": str}
 
-        self.attribute_map = {
-            'email': 'email'
-        }
+        self.attribute_map = {"email": "email"}
         self._email = email
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionV2Notifications':
+    def from_dict(cls, dikt) -> "ConnectionV2Notifications":
         """Returns the dict as a model
 
         :param dikt: A dict.
