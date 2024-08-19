@@ -155,3 +155,18 @@ def place_connection(body):
     # response["reason"] = reason # `reason` is not present in schema though.
 
     return response, code
+
+
+def patch_connection(service_id):  # noqa: E501
+    """Edit and change an existing L2vpn connection by ID from the SDX-Controller
+
+     # noqa: E501
+
+    :param service_id: ID of l2vpn connection that needs to be changed
+    :type service_id: dict | bytes
+
+    :rtype: Connection
+    """
+    if connexion.request.is_json:
+        service_id = Object.from_dict(connexion.request.get_json())  # noqa: E501
+    return "do some magic!"

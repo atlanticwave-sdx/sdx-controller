@@ -155,7 +155,7 @@ paths:
                 $ref: '#/components/schemas/connection'
         "404":
           description: no connections found
-      x-openapi-router-controller: sdx_controller.controllers.connection_controller
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
     post:
       tags:
       - l2vpn
@@ -177,7 +177,7 @@ paths:
                 $ref: '#/components/schemas/connection'
         "400":
           description: Invalid Connection
-      x-openapi-router-controller: sdx_controller.controllers.connection_controller
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
   /l2vpn/{service_id}:
     get:
       tags:
@@ -209,7 +209,7 @@ paths:
           description: Invalid ID supplied
         "404":
           description: connection not found
-      x-openapi-router-controller: sdx_controller.controllers.connection_controller
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
     delete:
       tags:
       - l2vpn
@@ -233,7 +233,34 @@ paths:
           description: Invalid ID supplied
         "404":
           description: connection not found
-      x-openapi-router-controller: sdx_controller.controllers.connection_controller
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
+    patch:
+      tags:
+      - l2vpn
+      summary: Edit and change an existing L2vpn connection by ID from the SDX-Controller
+      operationId: patch_connection
+      parameters:
+      - name: service_id
+        in: path
+        description: ID of l2vpn connection that needs to be changed
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/connection'
+              - $ref: '#/components/schemas/connection_v2'
+              x-content-type: application/json
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connection'
+        "400":
+          description: Invalid Connection
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
   /user:
     post:
       tags:

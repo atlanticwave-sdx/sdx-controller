@@ -61,6 +61,17 @@ class TestL2vpnController(BaseTestCase):
         )
         self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
+    def test_patch_connection(self):
+        """Test case for patch_connection
+
+        Edit and change an existing L2vpn connection by ID from the SDX-Controller
+        """
+        response = self.client.open(
+            "/SDX-Controller/1.0.0/l2vpn/{service_id}".format(service_id=Object()),
+            method="PATCH",
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
+
 
 if __name__ == "__main__":
     import unittest
