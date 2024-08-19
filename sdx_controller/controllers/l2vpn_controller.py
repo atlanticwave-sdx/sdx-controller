@@ -5,6 +5,11 @@ import uuid
 import connexion
 from flask import current_app
 
+from sdx_controller.models.connection import Connection  # noqa: E501
+from sdx_controller.models.l2vpn_body import L2vpnBody  # noqa: E501
+from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
+from sdx_controller import util
+
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.db_utils import DbUtils
 
