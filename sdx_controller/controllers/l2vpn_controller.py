@@ -170,5 +170,4 @@ def patch_connection(connection_id):  # noqa: E501
     value = db_instance.read_from_db("connections", f"{connection_id}")
     if not value:
         return "Connection not found", 404
-    # return json.loads(value[connection_id])
-    return "do some magic!"
+    return json.loads(value[connection_id])

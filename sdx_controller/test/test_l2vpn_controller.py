@@ -67,7 +67,9 @@ class TestL2vpnController(BaseTestCase):
         Edit and change an existing L2vpn connection by ID from the SDX-Controller
         """
         response = self.client.open(
-            "/SDX-Controller/1.0.0/l2vpn/{service_id}".format(service_id=Object()),
+            "/SDX-Controller/1.0.0/l2vpn/{service_id}".format(
+                service_id="38400000-8cf0-11bd-b23e-10b96e4ef00d"
+            ),
             method="PATCH",
         )
         self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
