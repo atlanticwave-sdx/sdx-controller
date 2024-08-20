@@ -26,16 +26,18 @@ db_instance.initialize_db()
 connection_handler = ConnectionHandler(db_instance)
 
 
-def delete_connection(connection_id):
+def delete_connection(service_id):
     """
     Delete connection order by ID.
 
-    :param connection_id: ID of the connection that needs to be
+    :param service_id: ID of the connection that needs to be
         deleted
-    :type connection_id: int
+    :type service_id: str
 
     :rtype: None
     """
+    connection_id = service_id
+
     logger.info(
         f"Handling delete (service id: {connection_id}) "
         f"with te_manager: {current_app.te_manager}"
@@ -71,11 +73,13 @@ def getconnection_by_id(connection_id):
     """
     Find connection by ID.
 
-    :param connection_id: ID of connection that needs to be fetched
-    :type connection_id: int
+    :param service_id: ID of connection that needs to be fetched
+    :type service_id: str
 
     :rtype: Connection
     """
+
+    connection_id = service_id
     value = db_instance.read_from_db("connections", f"{connection_id}")
     if not value:
         return "Connection not found", 404
