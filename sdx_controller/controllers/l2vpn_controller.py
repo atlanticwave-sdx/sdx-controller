@@ -69,7 +69,7 @@ def delete_connection(service_id):
     return "OK", 200
 
 
-def getconnection_by_id(connection_id):
+def getconnection_by_id(service_id):
     """
     Find connection by ID.
 
