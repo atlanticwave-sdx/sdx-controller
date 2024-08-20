@@ -121,6 +121,27 @@ class TestL2vpnController(BaseTestCase):
         # ingress port data, etc., for example.
         self.assertStatus(response, 400)
 
+    def test_place_connection_v2_no_topology(self):
+        """
+        Test case for place_connection.
+
+        Place a connection request with no topology present.
+        """
+        body = ConnectionV2()
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn",
+            method="POST",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        print(f"Response body is : {response.data.decode('utf-8')}")
+
+        # Expect 400 failure because the request is incomplete: the
+        # bare minimum connection request we sent does not have
+        # ingress port data, etc., for example.
+        self.assertStatus(response, 400)
+
     def __test_with_one_topology(self, topology_file):
         """
         A helper method to test place_connection() with just one topology.
