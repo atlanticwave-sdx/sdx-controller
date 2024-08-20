@@ -10,6 +10,7 @@ from flask import json
 from six import BytesIO
 
 from sdx_controller.models.connection import Connection
+from sdx_controller.models.connection_v2 import ConnectionV2
 from sdx_controller.models.l2vpn_body import L2vpnBody  # noqa: E501
 from sdx_controller.test import BaseTestCase, TestData
 
