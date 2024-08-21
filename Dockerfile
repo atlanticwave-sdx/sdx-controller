@@ -23,6 +23,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . /usr/src/app
 
+# Now install sdx-controller and the WSGI server.
+RUN pip install --no-cache-dir .[wsgi]
+
 # The final image.
 FROM python:3.9-slim-bullseye AS sdx-runtime-image
 

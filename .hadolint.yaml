@@ -2,3 +2,7 @@ ignored:
   # DL3008 asks to pin Debian package versions, but that way we will
   # miss out on security updates.
   - DL3008
+
+  # DL3013 asks to pin package versions. We mostly do, but hadolint
+  # can't check extras (such as `[wsgi]`), which we install.
+  - DL3013
