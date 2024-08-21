@@ -10,6 +10,7 @@ authors = [
     { name = "Yufeng Xin", email = "yxin@renci.org" },
     { name = "Cong Wang", email = "cwang@renci.org" },
     { name = "Sajith Sasidharan", email = "sajith@renci.org" },
+    { name = "Italo Valcy", email = "italo@ampath.net" },
 ]
 readme = "README.md"
 requires-python = ">=3.9"
