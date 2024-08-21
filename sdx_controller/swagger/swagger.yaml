@@ -133,7 +133,7 @@ paths:
         "404":
           description: Link not found
       x-openapi-router-controller: sdx_controller.controllers.link_controller
-  /l2vpn:
+  /l2vpn/1.0:
     get:
       tags:
       - l2vpn
@@ -178,7 +178,7 @@ paths:
         "400":
           description: Invalid Connection
       x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
-  /l2vpn/{service_id}:
+  /l2vpn/1.0/{service_id}:
     get:
       tags:
       - l2vpn
