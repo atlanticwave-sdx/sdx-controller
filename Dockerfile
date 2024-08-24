@@ -24,7 +24,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY . /usr/src/app
 
 # Now install sdx-controller and the WSGI server.
-RUN pip install --no-cache-dir .[wsgi]
+RUN pip install --no-cache-dir .[wsgi] ngrok
 
 # The final image.
 FROM python:3.9-slim-bullseye AS sdx-runtime-image
@@ -37,4 +37,4 @@ ENV PATH="/opt/venv/bin:$PATH"
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["-m", "ngrok", "--basic-auth", "sdx-username", "sdx-password", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]

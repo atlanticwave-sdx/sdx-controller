@@ -54,6 +54,7 @@ services:
       - MQ_HOST=${MQ_HOST}
       - MQ_PORT=${MQ_PORT:-5672}
       - SUB_QUEUE=${SUB_QUEUE}
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
 
 volumes:
   mongodb:
