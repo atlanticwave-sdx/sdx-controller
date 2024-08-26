@@ -13,7 +13,7 @@ class TestLinkController(BaseTestCase):
 
         get an existing link
         """
-        response = self.client.open("/SDX-Controller/1.0.0/link", method="GET")
+        response = self.client.open("/SDX-Controller/link", method="GET")
         self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
 

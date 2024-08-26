@@ -26,7 +26,7 @@ asgi_app = WsgiToAsgi(app)
 
 @app.route("/", methods=["GET"])
 def index():
-    return redirect("/SDX-Controller/1.0.0/ui/")
+    return redirect("/SDX-Controller/ui/")
 
 
 @atexit.register
