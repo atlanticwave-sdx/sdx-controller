@@ -110,7 +110,7 @@ class TestL2vpnController(BaseTestCase):
         body = Connection()
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=json.dumps(body),
             content_type="application/json",
@@ -303,7 +303,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"new_request: {new_request}")
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=new_request,
             content_type="application/json",
