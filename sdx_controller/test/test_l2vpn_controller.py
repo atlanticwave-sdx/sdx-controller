@@ -14,7 +14,7 @@ from sdx_controller.models.connection_v2 import ConnectionV2
 from sdx_controller.models.l2vpn_body import L2vpnBody  # noqa: E501
 from sdx_controller.test import BaseTestCase, TestData
 
-BASE_PATH = "/SDX-Controller/1.0.0"
+BASE_PATH = "/SDX-Controller"
 
 
 class TestL2vpnController(BaseTestCase):
@@ -28,7 +28,7 @@ class TestL2vpnController(BaseTestCase):
         """
         connection_id = 2
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
             method="DELETE",
         )
         self.assert404(response, f"Response body is : {response.data.decode('utf-8')}")
@@ -53,7 +53,7 @@ class TestL2vpnController(BaseTestCase):
         Test case for delete_connection()
 
         Set up a connection request, get the connection ID from the
-        response, and then do `DELETE /l2vpn/:connection_id`
+        response, and then do `DELETE /l2vpn/1.0/:connection_id`
         """
         # set up temanager connection first
         self.__add_the_three_topologies()
@@ -61,7 +61,7 @@ class TestL2vpnController(BaseTestCase):
         request_body = TestData.CONNECTION_REQ.read_text()
 
         connection_response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=request_body,
             content_type="application/json",
@@ -75,7 +75,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"Deleting request_id: {connection_id}")
 
         delete_response = self.client.open(
-            f"{BASE_PATH}/l2vpn/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
             method="DELETE",
         )
 
@@ -92,7 +92,7 @@ class TestL2vpnController(BaseTestCase):
         """
         connection_id = 10
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
             method="GET",
         )
 
@@ -110,7 +110,7 @@ class TestL2vpnController(BaseTestCase):
         body = Connection()
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=json.dumps(body),
             content_type="application/json",
@@ -131,7 +131,7 @@ class TestL2vpnController(BaseTestCase):
         body = ConnectionV2()
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=json.dumps(body),
             content_type="application/json",
@@ -153,7 +153,7 @@ class TestL2vpnController(BaseTestCase):
         request = TestData.CONNECTION_REQ.read_text()
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=request,
             content_type="application/json",
@@ -195,7 +195,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"request: {request} {type(request)}")
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=request,
             content_type="application/json",
@@ -232,7 +232,7 @@ class TestL2vpnController(BaseTestCase):
         request = TestData.CONNECTION_REQ.read_text()
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=request,
             content_type="application/json",
@@ -265,7 +265,7 @@ class TestL2vpnController(BaseTestCase):
             request = TestData.CONNECTION_REQ.read_text()
 
             response = self.client.open(
-                f"{BASE_PATH}/l2vpn",
+                f"{BASE_PATH}/l2vpn/1.0",
                 method="POST",
                 data=request,
                 content_type="application/json",
@@ -303,7 +303,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"new_request: {new_request}")
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=new_request,
             content_type="application/json",
@@ -346,7 +346,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"new_request: {new_request}")
 
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=new_request,
             content_type="application/json",
@@ -378,7 +378,7 @@ class TestL2vpnController(BaseTestCase):
         # Generate a random ID.
         connection_id = uuid.uuid4()
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
             method="GET",
         )
 
@@ -396,7 +396,7 @@ class TestL2vpnController(BaseTestCase):
         request_body = TestData.CONNECTION_REQ.read_text()
 
         post_response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
             data=request_body,
             content_type="application/json",
@@ -409,9 +409,9 @@ class TestL2vpnController(BaseTestCase):
         connection_id = post_response.get_json().get("service_id")
         print(f"Got connection_id: {connection_id}")
 
-        # Now try `GET /l2vpn/{connection_id}`
+        # Now try `GET /l2vpn/1.0/{connection_id}`
         get_response = self.client.open(
-            f"{BASE_PATH}/l2vpn/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
             method="GET",
         )
 
@@ -424,7 +424,7 @@ class TestL2vpnController(BaseTestCase):
         """Test case for getconnections."""
         mock_get_all_entries.return_value = {}
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="GET",
         )
         self.assertStatus(response, 404)
@@ -432,7 +432,7 @@ class TestL2vpnController(BaseTestCase):
     def test_z105_getconnections_success(self):
         """Test case for getconnections."""
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn",
+            f"{BASE_PATH}/l2vpn/1.0",
             method="GET",
         )
 

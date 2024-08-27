@@ -13,7 +13,7 @@ class TestTopologyController(BaseTestCase):
 
         get an existing topology
         """
-        response = self.client.open("/SDX-Controller/1.0.0/topology", method="GET")
+        response = self.client.open("/SDX-Controller/topology", method="GET")
         # There's nothing corresponding to `latest_topo` in DB at this
         # point, so we get a 204 No Content response.  We should
         # probably get a 404 Not Found response though.  See
@@ -27,7 +27,7 @@ class TestTopologyController(BaseTestCase):
         """
         query_string = [("topology_id", 789)]
         response = self.client.open(
-            "/SDX-Controller/1.0.0/topology/{version}".format(version=789),
+            "/SDX-Controller/topology/{version}".format(version=789),
             method="GET",
             query_string=query_string,
         )
@@ -41,7 +41,7 @@ class TestTopologyController(BaseTestCase):
         """
         query_string = [("topology_id", "test:topology:test_topology.net")]
         response = self.client.open(
-            "/SDX-Controller/1.0.0/topology/version",
+            "/SDX-Controller/topology/version",
             method="GET",
             query_string=query_string,
         )
