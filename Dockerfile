@@ -37,4 +37,4 @@ ENV PATH="/opt/venv/bin:$PATH"
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "ngrok", "--basic-auth", "sdx-username", "sdx-password", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["-m", "ngrok", "--basic-auth", "sdx-username", "sdx-password", "--domain", "renewing-large-katydid.ngrok-free.app", "uvicorn", "sdx_controller.app:asgi_app", "--host", "0.0.0.0", "--port", "8080"]
