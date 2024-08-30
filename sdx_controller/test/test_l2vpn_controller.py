@@ -26,9 +26,9 @@ class TestL2vpnController(BaseTestCase):
 
         Delete connection order by ID.
         """
-        connection_id = 2
+        service_id = 2
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
             method="DELETE",
         )
         self.assert404(response, f"Response body is : {response.data.decode('utf-8')}")
@@ -53,7 +53,7 @@ class TestL2vpnController(BaseTestCase):
         Test case for delete_connection()
 
         Set up a connection request, get the connection ID from the
-        response, and then do `DELETE /l2vpn/1.0/:connection_id`
+        response, and then do `DELETE /l2vpn/1.0/:service_id`
         """
         # set up temanager connection first
         self.__add_the_three_topologies()
@@ -71,11 +71,11 @@ class TestL2vpnController(BaseTestCase):
 
         self.assertStatus(connection_response, 200)
 
-        connection_id = connection_response.get_json().get("service_id")
-        print(f"Deleting request_id: {connection_id}")
+        service_id = connection_response.get_json().get("service_id")
+        print(f"Deleting request_id: {service_id}")
 
         delete_response = self.client.open(
-            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
             method="DELETE",
         )
 
@@ -90,14 +90,14 @@ class TestL2vpnController(BaseTestCase):
 
         Find connection by ID.
         """
-        connection_id = 10
+        service_id = 10
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
             method="GET",
         )
 
-        # The connection_id we've supplied above should not exist.
-        # TODO: test for existing connection_id.  See
+        # The service_id we've supplied above should not exist.
+        # TODO: test for existing service_id.  See
         # https://github.com/atlanticwave-sdx/sdx-controller/issues/34.
         self.assertStatus(response, 404)
 
@@ -324,8 +324,8 @@ class TestL2vpnController(BaseTestCase):
 
         # Returned connection ID should be different from the original
         # request ID.
-        connection_id = response.get_json().get("service_id")
-        self.assertNotEqual(connection_id, original_request_id)
+        service_id = response.get_json().get("service_id")
+        self.assertNotEqual(service_id, original_request_id)
 
     def test_place_connection_v2_with_three_topologies_200_response(self):
         """
@@ -368,17 +368,17 @@ class TestL2vpnController(BaseTestCase):
 
         # Returned connection ID should be different from the original
         # request ID.
-        connection_id = response.get_json().get("service_id")
-        self.assertNotEqual(connection_id, original_request_id)
+        service_id = response.get_json().get("service_id")
+        self.assertNotEqual(service_id, original_request_id)
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
         Test getconnection_by_id with a non-existent connection ID.
         """
         # Generate a random ID.
-        connection_id = uuid.uuid4()
+        service_id = uuid.uuid4()
         response = self.client.open(
-            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
             method="GET",
         )
 
@@ -406,12 +406,12 @@ class TestL2vpnController(BaseTestCase):
 
         self.assertStatus(post_response, 200)
 
-        connection_id = post_response.get_json().get("service_id")
-        print(f"Got connection_id: {connection_id}")
+        service_id = post_response.get_json().get("service_id")
+        print(f"Got service_id: {service_id}")
 
-        # Now try `GET /l2vpn/1.0/{connection_id}`
+        # Now try `GET /l2vpn/1.0/{service_id}`
         get_response = self.client.open(
-            f"{BASE_PATH}/l2vpn/1.0/{connection_id}",
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
             method="GET",
         )
 

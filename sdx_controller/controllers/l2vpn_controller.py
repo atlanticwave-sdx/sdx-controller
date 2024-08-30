@@ -36,34 +36,32 @@ def delete_connection(service_id):
 
     :rtype: None
     """
-    connection_id = service_id
-
     logger.info(
-        f"Handling delete (service id: {connection_id}) "
+        f"Handling delete (service id: {service_id}) "
         f"with te_manager: {current_app.te_manager}"
     )
 
     # # Looking up by UUID do not seem work yet.  Will address in
     # # https://github.com/atlanticwave-sdx/sdx-controller/issues/252.
     #
-    # value = db_instance.read_from_db(f"{connection_id}")
+    # value = db_instance.read_from_db(f"{service_id}")
     # print(f"value: {value}")
     # if not value:
     #     return "Not found", 404
 
     try:
         # TODO: pce's unreserve_vlan() method silently returns even if the
-        # connection_id is not found.  This should in fact be an error.
+        # service_id is not found.  This should in fact be an error.
         #
         # https://github.com/atlanticwave-sdx/pce/issues/180
-        connection = db_instance.read_from_db("connections", f"{connection_id}")
+        connection = db_instance.read_from_db("connections", f"{service_id}")
         if not connection:
             return "Did not find connection", 404
-        connection_handler.remove_connection(current_app.te_manager, connection_id)
-        db_instance.mark_deleted("connections", f"{connection_id}")
-        db_instance.mark_deleted("breakdowns", f"{connection_id}")
+        connection_handler.remove_connection(current_app.te_manager, service_id)
+        db_instance.mark_deleted("connections", f"{service_id}")
+        db_instance.mark_deleted("breakdowns", f"{service_id}")
     except Exception as e:
-        logger.info(f"Delete failed (connection id: {connection_id}): {e}")
+        logger.info(f"Delete failed (connection id: {service_id}): {e}")
         return f"Failed, reason: {e}", 500
 
     return "OK", 200
@@ -79,11 +77,10 @@ def getconnection_by_id(service_id):
     :rtype: Connection
     """
 
-    connection_id = service_id
-    value = db_instance.read_from_db("connections", f"{connection_id}")
+    value = db_instance.read_from_db("connections", f"{service_id}")
     if not value:
         return "Connection not found", 404
-    return json.loads(value[connection_id])
+    return json.loads(value[service_id])
 
 
 def getconnections():  # noqa: E501
@@ -98,8 +95,8 @@ def getconnections():  # noqa: E501
         return "No connection was found", 404
     return_values = {}
     for connection in values:
-        connection_id = next(iter(connection))
-        return_values[connection_id] = json.loads(connection[connection_id])
+        service_id = next(iter(connection))
+        return_values[service_id] = json.loads(connection[service_id])
     return return_values
 
 
@@ -121,32 +118,32 @@ def place_connection(body):
 
     logger.info("Placing connection. Saving to database.")
 
-    connection_id = body.get("id")
+    service_id = body.get("id")
 
-    if connection_id is None:
-        connection_id = str(uuid.uuid4())
-        body["id"] = connection_id
-        logger.info(f"Request has no ID. Generated ID: {connection_id}")
+    if service_id is None:
+        service_id = str(uuid.uuid4())
+        body["id"] = service_id
+        logger.info(f"Request has no ID. Generated ID: {service_id}")
 
     logger.info("Saving to database complete.")
 
     logger.info(
-        f"Handling request {connection_id} with te_manager: {current_app.te_manager}"
+        f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code == 200:
         db_instance.add_key_value_pair_to_db(
-            "connections", connection_id, json.dumps(body)
+            "connections", service_id, json.dumps(body)
         )
 
     logger.info(
-        f"place_connection result: ID: {connection_id} reason='{reason}', code={code}"
+        f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
 
     response = {
-        "service_id": connection_id,
+        "service_id": service_id,
         "status": "OK" if code == 200 else "Failure",
         "reason": reason,
     }
@@ -158,14 +155,14 @@ def place_connection(body):
     # # https://github.com/atlanticwave-sdx/sdx-controller/issues/251
     # response = body
 
-    # response["id"] = connection_id
+    # response["id"] = service_id
     # response["status"] = "success" if code == 200 else "failure"
     # response["reason"] = reason # `reason` is not present in schema though.
 
     return response, code
 
 
-def patch_connection(connection_id, body=None):  # noqa: E501
+def patch_connection(service_id, body=None):  # noqa: E501
     """Edit and change an existing L2vpn connection by ID from the SDX-Controller
 
      # noqa: E501
@@ -177,11 +174,10 @@ def patch_connection(connection_id, body=None):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db("connections", f"{connection_id}")
+    value = db_instance.read_from_db("connections", f"{service_id}")
     if not value:
         return "Connection not found", 404
 
-    logger.info(f"Changed connection: {body}")
     if not connexion.request.is_json:
         return "Request body must be JSON", 400
 
@@ -189,4 +185,34 @@ def patch_connection(connection_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {body}")
 
-    return json.loads(value[connection_id])
+    new_service_id = str(uuid.uuid4())
+    body["id"] = new_service_id
+    logger.info(f"Request has no ID. Generated ID: {service_id}")
+
+    try:
+        logger.info("Removing connection")
+        connection_handler.remove_connection(current_app.te_manager, service_id)
+        db_instance.mark_deleted("connections", f"{service_id}")
+        db_instance.mark_deleted("breakdowns", f"{service_id}")
+        logger.info("Removed connection: ", service_id)
+        logger.info(
+            f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
+        )
+        reason, code = connection_handler.place_connection(current_app.te_manager, body)
+        if code == 200:
+            db_instance.add_key_value_pair_to_db(
+                "connections", service_id, json.dumps(body)
+            )
+        logger.info(
+            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
+        )
+        response = {
+            "service_id": service_id,
+            "status": "OK" if code == 200 else "Failure",
+            "reason": reason,
+        }
+    except Exception as e:
+        logger.info(f"Delete failed (connection id: {service_id}): {e}")
+        return f"Failed, reason: {e}", 500
+
+    return response, code
