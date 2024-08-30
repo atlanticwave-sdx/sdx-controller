@@ -172,12 +172,10 @@ class ConnectionHandler:
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.unreserve_vlan(service_id)
-        connection_request = self.db_instance.read_from_db(
-            "connections", service_id
-        )
+        connection_request = self.db_instance.read_from_db("connections", service_id)
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
-        
+
         connection_request = connection_request[service_id]
 
         breakdown = self.db_instance.read_from_db("breakdowns", service_id)
