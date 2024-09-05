@@ -1,11 +1,10 @@
-import json
 import logging
 import os
 from urllib.parse import urlparse
 
 import pymongo
 
-COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links"]
+COLLECTION_NAMES = ["topologies", "connections", "breakdowns", "domains", "links", "historical_connections"]
 
 pymongo_logger = logging.getLogger("pymongo")
 pymongo_logger.setLevel(logging.INFO)

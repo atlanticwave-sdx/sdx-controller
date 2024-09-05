@@ -170,6 +170,24 @@ class ConnectionHandler:
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
             return f"Error: {e}", 400
 
+    def archive_connection(self, service_id) -> None:
+        connection_request = self.db_instance.read_from_db("connections", service_id)
+        if not connection_request:
+            return
+        
+        self.db_instance.delete_one_entry("connections", service_id)
+
+        historical_connections = self.db_instance.read_from_db("historical_connections", service_id)
+
+        if historical_connections:
+            historical_connections[service_id].append(connection_request)
+            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, historical_connections)
+        else:
+            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, [connection_request])
+        logger.debug(f"Archived connection: {service_id}")
+        print("Getting historical connection")
+        print(historical_connections = self.db_instance.read_from_db("historical_connections", service_id))
+
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.unreserve_vlan(service_id)
         connection_request = self.db_instance.read_from_db("connections", service_id)
@@ -187,6 +205,8 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", json.loads(connection_request)
             )
+            self.db_instance.delete_one_entry("breakdowns", service_id)
+            self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
