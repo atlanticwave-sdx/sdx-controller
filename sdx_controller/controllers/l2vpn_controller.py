@@ -196,18 +196,18 @@ def patch_connection(service_id, body=None):  # noqa: E501
         db_instance.mark_deleted("breakdowns", f"{service_id}")
         logger.info("Removed connection: ", service_id)
         logger.info(
-            f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
+            f"Placing new connection {new_service_id} with te_manager: {current_app.te_manager}"
         )
         reason, code = connection_handler.place_connection(current_app.te_manager, body)
         if code == 200:
             db_instance.add_key_value_pair_to_db(
-                "connections", service_id, json.dumps(body)
+                "connections", new_service_id, json.dumps(body)
             )
         logger.info(
-            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
+            f"place_connection result: ID: {new_service_id} reason='{reason}', code={code}"
         )
         response = {
-            "service_id": service_id,
+            "service_id": new_service_id,
             "status": "OK" if code == 200 else "Failure",
             "reason": reason,
         }
