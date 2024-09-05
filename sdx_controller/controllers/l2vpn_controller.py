@@ -185,16 +185,13 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {body}")
 
-    new_service_id = str(uuid.uuid4())
-    body["id"] = new_service_id
+    body["id"] = service_id
     logger.info(f"Request has no ID. Generated ID: {service_id}")
 
     try:
         logger.info("Removing connection")
         connection_handler.remove_connection(current_app.te_manager, service_id)
-        db_instance.mark_deleted("connections", f"{service_id}")
-        db_instance.mark_deleted("breakdowns", f"{service_id}")
-        logger.info("Removed connection: ", service_id)
+        logger.info(f"Removed connection: {service_id}")
         logger.info(
             f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
         )

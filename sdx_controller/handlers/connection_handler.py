@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import traceback
 from typing import Tuple
 
@@ -131,8 +132,8 @@ class ConnectionHandler:
         Note that we can return early if things fail.  Return value is
         a tuple of the form (reason, HTTP code).
         """
-        for num, val in enumerate(te_manager.get_topology_map().values()):
-            logger.debug(f"TE topology #{num}: {val}")
+        # for num, val in enumerate(te_manager.get_topology_map().values()):
+        #     logger.debug(f"TE topology #{num}: {val}")
 
         graph = te_manager.generate_graph_te()
         if graph is None:
@@ -170,6 +171,36 @@ class ConnectionHandler:
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
             return f"Error: {e}", 400
 
+    def archive_connection(self, service_id) -> None:
+        connection_request = self.db_instance.read_from_db("connections", service_id)
+        if not connection_request:
+            return
+
+        connection_request_str = connection_request[service_id]
+        self.db_instance.delete_one_entry("connections", service_id)
+
+        historical_connections = self.db_instance.read_from_db(
+            "historical_connections", service_id
+        )
+        # Current timestamp in seconds
+        timestamp = int(time.time())
+
+        if historical_connections:
+            historical_connections_list = historical_connections[service_id]
+            historical_connections_list.append(
+                json.dumps({timestamp: json.loads(connection_request_str)})
+            )
+            self.db_instance.add_key_value_pair_to_db(
+                "historical_connections", service_id, historical_connections_list
+            )
+        else:
+            self.db_instance.add_key_value_pair_to_db(
+                "historical_connections",
+                service_id,
+                [json.dumps({timestamp: json.loads(connection_request_str)})],
+            )
+        logger.debug(f"Archived connection: {service_id}")
+
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.unreserve_vlan(service_id)
         connection_request = self.db_instance.read_from_db("connections", service_id)
@@ -187,6 +218,8 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", json.loads(connection_request)
             )
+            self.db_instance.delete_one_entry("breakdowns", service_id)
+            self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
