@@ -56,10 +56,10 @@ def topology_version(topology_id):  # noqa: E501
     """
     return "do some magic!"
 
+
 def get_topology_domains():
     domain_list = db_instance.read_from_db("domains", "domain_list")
     if not domain_list:
         return []
-    
+
     return domain_list["domain_list"]
-    
