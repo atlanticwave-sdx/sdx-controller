@@ -174,18 +174,24 @@ class ConnectionHandler:
         connection_request = self.db_instance.read_from_db("connections", service_id)
         if not connection_request:
             return
-        
+
         connection_request_str = connection_request[service_id]
         self.db_instance.delete_one_entry("connections", service_id)
 
-        historical_connections = self.db_instance.read_from_db("historical_connections", service_id)
+        historical_connections = self.db_instance.read_from_db(
+            "historical_connections", service_id
+        )
 
         if historical_connections:
             historical_connections_list = historical_connections[service_id]
             historical_connections_list.append(connection_request_str)
-            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, historical_connections_list)
+            self.db_instance.add_key_value_pair_to_db(
+                "historical_connections", service_id, historical_connections_list
+            )
         else:
-            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, [connection_request_str])
+            self.db_instance.add_key_value_pair_to_db(
+                "historical_connections", service_id, [connection_request_str]
+            )
         logger.debug(f"Archived connection: {service_id}")
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
