@@ -103,6 +103,26 @@ paths:
         "404":
           description: Topology not found
       x-openapi-router-controller: sdx_controller.controllers.topology_controller
+  /topology/domain:
+    get:
+      tags:
+      - topology
+      summary: List all domains
+      description: Returns a list of all domains
+      operationId: get_topology_domains
+      responses:
+        "200":
+          description: ok
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Topology not found
+      x-openapi-router-controller: sdx_controller.controllers.topology_controller
   /node:
     get:
       tags:

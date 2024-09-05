@@ -20,7 +20,7 @@ def get_topology():  # noqa: E501
 
     # TODO: this is a workaround because of the way we read values
     # from MongoDB; refactor and test this more.
-    if topo_val is None:
+    if not topo_val:
         return None
 
     return topo_val["latest_topo"]
@@ -55,3 +55,11 @@ def topology_version(topology_id):  # noqa: E501
     :rtype: Topology
     """
     return "do some magic!"
+
+
+def get_topology_domains():
+    domain_list = db_instance.read_from_db("domains", "domain_list")
+    if not domain_list:
+        return []
+
+    return domain_list["domain_list"]
