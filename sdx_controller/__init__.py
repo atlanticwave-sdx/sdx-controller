@@ -53,6 +53,7 @@ def create_app(run_listener: bool = True):
     else:
         logging.basicConfig(level=logging.DEBUG)
 
+    logging.getLogger("sdx_pce.topology.temanager").setLevel(logging.INFO)
     app = connexion.App(__name__, specification_dir="./swagger/")
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api(

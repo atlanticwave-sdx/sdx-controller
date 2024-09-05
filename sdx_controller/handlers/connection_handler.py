@@ -131,8 +131,8 @@ class ConnectionHandler:
         Note that we can return early if things fail.  Return value is
         a tuple of the form (reason, HTTP code).
         """
-        for num, val in enumerate(te_manager.get_topology_map().values()):
-            logger.debug(f"TE topology #{num}: {val}")
+        # for num, val in enumerate(te_manager.get_topology_map().values()):
+        #     logger.debug(f"TE topology #{num}: {val}")
 
         graph = te_manager.generate_graph_te()
         if graph is None:
@@ -175,18 +175,18 @@ class ConnectionHandler:
         if not connection_request:
             return
         
+        connection_request_str = connection_request[service_id]
         self.db_instance.delete_one_entry("connections", service_id)
 
         historical_connections = self.db_instance.read_from_db("historical_connections", service_id)
 
         if historical_connections:
-            historical_connections[service_id].append(connection_request)
-            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, historical_connections)
+            historical_connections_list = historical_connections[service_id]
+            historical_connections_list.append(connection_request_str)
+            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, historical_connections_list)
         else:
-            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, [connection_request])
+            self.db_instance.add_key_value_pair_to_db("historical_connections", service_id, [connection_request_str])
         logger.debug(f"Archived connection: {service_id}")
-        print("Getting historical connection")
-        print(historical_connections = self.db_instance.read_from_db("historical_connections", service_id))
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.unreserve_vlan(service_id)

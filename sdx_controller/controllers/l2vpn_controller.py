@@ -185,29 +185,26 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {body}")
 
-    new_service_id = str(uuid.uuid4())
-    body["id"] = new_service_id
+    body["id"] = service_id
     logger.info(f"Request has no ID. Generated ID: {service_id}")
 
     try:
         logger.info("Removing connection")
         connection_handler.remove_connection(current_app.te_manager, service_id)
-        db_instance.mark_deleted("connections", f"{service_id}")
-        db_instance.mark_deleted("breakdowns", f"{service_id}")
-        logger.info("Removed connection: ", service_id)
+        logger.info(f"Removed connection: {service_id}")
         logger.info(
-            f"Placing new connection {new_service_id} with te_manager: {current_app.te_manager}"
+            f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
         )
         reason, code = connection_handler.place_connection(current_app.te_manager, body)
         if code == 200:
             db_instance.add_key_value_pair_to_db(
-                "connections", new_service_id, json.dumps(body)
+                "connections", service_id, json.dumps(body)
             )
         logger.info(
-            f"place_connection result: ID: {new_service_id} reason='{reason}', code={code}"
+            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
         )
         response = {
-            "service_id": new_service_id,
+            "service_id": service_id,
             "status": "OK" if code == 200 else "Failure",
             "reason": reason,
         }
