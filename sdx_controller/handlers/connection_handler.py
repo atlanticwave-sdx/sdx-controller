@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import traceback
 from typing import Tuple
 
@@ -181,16 +182,22 @@ class ConnectionHandler:
         historical_connections = self.db_instance.read_from_db(
             "historical_connections", service_id
         )
+        # Current timestamp in seconds
+        timestamp = int(time.time())
 
         if historical_connections:
             historical_connections_list = historical_connections[service_id]
-            historical_connections_list.append(connection_request_str)
+            historical_connections_list.append(
+                json.dumps({timestamp: json.loads(connection_request_str)})
+            )
             self.db_instance.add_key_value_pair_to_db(
                 "historical_connections", service_id, historical_connections_list
             )
         else:
             self.db_instance.add_key_value_pair_to_db(
-                "historical_connections", service_id, [connection_request_str]
+                "historical_connections",
+                service_id,
+                [json.dumps({timestamp: json.loads(connection_request_str)})],
             )
         logger.debug(f"Archived connection: {service_id}")
 
