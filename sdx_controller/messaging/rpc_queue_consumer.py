@@ -46,24 +46,24 @@ class RpcConsumer(object):
         self._exit_event = threading.Event()
 
     def on_request(self, ch, method, props, message_body):
-        response = message_body
+        # response = message_body
         self._thread_queue.put(message_body)
 
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=MQ_HOST,
-                port=MQ_PORT,
-                credentials=pika.PlainCredentials(username=MQ_USER, password=MQ_PASS),
-            )
-        )
-        self.channel = self.connection.channel()
+        # self.connection = pika.BlockingConnection(
+        #     pika.ConnectionParameters(
+        #         host=MQ_HOST,
+        #         port=MQ_PORT,
+        #         credentials=pika.PlainCredentials(username=MQ_USER, password=MQ_PASS),
+        #     )
+        # )
+        # self.channel = self.connection.channel()
 
-        ch.basic_publish(
-            exchange=self.exchange_name,
-            routing_key=props.reply_to,
-            properties=pika.BasicProperties(correlation_id=props.correlation_id),
-            body=str(response),
-        )
+        # ch.basic_publish(
+        #     exchange=self.exchange_name,
+        #     routing_key=props.reply_to,
+        #     properties=pika.BasicProperties(correlation_id=props.correlation_id),
+        #     body=str(response),
+        # )
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start_consumer(self):
@@ -77,8 +77,7 @@ class RpcConsumer(object):
         MESSAGE_ID = 0
         HEARTBEAT_ID = 0
 
-        rpc = RpcConsumer(thread_queue, "", self.te_manager)
-        t1 = threading.Thread(target=rpc.start_consumer, args=(), daemon=True)
+        t1 = threading.Thread(target=self.start_consumer, args=(), daemon=True)
         t1.start()
 
         lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
