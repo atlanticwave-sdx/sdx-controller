@@ -11,6 +11,7 @@ COLLECTION_NAMES = [
     "domains",
     "links",
     "historical_connections",
+    "users",
 ]
 
 pymongo_logger = logging.getLogger("pymongo")

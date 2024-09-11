@@ -1,6 +1,18 @@
-import connexion
+import json
+import logging
+import secrets
+import uuid
 
+import connexion
+from flask import current_app
+
+from sdx_controller.db_utils import DbUtils
 from sdx_controller.models.user import User  # noqa: E501
+
+# Get DB connection and tables set up.
+db_instance = DbUtils()
+db_instance.initialize_db()
+collection_name = "users"
 
 
 def create_user(body):  # noqa: E501
@@ -13,9 +25,24 @@ def create_user(body):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        body = User.from_dict(connexion.request.get_json())  # noqa: E501
-    return "do some magic!"
+    logger.info(f"Creating a user: {body}")
+    if not connexion.request.is_json:
+        return "Request body must be JSON", 400
+
+    body = connexion.request.get_json()
+    user_id = body.get("id")
+    if user_id is None:
+        user_id_id = str(uuid.uuid4())
+        body["id"] = user_id
+        logger.info(f"User has no ID. Generated ID: {user_id}")
+
+    user = User.from_dict(body)  # noqa: E501
+
+    logger.info(f"Gathered connexion JSON: {body}")
+
+    db_instance.add_key_value_pair_to_db(collection_name, user_id, json.dumps(body))
+
+    logger.info("Saving to database complete.")
 
 
 def create_users_with_array_input(body):  # noqa: E501
@@ -115,3 +142,15 @@ def update_user(body, username):  # noqa: E501
     if connexion.request.is_json:
         body = User.from_dict(connexion.request.get_json())  # noqa: E501
     return "do some magic!"
+
+
+def generate_api_key(username):  # noqa: E501
+    """Generate API key for a user
+
+    This can only be done by the logged in user. # noqa: E501
+
+    :param username: The name of the user for generating API key
+    :type username: str
+    """  # Generate the API key using secrets.token_hex()
+    api_key = secrets.token_hex(16)
+    return api_key

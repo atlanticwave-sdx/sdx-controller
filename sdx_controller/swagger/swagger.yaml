@@ -301,7 +301,11 @@ paths:
       responses:
         default:
           description: successful operation
+        "400":
+          description: Invalid API_KEY supplied
       x-openapi-router-controller: sdx_controller.controllers.user_controller
+      security:
+        - api_key: []
   /user/createWithArray:
     post:
       tags:
