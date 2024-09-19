@@ -388,12 +388,9 @@ class TestL2vpnController(BaseTestCase):
         """
         self.__add_the_three_topologies()
 
-        request = json.loads(
-            """
+        request = """
             {
                 "name": "new-connection",
-                "description": "a test circuit",
-                "id": "test-connection-id",
                 "endpoints": [
                     {
                         "port_id": "urn:sdx:port:amlight.net:A1:1",
@@ -405,13 +402,7 @@ class TestL2vpnController(BaseTestCase):
                     }
                 ]
             }
-            """
-        )
-
-        print(
-            f"requested vlan 0: {request['endpoints'][0]['vlan']}, "
-            f"requested vlan 1: {request['endpoints'][1]['vlan']}"
-        )
+        """
 
         response = self.client.open(
             f"{BASE_PATH}/l2vpn/1.0",
