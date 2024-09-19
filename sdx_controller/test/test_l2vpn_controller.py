@@ -371,6 +371,48 @@ class TestL2vpnController(BaseTestCase):
         service_id = response.get_json().get("service_id")
         self.assertNotEqual(service_id, original_request_id)
 
+    def test_place_connection_v2_with_any_vlan_in_request(self):
+        """
+        Test that we get a valid response when the VLAN requested for
+        is "any".
+        """
+        self.__add_the_three_topologies()
+
+        request = json.loads(
+            """
+            {
+                "name": "new-connection",
+                "description": "a test circuit",
+                "id": "test-connection-id",
+                "endpoints": [
+                    {
+                        "port_id": "urn:sdx:port:amlight.net:A1:1",
+                        "vlan": "any"
+                    },
+                    {
+                        "port_id": "urn:sdx:port:amlight:B1:1",
+                        "vlan": "any"
+                    }
+                ]
+            }
+            """
+        )
+
+        print(
+            f"requested vlan 0: {request['endpoints'][0]['vlan']}, "
+            f"requested vlan 1: {request['endpoints'][1]['vlan']}"
+        )
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0",
+            method="POST",
+            data=new_request,
+            content_type="application/json",
+        )
+
+        print(f"Response body is : {response.data.decode('utf-8')}")
+        print(f"Response JSON is : {response.get_json()}")
+
     def test_z100_getconnection_by_id_expect_404(self):
         """
         Test getconnection_by_id with a non-existent connection ID.
