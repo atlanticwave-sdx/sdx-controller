@@ -284,7 +284,7 @@ def get_connection_status(db, service_id: str):
         logger.info(f"Could not find breakdown for {service_id}")
         return None
 
-    print(f"breakdown for {service_id}: {breakdown}")
+    logger.info(f"breakdown for {service_id}: {breakdown}")
 
     # The breakdown we read from DB is in this shape:
     #
