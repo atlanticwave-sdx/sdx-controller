@@ -305,6 +305,27 @@ def get_connection_status(db, service_id: str):
     #         }
     #     },
     # }
+    #
+    # We need to shape that into this form, at a minimum:
+    #
+    # {
+    #     "c73da8e1-5d03-4620-a1db-7cdf23e8978c": {
+    #         "service_id": "c73da8e1-5d03-4620-a1db-7cdf23e8978c",
+    #         "name": "new-connection",
+    #         "endpoints": [
+    #          {
+    #             "port_id": "urn:sdx:port:amlight.net:A1:1",
+    #             "vlan": "150"
+    #          },
+    #          {
+    #             "port_id": "urn:sdx:port:amlight:B1:1",
+    #             "vlan": "300"}
+    #         ],
+    #     }
+    # }
+    #
+    # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
+    #
 
     response = {}
 
@@ -334,10 +355,16 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_z)
 
+    # TODO: we're missing many of the attributes in the response here,
+    # such as: name, description, qos_metrics, notifications,
+    # ownership, creation_date, archived_date, status, state,
+    # counters_location, last_modified, current_path, oxp_service_ids.
+    # Implementing each of them would be worth a separate ticket each,
+    # so we'll just make do with this minimal response for now.
     response[service_id] = {
         "service_id": service_id,
         # TODO: use the real name here.
-        "name": "Fake Name",
+        "name": "Fake connection name",
         "endpoints": endpoints,
     }
 
