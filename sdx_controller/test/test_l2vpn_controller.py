@@ -349,8 +349,8 @@ class TestL2vpnController(BaseTestCase):
         # on the egress port.  This is an unsolvable request because
         # of (1), and an invalid one because of (2) since both ports
         # have to ask for either a range or a single VLAN.
-        connection_request["endpoints"][0]["vlan"] = "100"
-        connection_request["endpoints"][1]["vlan"] = "100"
+        request["endpoints"][0]["vlan"] = "100"
+        request["endpoints"][1]["vlan"] = "100"
 
         new_request = json.dumps(request)
         print(f"new_request: {new_request}")
