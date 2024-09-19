@@ -411,10 +411,76 @@ class TestL2vpnController(BaseTestCase):
             content_type="application/json",
         )
 
-        print(f"Response body is : {response.data.decode('utf-8')}")
-        print(f"Response JSON is : {response.get_json()}")
+        print(f"POST response body is : {response.data.decode('utf-8')}")
+        print(f"POST Response JSON is : {response.get_json()}")
 
         self.assertStatus(response, 200)
+
+        service_id = response.get_json().get("service_id")
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
+            method="GET",
+        )
+
+        print(f"GET response body is : {response.data.decode('utf-8')}")
+        print(f"GET response JSON is : {response.get_json()}")
+
+        self.assertStatus(response, 200)
+
+        # Expect a response like this:
+        #
+        # {
+        #     "c73da8e1-5d03-4620-a1db-7cdf23e8978c": {
+        #         "service_id": "c73da8e1-5d03-4620-a1db-7cdf23e8978c",
+        #         "name": "new-connection",
+        #         "endpoints": [
+        #          {
+        #             "port_id": "urn:sdx:port:amlight.net:A1:1",
+        #             "vlan": "150"
+        #          },
+        #          {
+        #             "port_id": "urn:sdx:port:amlight:B1:1",
+        #             "vlan": "300"}
+        #         ],
+        #     }
+        # }
+        #
+        # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
+
+        blob = response.get_json()
+        service = blob.get(service_id)
+
+        self.assertIsNotNone(service)
+        self.assertEqual(service_id, service.get(service_id))
+
+        endpoints = service.get("endpoints")
+
+        self.assertEqual(len(endpoints), 2)
+
+        ep0 = endpoints[0]
+        ep1 = endpoints[1]
+
+        # What were the original port_ids now?
+        request_dict = json.loads(connection_request)
+        requested_port0 = request_dict.get("endpoints")[0].get("port_id")
+        requested_port1 = request_dict.get("endpoints")[1].get("port_id")
+
+        self.assertEqual(ep0.get("port_id"), requested_port0)
+        self.assertEqual(ep1.get("port_id"), requested_port1)
+
+        def is_integer(s: str):
+            """
+            Retrun True if `s` wraps a number as a string.
+            """
+            try:
+                int(s)
+                return True
+            except:
+                return False
+
+        self.assertTrue(is_integer(ep0.get("vlan")))
+        self.assertTrue(is_integer(ep1.get("vlan")))
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
