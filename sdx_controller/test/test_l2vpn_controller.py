@@ -335,14 +335,24 @@ class TestL2vpnController(BaseTestCase):
         self.__add_the_three_topologies()
 
         # There should be solution for this request.
-        request = TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text()
+        request = json.loads(TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text())
 
         # Remove any existing request ID.
-        request_json = json.loads(request)
-        original_request_id = request_json.pop("id")
+        original_request_id = request.pop("id")
         print(f"original_request_id: {original_request_id}")
 
-        new_request = json.dumps(request_json)
+        # TODO: As a temporary workaround until the original
+        # connection request is corrected in datamodel, we modify the
+        # connection request for this test so that we have a solvable
+        # one. The original one asks for (1) a VLAN that is not
+        # present on the ingress port (777), and (2) a range ("55:90")
+        # on the egress port.  This is an unsolvable request because
+        # of (1), and an invalid one because of (2) since both ports
+        # have to ask for either a range or a single VLAN.
+        connection_request["endpoints"][0]["vlan"] = "100"
+        connection_request["endpoints"][1]["vlan"] = "100"
+
+        new_request = json.dumps(request)
         print(f"new_request: {new_request}")
 
         response = self.client.open(
