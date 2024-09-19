@@ -355,16 +355,34 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_z)
 
-    # TODO: we're missing many of the attributes in the response here,
-    # such as: name, description, qos_metrics, notifications,
-    # ownership, creation_date, archived_date, status, state,
-    # counters_location, last_modified, current_path, oxp_service_ids.
-    # Implementing each of them would be worth a separate ticket each,
-    # so we'll just make do with this minimal response for now.
+    # Find the name and description from the original connection
+    # request for this service_id.
+    name = "unknown"
+    description = "unknown"
+
+    request = db.read_from_db("connections", service_id)
+    if not request:
+        logger.error(f"Can't find a connection request for {service_id}")
+        # TODO: we're in a strange state here. Should we panic?
+    else:
+        logger.info(f"Found request for {service_id}: {request}")
+        # We seem to have saved the original request in the form of a
+        # string into the DB, not a record.
+        request_dict = json.loads(request.get(service_id))
+        name = request_dict.get("name")
+        description = request_dict.get("description")
+
+    # TODO: we're missing many of the attributes in the response here
+    # which have been specified in the provisioning spec, such as:
+    # name, description, qos_metrics, notifications, ownership,
+    # creation_date, archived_date, status, state, counters_location,
+    # last_modified, current_path, oxp_service_ids.  Implementing each
+    # of them would be worth a separate ticket each, so we'll just
+    # make do with this minimal response for now.
     response[service_id] = {
         "service_id": service_id,
-        # TODO: use the real name here.
-        "name": "Fake connection name",
+        "name": name,
+        "description": description,
         "endpoints": endpoints,
     }
 

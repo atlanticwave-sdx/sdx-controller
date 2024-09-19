@@ -488,11 +488,18 @@ class TestL2vpnController(BaseTestCase):
         vlan0 = endpoints[0].get("vlan")
         vlan1 = endpoints[1].get("vlan")
 
+        # Check that one VLAN has been assigned on ingress port...
         self.assertIsInstance(vlan0, str)
         self.assertTrue(is_integer(vlan0))
 
+        # ... and one VLAN has been assigned on egress port.
         self.assertIsInstance(vlan1, str)
         self.assertTrue(is_integer(vlan1))
+
+        # Check that name and description match in request and
+        # response.
+        self.assertEqual(service.get("name"), request_dict.get("name"))
+        self.assertEqual(service.get("description"), request_dict.get("description"))
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
