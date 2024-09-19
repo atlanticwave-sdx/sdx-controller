@@ -388,7 +388,7 @@ class TestL2vpnController(BaseTestCase):
         """
         self.__add_the_three_topologies()
 
-        request = """
+        connection_request = """
             {
                 "name": "new-connection",
                 "endpoints": [
@@ -407,12 +407,14 @@ class TestL2vpnController(BaseTestCase):
         response = self.client.open(
             f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
-            data=request,
+            data=connection_request,
             content_type="application/json",
         )
 
         print(f"Response body is : {response.data.decode('utf-8')}")
         print(f"Response JSON is : {response.get_json()}")
+
+        self.assertStatus(response, 200)
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
