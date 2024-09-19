@@ -406,7 +406,7 @@ class TestL2vpnController(BaseTestCase):
         response = self.client.open(
             f"{BASE_PATH}/l2vpn/1.0",
             method="POST",
-            data=new_request,
+            data=request,
             content_type="application/json",
         )
 
