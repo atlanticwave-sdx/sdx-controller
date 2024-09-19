@@ -448,8 +448,7 @@ class TestL2vpnController(BaseTestCase):
         #
         # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
 
-        blob = response.get_json()
-        service = blob.get(service_id)
+        service = response.get_json().get(service_id)
 
         self.assertIsNotNone(service)
         self.assertEqual(service_id, service.get("service_id"))
