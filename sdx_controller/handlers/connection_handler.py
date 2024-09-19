@@ -270,3 +270,77 @@ class ConnectionHandler:
                     logger.debug("Removed connection:")
                     logger.debug(connection)
                     self.place_connection(te_manager, connection)
+
+
+def get_connection_status(db, service_id: str):
+    """
+    Form a response to `GET /l2vpn/1.0/{service_id}`.
+    """
+    assert db is not None
+    assert service_id is not None
+
+    breakdown = db.read_from_db("breakdowns", service_id)
+    if not breakdown:
+        logger.info(f"Could not find breakdown for {service_id}")
+        return None
+
+    print(f"breakdown for {service_id}: {breakdown}")
+
+    # The breakdown we read from DB is in this shape:
+    #
+    # {
+    #     "_id": ObjectId("66ec71770c7022eb0922f41a"),
+    #     "5b7df397-2269-489b-8e03-f256461265a0": {
+    #         "urn:sdx:topology:amlight.net": {
+    #             "name": "AMLIGHT_vlan_1000_10001",
+    #             "dynamic_backup_path": True,
+    #             "uni_a": {
+    #                 "tag": {"value": 1000, "tag_type": 1},
+    #                 "port_id": "urn:sdx:port:amlight.net:A1:1",
+    #             },
+    #             "uni_z": {
+    #                 "tag": {"value": 10001, "tag_type": 1},
+    #                 "port_id": "urn:sdx:port:amlight.net:B1:3",
+    #             },
+    #         }
+    #     },
+    # }
+
+    response = {}
+
+    domains = breakdown.get(service_id)
+    logger.info(f"domains for {service_id}: {domains.keys()}")
+
+    endpoints = list()
+
+    for domain, breakdown in domains.items():
+        uni_a_port = breakdown.get("uni_a").get("port_id")
+        uni_a_vlan = breakdown.get("uni_a").get("tag").get("value")
+
+        endpoint_a = {
+            "port_id": uni_a_port,
+            "vlan": str(uni_a_vlan),
+        }
+
+        endpoints.append(endpoint_a)
+
+        uni_z_port = breakdown.get("uni_z").get("port_id")
+        uni_z_vlan = breakdown.get("uni_z").get("tag").get("value")
+
+        endpoint_z = {
+            "port_id": uni_z_port,
+            "vlan": str(uni_z_vlan),
+        }
+
+        endpoints.append(endpoint_z)
+
+    response[service_id] = {
+        "service_id": service_id,
+        # TODO: use the real name here.
+        "name": "Fake Name",
+        "endpoints": endpoints,
+    }
+
+    logger.info(f"Formed a response: {response}")
+
+    return response
