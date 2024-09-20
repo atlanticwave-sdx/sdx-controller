@@ -270,3 +270,122 @@ class ConnectionHandler:
                     logger.debug("Removed connection:")
                     logger.debug(connection)
                     self.place_connection(te_manager, connection)
+
+
+def get_connection_status(db, service_id: str):
+    """
+    Form a response to `GET /l2vpn/1.0/{service_id}`.
+    """
+    assert db is not None
+    assert service_id is not None
+
+    breakdown = db.read_from_db("breakdowns", service_id)
+    if not breakdown:
+        logger.info(f"Could not find breakdown for {service_id}")
+        return None
+
+    logger.info(f"breakdown for {service_id}: {breakdown}")
+
+    # The breakdown we read from DB is in this shape:
+    #
+    # {
+    #     "_id": ObjectId("66ec71770c7022eb0922f41a"),
+    #     "5b7df397-2269-489b-8e03-f256461265a0": {
+    #         "urn:sdx:topology:amlight.net": {
+    #             "name": "AMLIGHT_vlan_1000_10001",
+    #             "dynamic_backup_path": True,
+    #             "uni_a": {
+    #                 "tag": {"value": 1000, "tag_type": 1},
+    #                 "port_id": "urn:sdx:port:amlight.net:A1:1",
+    #             },
+    #             "uni_z": {
+    #                 "tag": {"value": 10001, "tag_type": 1},
+    #                 "port_id": "urn:sdx:port:amlight.net:B1:3",
+    #             },
+    #         }
+    #     },
+    # }
+    #
+    # We need to shape that into this form, at a minimum:
+    #
+    # {
+    #     "c73da8e1-5d03-4620-a1db-7cdf23e8978c": {
+    #         "service_id": "c73da8e1-5d03-4620-a1db-7cdf23e8978c",
+    #         "name": "new-connection",
+    #         "endpoints": [
+    #          {
+    #             "port_id": "urn:sdx:port:amlight.net:A1:1",
+    #             "vlan": "150"
+    #          },
+    #          {
+    #             "port_id": "urn:sdx:port:amlight:B1:1",
+    #             "vlan": "300"}
+    #         ],
+    #     }
+    # }
+    #
+    # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
+    #
+
+    response = {}
+
+    domains = breakdown.get(service_id)
+    logger.info(f"domains for {service_id}: {domains.keys()}")
+
+    endpoints = list()
+
+    for domain, breakdown in domains.items():
+        uni_a_port = breakdown.get("uni_a").get("port_id")
+        uni_a_vlan = breakdown.get("uni_a").get("tag").get("value")
+
+        endpoint_a = {
+            "port_id": uni_a_port,
+            "vlan": str(uni_a_vlan),
+        }
+
+        endpoints.append(endpoint_a)
+
+        uni_z_port = breakdown.get("uni_z").get("port_id")
+        uni_z_vlan = breakdown.get("uni_z").get("tag").get("value")
+
+        endpoint_z = {
+            "port_id": uni_z_port,
+            "vlan": str(uni_z_vlan),
+        }
+
+        endpoints.append(endpoint_z)
+
+    # Find the name and description from the original connection
+    # request for this service_id.
+    name = "unknown"
+    description = "unknown"
+
+    request = db.read_from_db("connections", service_id)
+    if not request:
+        logger.error(f"Can't find a connection request for {service_id}")
+        # TODO: we're in a strange state here. Should we panic?
+    else:
+        logger.info(f"Found request for {service_id}: {request}")
+        # We seem to have saved the original request in the form of a
+        # string into the DB, not a record.
+        request_dict = json.loads(request.get(service_id))
+        name = request_dict.get("name")
+        description = request_dict.get("description")
+
+    # TODO: we're missing many of the attributes in the response here
+    # which have been specified in the provisioning spec, such as:
+    # name, description, qos_metrics, notifications, ownership,
+    # creation_date, archived_date, status, state, counters_location,
+    # last_modified, current_path, oxp_service_ids.  Implementing each
+    # of them would be worth a separate ticket each, so we'll just
+    # make do with this minimal response for now.
+    response[service_id] = {
+        "service_id": service_id,
+        "name": name,
+        "description": description,
+        "endpoints": endpoints,
+    }
+
+    logger.info(f"Formed a response: {response}")
+
+    return response

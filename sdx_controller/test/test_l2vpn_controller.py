@@ -335,14 +335,24 @@ class TestL2vpnController(BaseTestCase):
         self.__add_the_three_topologies()
 
         # There should be solution for this request.
-        request = TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text()
+        request = json.loads(TestData.CONNECTION_REQ_V2_AMLIGHT_ZAOXI.read_text())
 
         # Remove any existing request ID.
-        request_json = json.loads(request)
-        original_request_id = request_json.pop("id")
+        original_request_id = request.pop("id")
         print(f"original_request_id: {original_request_id}")
 
-        new_request = json.dumps(request_json)
+        # TODO: As a temporary workaround until the original
+        # connection request is corrected in datamodel, we modify the
+        # connection request for this test so that we have a solvable
+        # one. The original one asks for (1) a VLAN that is not
+        # present on the ingress port (777), and (2) a range ("55:90")
+        # on the egress port.  This is an unsolvable request because
+        # of (1), and an invalid one because of (2) since both ports
+        # have to ask for either a range or a single VLAN.
+        request["endpoints"][0]["vlan"] = "100"
+        request["endpoints"][1]["vlan"] = "100"
+
+        new_request = json.dumps(request)
         print(f"new_request: {new_request}")
 
         response = self.client.open(
@@ -370,6 +380,125 @@ class TestL2vpnController(BaseTestCase):
         # request ID.
         service_id = response.get_json().get("service_id")
         self.assertNotEqual(service_id, original_request_id)
+
+    def test_place_connection_v2_with_any_vlan_in_request(self):
+        """
+        Test that we get a valid response when the VLAN requested for
+        is "any".
+        """
+        self.__add_the_three_topologies()
+
+        connection_request = """
+            {
+                "name": "new-connection",
+                "endpoints": [
+                    {
+                        "port_id": "urn:sdx:port:amlight.net:A1:1",
+                        "vlan": "any"
+                    },
+                    {
+                        "port_id": "urn:sdx:port:amlight:B1:1",
+                        "vlan": "any"
+                    }
+                ]
+            }
+        """
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0",
+            method="POST",
+            data=connection_request,
+            content_type="application/json",
+        )
+
+        print(f"POST response body is : {response.data.decode('utf-8')}")
+        print(f"POST Response JSON is : {response.get_json()}")
+
+        self.assertStatus(response, 200)
+
+        service_id = response.get_json().get("service_id")
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}",
+            method="GET",
+        )
+
+        print(f"GET response body is : {response.data.decode('utf-8')}")
+        print(f"GET response JSON is : {response.get_json()}")
+
+        self.assertStatus(response, 200)
+
+        # Expect a response like this:
+        #
+        # {
+        #     "c73da8e1-5d03-4620-a1db-7cdf23e8978c": {
+        #         "service_id": "c73da8e1-5d03-4620-a1db-7cdf23e8978c",
+        #         "name": "new-connection",
+        #         "endpoints": [
+        #          {
+        #             "port_id": "urn:sdx:port:amlight.net:A1:1",
+        #             "vlan": "150"
+        #          },
+        #          {
+        #             "port_id": "urn:sdx:port:amlight:B1:1",
+        #             "vlan": "300"}
+        #         ],
+        #     }
+        # }
+        #
+        # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
+
+        service = response.get_json().get(service_id)
+
+        self.assertIsNotNone(service)
+        self.assertEqual(service_id, service.get("service_id"))
+
+        endpoints = service.get("endpoints")
+        print(f"response endpoints: {endpoints}")
+
+        self.assertEqual(len(endpoints), 2)
+
+        # What were the original port_ids now?
+        request_dict = json.loads(connection_request)
+        requested_port0 = request_dict.get("endpoints")[0].get("port_id")
+        requested_port1 = request_dict.get("endpoints")[1].get("port_id")
+
+        # print(f"requested_port0: {requested_port0}")
+        # print(f"requested_port1: {requested_port1}")
+
+        # # TODO: There seems to be a little bit of inconsistency in
+        # # port names in amlight "user" topology file, present in
+        # # datamodel repository. Some ports have IDs like
+        # # `"urn:sdx:port:amlight:B1:1"` - note the missing ".net".
+        # # Just skip the assertion for now.
+        # self.assertEqual(endpoints[0].get("port_id"), requested_port0)
+        # self.assertEqual(endpoints[1].get("port_id"), requested_port1)
+
+        def is_integer(s: str):
+            """
+            Retrun True if `s` wraps a number as a string.
+            """
+            try:
+                int(s)
+                return True
+            except:
+                return False
+
+        vlan0 = endpoints[0].get("vlan")
+        vlan1 = endpoints[1].get("vlan")
+
+        # Check that one VLAN has been assigned on ingress port...
+        self.assertIsInstance(vlan0, str)
+        self.assertTrue(is_integer(vlan0))
+
+        # ... and one VLAN has been assigned on egress port.
+        self.assertIsInstance(vlan1, str)
+        self.assertTrue(is_integer(vlan1))
+
+        # Check that name and description match in request and
+        # response.
+        self.assertEqual(service.get("name"), request_dict.get("name"))
+        self.assertEqual(service.get("description"), request_dict.get("description"))
 
     def test_z100_getconnection_by_id_expect_404(self):
         """
