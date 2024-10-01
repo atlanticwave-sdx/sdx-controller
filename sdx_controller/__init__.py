@@ -1,8 +1,8 @@
+import json
 import logging
 import os
 import threading
 from queue import Queue
-import json
 
 import connexion
 from sdx_pce.topology.temanager import TEManager
