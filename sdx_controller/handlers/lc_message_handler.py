@@ -53,7 +53,7 @@ class LcMessageHandler:
                 "domains", "domain_list", domain_list
             )
 
-            logger.info("Adding topo")
+            logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
 
             if self.db_instance.read_from_db("topologies", "num_domain_topos") is None:
@@ -63,15 +63,14 @@ class LcMessageHandler:
                 )
             else:
                 num_domain_topos = len(domain_list)
-                num_domain_topos = int(num_domain_topos) + 1
                 self.db_instance.add_key_value_pair_to_db(
                     "topologies", "num_domain_topos", num_domain_topos
                 )
 
-        logger.info("Adding topo to db.")
-        db_key = "LC-" + str(num_domain_topos)
+        logger.info("Adding topology to db: " + domain_name)
+
         self.db_instance.add_key_value_pair_to_db(
-            "topologies", db_key, json.dumps(msg_json)
+            "topologies", domain_name, json.dumps(msg_json)
         )
 
         # TODO: use TEManager API directly; but TEManager does not

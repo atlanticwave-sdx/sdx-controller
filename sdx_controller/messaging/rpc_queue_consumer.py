@@ -111,16 +111,16 @@ class RpcConsumer(object):
             num_domain_topos = num_domain_topos_from_db["num_domain_topos"]
             logger.debug("Read num_domain_topos from db: ")
             logger.debug(num_domain_topos)
-            for topo in range(1, num_domain_topos + 2):
-                db_key = f"LC-{topo}"
-                topology = db_instance.read_from_db("topologies", db_key)
+
+            for domain in domain_list:
+                topology = db_instance.read_from_db("topologies", domain)
 
                 if topology:
                     # Get the actual thing minus the Mongo ObjectID.
-                    topology = topology[db_key]
+                    topology = topology[domain]
                     topo_json = json.loads(topology)
                     self.te_manager.add_topology(topo_json)
-                    logger.debug(f"Read {db_key}: {topology}")
+                    logger.debug(f"Read {domain}: {topology}")
 
         while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.

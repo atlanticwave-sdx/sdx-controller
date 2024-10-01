@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import threading
@@ -64,8 +65,14 @@ def create_app(run_listener: bool = True):
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
 
+    topo_val = app.db_instance.read_from_db("topologies", "latest_topo")
+
     # Get a handle to PCE.
-    app.te_manager = TEManager(topology_data=None)
+    app.te_manager = (
+        TEManager(topology_data=json.loads(topo_val["latest_topo"]))
+        if topo_val
+        else TEManager(topology_data=None)
+    )
 
     # TODO: This is a hack, until we find a better way to get a handle
     # to TEManager from Flask current_app, which are typically
