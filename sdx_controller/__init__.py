@@ -2,6 +2,7 @@ import logging
 import os
 import threading
 from queue import Queue
+import json
 
 import connexion
 from sdx_pce.topology.temanager import TEManager
@@ -68,7 +69,7 @@ def create_app(run_listener: bool = True):
 
     # Get a handle to PCE.
     app.te_manager = (
-        TEManager(topology_data=topo_val["latest_topo"])
+        TEManager(topology_data=json.loads(topo_val["latest_topo"]))
         if topo_val
         else TEManager(topology_data=None)
     )
