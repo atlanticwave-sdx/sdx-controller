@@ -67,12 +67,11 @@ class LcMessageHandler:
                     "topologies", "num_domain_topos", num_domain_topos
                 )
 
-            logger.info("Adding topology to db.")
-            db_key = "LC-" + str(num_domain_topos)
+        logger.info("Adding topology to db: " + domain_name)
 
-            self.db_instance.add_key_value_pair_to_db(
-                "topologies", db_key, json.dumps(msg_json)
-            )
+        self.db_instance.add_key_value_pair_to_db(
+            "topologies", domain_name, json.dumps(msg_json)
+        )
 
         # TODO: use TEManager API directly; but TEManager does not
         # expose a `get_topology()` method yet.
