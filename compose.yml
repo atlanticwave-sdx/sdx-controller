@@ -23,6 +23,7 @@ services:
       # MongoDB logs can drown out everything else, so we'll write
       # them to a file.  To watch the log messages, use: `docker exec
       # -it <container> tail -f /var/log/mongodb/mongod.log`.
+      - '--quiet'
       - '--logpath'
       - '/var/log/mongodb/mongod.log'
     healthcheck:

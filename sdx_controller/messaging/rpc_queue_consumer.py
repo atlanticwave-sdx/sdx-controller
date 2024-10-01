@@ -111,7 +111,7 @@ class RpcConsumer(object):
             num_domain_topos = num_domain_topos_from_db["num_domain_topos"]
             logger.debug("Read num_domain_topos from db: ")
             logger.debug(num_domain_topos)
-            for topo in range(1, num_domain_topos + 2):
+            for topo in range(1, num_domain_topos + 1):
                 db_key = f"LC-{topo}"
                 topology = db_instance.read_from_db("topologies", db_key)
 
