@@ -62,13 +62,7 @@ class LcMessageHandler:
                     "topologies", "num_domain_topos", num_domain_topos
                 )
             else:
-                # print("----current domain list----")
-                # print(domain_list)
                 num_domain_topos = len(domain_list)
-                # num_domain_topos = int(num_domain_topos) + 1
-                # self.db_instance.add_key_value_pair_to_db(
-                #     "topologies", "num_domain_topos", num_domain_topos
-                # )
 
         db_key = "LC-" + str(num_domain_topos)
         logger.info(f"Adding topology {db_key} to db.")
