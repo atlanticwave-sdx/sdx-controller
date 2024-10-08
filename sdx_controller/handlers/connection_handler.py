@@ -271,6 +271,14 @@ class ConnectionHandler:
                     logger.debug(connection)
                     self.place_connection(te_manager, connection)
 
+    def get_archived_connections(self, service_id: str):
+        historical_connections = self.db_instance.read_from_db(
+            "historical_connections", service_id
+        )
+        if not historical_connections:
+            return None
+        return historical_connections[service_id]
+
 
 def get_connection_status(db, service_id: str):
     """
