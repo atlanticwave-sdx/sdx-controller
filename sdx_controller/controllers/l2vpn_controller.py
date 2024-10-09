@@ -70,7 +70,7 @@ def delete_connection(service_id):
     return "OK", 200
 
 
-def getconnection_by_id(service_id):
+def get_connection_by_id(service_id):
     """
     Find connection by ID.
 
@@ -88,7 +88,7 @@ def getconnection_by_id(service_id):
     return value
 
 
-def getconnections():  # noqa: E501
+def get_connections():  # noqa: E501
     """List all connections
 
     connection details # noqa: E501
@@ -218,3 +218,21 @@ def patch_connection(service_id, body=None):  # noqa: E501
         return f"Failed, reason: {e}", 500
 
     return response, code
+
+
+def get_archived_connections_by_id(service_id):
+    """
+    List archived connection by ID.
+
+    :param service_id: ID of connection that needs to be fetched
+    :type service_id: str
+
+    :rtype: Connection
+    """
+
+    value = get_connection_status(db_instance, service_id)
+
+    if not value:
+        return "Connection not found", 404
+
+    return value
