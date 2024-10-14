@@ -80,12 +80,12 @@ def getconnection_by_id(service_id):
     :rtype: Connection
     """
 
-    value = get_connection_status(db_instance, service_id)
+    value = db_instance.read_from_db("connections", service_id)
 
     if not value:
         return "Connection not found", 404
 
-    return value
+    return json.loads(value[service_id])
 
 
 def getconnections():  # noqa: E501
