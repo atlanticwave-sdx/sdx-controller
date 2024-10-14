@@ -159,7 +159,7 @@ paths:
       - l2vpn
       summary: List all l2vpn connections
       description: connection details
-      operationId: getconnections
+      operationId: get_connections
       responses:
         "200":
           description: successful operation
@@ -204,7 +204,7 @@ paths:
       - l2vpn
       summary: Find l2vpn connection by ID
       description: connection details
-      operationId: getconnection_by_id
+      operationId: get_connection_by_id
       parameters:
       - name: service_id
         in: path
@@ -283,6 +283,38 @@ paths:
                 $ref: '#/components/schemas/connection'
         "400":
           description: Invalid Connection
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
+  /l2vpn/1.0/{service_id}/archived:
+    get:
+      tags:
+      - l2vpn
+      summary: Get list of l2vpn connection historical events by ID
+      description: connection historical events
+      operationId: get_archived_connections_by_id
+      parameters:
+      - name: service_id
+        in: path
+        description: ID of l2vpn connection for querying history
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connection'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/connection'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: connection not found
       x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
   /user:
     post:
