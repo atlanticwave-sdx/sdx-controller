@@ -115,12 +115,12 @@ def place_connection(body):
     :rtype: Connection
     """
     logger.info(f"Placing connection: {body}")
+
     if not connexion.request.is_json:
         return "Request body must be JSON", 400
 
     body = connexion.request.get_json()
     logger.info(f"Gathered connexion JSON: {body}")
-
     logger.info("Placing connection. Saving to database.")
 
     service_id = body.get("id")
@@ -136,11 +136,12 @@ def place_connection(body):
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
 
+    connection_request_str = json.dumps(body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code == 200:
         db_instance.add_key_value_pair_to_db(
-            "connections", service_id, json.dumps(body)
+            "connections", service_id, connection_request_str
         )
 
     logger.info(
