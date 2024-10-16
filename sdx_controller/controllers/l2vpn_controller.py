@@ -179,8 +179,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db("connections", f"{service_id}")
-    if not value:
+    prior_connection = db_instance.read_from_db("connections", f"{service_id}")
+    if not prior_connection:
         return "Connection not found", 404
 
     if not connexion.request.is_json:
@@ -197,14 +197,17 @@ def patch_connection(service_id, body=None):  # noqa: E501
         logger.info("Removing connection")
         connection_handler.remove_connection(current_app.te_manager, service_id)
         logger.info(f"Removed connection: {service_id}")
-        logger.info(
-            f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
+    except Exception as e:
+        logger.info(f"Delete failed (connection id: {service_id}): {e}")
+        return f"Failed, reason: {e}", 500
+    logger.info(
+        f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
+    )
+    reason, code = connection_handler.place_connection(current_app.te_manager, body)
+    if code == 200:
+        db_instance.add_key_value_pair_to_db(
+            "connections", service_id, json.dumps(body)
         )
-        reason, code = connection_handler.place_connection(current_app.te_manager, body)
-        if code == 200:
-            db_instance.add_key_value_pair_to_db(
-                "connections", service_id, json.dumps(body)
-            )
         logger.info(
             f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
         )
@@ -213,10 +216,21 @@ def patch_connection(service_id, body=None):  # noqa: E501
             "status": "OK" if code == 200 else "Failure",
             "reason": reason,
         }
-    except Exception as e:
-        logger.info(f"Delete failed (connection id: {service_id}): {e}")
-        return f"Failed, reason: {e}", 500
+        return response, code
 
+    logger.info("Place connection failed. Rolling back to last successful connection.")
+    rollback_reason, rollback_code = connection_handler.place_connection(
+        current_app.te_manager, prior_connection
+    )
+    rollback_response = {
+        "service_id": service_id,
+        "status": "Failure",
+        "reason": (
+            f"{reason}; Rolled back to previous connection."
+            if rollback_code == 200
+            else f"{reason}; Unable to roll back to previous connection."
+        ),
+    }
     return response, code
 
 
