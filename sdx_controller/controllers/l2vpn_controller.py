@@ -219,7 +219,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         return response, code
 
     logger.info("Place connection failed. Rolling back to last successful connection.")
-    rollback_reason, rollback_code = connection_handler.place_connection(
+    _rollback_reason, rollback_code = connection_handler.place_connection(
         current_app.te_manager, prior_connection[service_id]
     )
     rollback_response = {
@@ -231,7 +231,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             else f"{reason}; Unable to roll back to previous connection."
         ),
     }
-    return response, code
+    return rollback_response, code
 
 
 def get_archived_connections_by_id(service_id):
