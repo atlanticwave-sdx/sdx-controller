@@ -404,7 +404,7 @@ def get_connection_status(db, service_id: str):
 
     if scheduling:
         response[service_id]["scheduling"] = scheduling
-    
+
     if notifications:
         response[service_id]["notifications"] = notifications
 
