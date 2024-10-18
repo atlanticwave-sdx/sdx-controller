@@ -203,35 +203,36 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(
         f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
-    reason, code = connection_handler.place_connection(current_app.te_manager, body)
-    if code == 200:
-        db_instance.add_key_value_pair_to_db(
-            "connections", service_id, json.dumps(body)
+    try:
+        reason, code = connection_handler.place_connection(current_app.te_manager, body)
+        if code == 200:
+            db_instance.add_key_value_pair_to_db(
+                "connections", service_id, json.dumps(body)
+            )
+            logger.info(
+                f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
+            )
+            response = {
+                "service_id": service_id,
+                "status": "OK" if code == 200 else "Failure",
+                "reason": reason,
+            }
+            return response, code
+    except Exception as e:
+        logger.info("Place connection failed. Rolling back to last successful connection.")
+        _rollback_reason, rollback_code = connection_handler.place_connection(
+            current_app.te_manager, prior_connection[service_id]
         )
-        logger.info(
-            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
-        )
-        response = {
+        rollback_response = {
             "service_id": service_id,
-            "status": "OK" if code == 200 else "Failure",
-            "reason": reason,
+            "status": "Failure",
+            "reason": (
+                f"Unable to place new connection; Rolled back to previous connection."
+                if rollback_code == 200
+                else f"Unable to place new connection; Failed to roll back to previous connection."
+            ),
         }
-        return response, code
-
-    logger.info("Place connection failed. Rolling back to last successful connection.")
-    _rollback_reason, rollback_code = connection_handler.place_connection(
-        current_app.te_manager, prior_connection[service_id]
-    )
-    rollback_response = {
-        "service_id": service_id,
-        "status": "Failure",
-        "reason": (
-            f"{reason}; Rolled back to previous connection."
-            if rollback_code == 200
-            else f"{reason}; Unable to roll back to previous connection."
-        ),
-    }
-    return rollback_response, code
+        return rollback_response, code
 
 
 def get_archived_connections_by_id(service_id):
