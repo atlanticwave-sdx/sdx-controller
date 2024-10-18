@@ -101,7 +101,9 @@ def get_connections():  # noqa: E501
     return_values = {}
     for connection in values:
         service_id = next(iter(connection))
-        return_values[service_id] = get_connection_status(db_instance, service_id)[service_id]
+        return_values[service_id] = get_connection_status(db_instance, service_id)[
+            service_id
+        ]
     return return_values
 
 
