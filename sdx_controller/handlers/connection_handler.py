@@ -370,6 +370,7 @@ def get_connection_status(db, service_id: str):
     qos_metrics = {}
     scheduling = {}
     notifications = {}
+    request_endpoints = []
 
     request = db.read_from_db("connections", service_id)
     if not request:
@@ -385,6 +386,7 @@ def get_connection_status(db, service_id: str):
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
+        request_endpoints = request_dict.get("endpoints")
 
     # TODO: we're missing many of the attributes in the response here
     # which have been specified in the provisioning spec, such as:
@@ -397,7 +399,8 @@ def get_connection_status(db, service_id: str):
         "service_id": service_id,
         "name": name,
         "description": description,
-        "endpoints": endpoints,
+        "endpoints": request_endpoints,
+        "current_path": endpoints,
     }
     if qos_metrics:
         response[service_id]["qos_metrics"] = qos_metrics
