@@ -364,9 +364,17 @@ def get_connection_status(db, service_id: str):
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
-        request_endpoints = request_dict.get("endpoints")
-        request_uni_a = request_endpoints[0]
-        request_uni_z = request_endpoints[1]
+        if request_dict.get("endpoints") is not None:  # spec version 2.0.0
+            request_endpoints = request_dict.get("endpoints")
+            request_uni_a = request_endpoints[0]
+            request_uni_a_id = request_uni_a.get("port_id")
+            request_uni_z = request_endpoints[1]
+            request_uni_z_id = request_uni_z.get("port_id")
+        else:  # spec version 1.0.0
+            request_uni_a = request_dict.get("ingress_port")
+            request_uni_a_id = request_uni_a.get("id")
+            request_uni_z = request_dict.get("egress_port")
+            request_uni_z_id = request_uni_z.get("id")
 
     response = {}
 
@@ -381,10 +389,10 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_a)
 
-        if request_uni_a.get("id") == uni_a_port:
+        if request_uni_a_id == uni_a_port:
             response_endpoints.append(endpoint_a)
 
-        if request_uni_z.get("id") == uni_a_port:
+        if request_uni_z_id == uni_a_port:
             response_endpoints.append(endpoint_a)
 
         uni_z_port = breakdown.get("uni_z").get("port_id")
@@ -397,9 +405,9 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_z)
 
-        if request_uni_a.get("id") == uni_z_port:
+        if request_uni_a_id == uni_z_port:
             response_endpoints.append(endpoint_z)
-        if request_uni_z.get("id") == uni_z_port:
+        if request_uni_z_id == uni_z_port:
             response_endpoints.append(endpoint_z)
 
     # TODO: we're missing many of the attributes in the response here
