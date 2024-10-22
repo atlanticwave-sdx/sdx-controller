@@ -338,6 +338,14 @@ def get_connection_status(db, service_id: str):
     domains = breakdown.get(service_id)
     logger.info(f"domains for {service_id}: {domains.keys()}")
 
+    # Find the name and description from the original connection
+    # request for this service_id.
+    name = "unknown"
+    description = "unknown"
+    qos_metrics = {}
+    scheduling = {}
+    notifications = {}
+
     endpoints = list()
     request_endpoints = []
     response_endpoints = []
@@ -373,10 +381,10 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_a)
 
-        if request_uni_a.get("port_id") == uni_a_port:
+        if request_uni_a.get("id") == uni_a_port:
             response_endpoints.append(endpoint_a)
 
-        if request_uni_z.get("port_id") == uni_a_port:
+        if request_uni_z.get("id") == uni_a_port:
             response_endpoints.append(endpoint_a)
 
         uni_z_port = breakdown.get("uni_z").get("port_id")
@@ -389,18 +397,10 @@ def get_connection_status(db, service_id: str):
 
         endpoints.append(endpoint_z)
 
-        if request_uni_a.get("port_id") == uni_z_port:
+        if request_uni_a.get("id") == uni_z_port:
             response_endpoints.append(endpoint_z)
-        if request_uni_z.get("port_id") == uni_z_port:
+        if request_uni_z.get("id") == uni_z_port:
             response_endpoints.append(endpoint_z)
-
-    # Find the name and description from the original connection
-    # request for this service_id.
-    name = "unknown"
-    description = "unknown"
-    qos_metrics = {}
-    scheduling = {}
-    notifications = {}
 
     # TODO: we're missing many of the attributes in the response here
     # which have been specified in the provisioning spec, such as:
