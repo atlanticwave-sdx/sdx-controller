@@ -440,7 +440,7 @@ class TestL2vpnController(BaseTestCase):
         #             "vlan": "150"
         #          },
         #          {
-        #             "port_id": "urn:sdx:port:amlight:B1:1",
+        #             "port_id": "urn:sdx:port:amlight:B1:3",
         #             "vlan": "300"}
         #         ],
         #     }
