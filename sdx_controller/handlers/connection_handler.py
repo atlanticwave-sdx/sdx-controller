@@ -349,6 +349,8 @@ def get_connection_status(db, service_id: str):
     endpoints = list()
     request_endpoints = []
     response_endpoints = []
+    request_uni_a_id = None
+    request_uni_z_id = None
 
     request = db.read_from_db("connections", service_id)
     if not request:
@@ -409,6 +411,10 @@ def get_connection_status(db, service_id: str):
             response_endpoints.append(endpoint_z)
         if request_uni_z_id == uni_z_port:
             response_endpoints.append(endpoint_z)
+
+        logger.info(
+            f"endpoints info: {request_uni_a_id}, {request_uni_z_id}, {uni_a_port}, {uni_z_port}"
+        )
 
     # TODO: we're missing many of the attributes in the response here
     # which have been specified in the provisioning spec, such as:
