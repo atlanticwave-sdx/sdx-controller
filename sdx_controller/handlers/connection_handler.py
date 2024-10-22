@@ -412,7 +412,7 @@ def get_connection_status(db, service_id: str):
         if request_uni_z_id == uni_z_port:
             response_endpoints.append(endpoint_z)
 
-        logger.info(
+        print(
             f"endpoints info: {request_uni_a_id}, {request_uni_z_id}, {uni_a_port}, {uni_z_port}"
         )
 
