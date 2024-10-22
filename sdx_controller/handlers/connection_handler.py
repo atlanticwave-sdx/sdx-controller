@@ -366,6 +366,7 @@ def get_connection_status(db, service_id: str):
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
+        print(f"request_dict: {request_dict}")
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
