@@ -335,38 +335,22 @@ def get_connection_status(db, service_id: str):
     # See https://sdx-docs.readthedocs.io/en/latest/specs/provisioning-api-1.0.html#request-format-2
     #
 
-    response = {}
-
     domains = breakdown.get(service_id)
     logger.info(f"domains for {service_id}: {domains.keys()}")
-
-    endpoints = list()
-
-    for domain, breakdown in domains.items():
-        uni_a_port = breakdown.get("uni_a").get("port_id")
-        uni_a_vlan = breakdown.get("uni_a").get("tag").get("value")
-
-        endpoint_a = {
-            "port_id": uni_a_port,
-            "vlan": str(uni_a_vlan),
-        }
-
-        endpoints.append(endpoint_a)
-
-        uni_z_port = breakdown.get("uni_z").get("port_id")
-        uni_z_vlan = breakdown.get("uni_z").get("tag").get("value")
-
-        endpoint_z = {
-            "port_id": uni_z_port,
-            "vlan": str(uni_z_vlan),
-        }
-
-        endpoints.append(endpoint_z)
 
     # Find the name and description from the original connection
     # request for this service_id.
     name = "unknown"
     description = "unknown"
+    qos_metrics = {}
+    scheduling = {}
+    notifications = {}
+
+    endpoints = list()
+    request_endpoints = []
+    response_endpoints = []
+    request_uni_a_id = None
+    request_uni_z_id = None
 
     request = db.read_from_db("connections", service_id)
     if not request:
@@ -379,6 +363,77 @@ def get_connection_status(db, service_id: str):
         request_dict = json.loads(request.get(service_id))
         name = request_dict.get("name")
         description = request_dict.get("description")
+        qos_metrics = request_dict.get("qos_metrics")
+        scheduling = request_dict.get("scheduling")
+        notifications = request_dict.get("notifications")
+        print(f"request_dict: {request_dict}")
+        if request_dict.get("endpoints") is not None:  # spec version 2.0.0
+            request_endpoints = request_dict.get("endpoints")
+            request_uni_a = request_endpoints[0]
+            request_uni_a_id = request_uni_a.get("port_id")
+            if request_uni_a_id is None:
+                request_uni_a_id = request_uni_a.get("id")
+            request_uni_z = request_endpoints[1]
+            request_uni_z_id = request_uni_z.get("port_id")
+            if request_uni_z_id is None:
+                request_uni_z_id = request_uni_z.get("id")
+        else:  # spec version 1.0.0
+            request_uni_a = request_dict.get("ingress_port")
+            request_uni_a_id = request_uni_a.get("id")
+            request_uni_z = request_dict.get("egress_port")
+            request_uni_z_id = request_uni_z.get("id")
+
+    response = {}
+
+    for domain, breakdown in domains.items():
+        uni_a_port = breakdown.get("uni_a").get("port_id")
+        uni_a_vlan = breakdown.get("uni_a").get("tag").get("value")
+
+        endpoint_a = {
+            "port_id": uni_a_port,
+            "vlan": str(uni_a_vlan),
+        }
+
+        endpoints.append(endpoint_a)
+
+        if request_uni_a_id == uni_a_port:
+            (
+                response_endpoints.append(endpoint_a)
+                if endpoint_a not in response_endpoints
+                else None
+            )
+        if request_uni_z_id == uni_a_port:
+            (
+                response_endpoints.append(endpoint_a)
+                if endpoint_a not in response_endpoints
+                else None
+            )
+
+        uni_z_port = breakdown.get("uni_z").get("port_id")
+        uni_z_vlan = breakdown.get("uni_z").get("tag").get("value")
+
+        endpoint_z = {
+            "port_id": uni_z_port,
+            "vlan": str(uni_z_vlan),
+        }
+
+        endpoints.append(endpoint_z)
+
+        if request_uni_a_id == uni_z_port:
+            (
+                response_endpoints.append(endpoint_z)
+                if endpoint_z not in response_endpoints
+                else None
+            )
+        if request_uni_z_id == uni_z_port:
+            (
+                response_endpoints.append(endpoint_z)
+                if endpoint_z not in response_endpoints
+                else None
+            )
+        print(
+            f"endpoints info: {request_uni_a_id}, {request_uni_z_id}, {uni_a_port}, {uni_z_port}"
+        )
 
     # TODO: we're missing many of the attributes in the response here
     # which have been specified in the provisioning spec, such as:
@@ -391,8 +446,17 @@ def get_connection_status(db, service_id: str):
         "service_id": service_id,
         "name": name,
         "description": description,
-        "endpoints": endpoints,
+        "endpoints": response_endpoints,
+        "current_path": endpoints,
     }
+    if qos_metrics:
+        response[service_id]["qos_metrics"] = qos_metrics
+
+    if scheduling:
+        response[service_id]["scheduling"] = scheduling
+
+    if notifications:
+        response[service_id]["notifications"] = notifications
 
     logger.info(f"Formed a response: {response}")
 
