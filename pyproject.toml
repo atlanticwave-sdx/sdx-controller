@@ -67,7 +67,7 @@ profile = "black"
 src_paths = ["sdx_controller", "bapm_server"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=sdx_controller --cov=bapm_server --cov-report html --cov-report term-missing"
+addopts = "--cov=sdx_controller --cov=bapm_server"
 testpaths = [
     "sdx_controller/test"
 ]

@@ -397,10 +397,17 @@ def get_connection_status(db, service_id: str):
         endpoints.append(endpoint_a)
 
         if request_uni_a_id == uni_a_port:
-            response_endpoints.append(endpoint_a)
-
+            (
+                response_endpoints.append(endpoint_a)
+                if endpoint_a not in response_endpoints
+                else None
+            )
         if request_uni_z_id == uni_a_port:
-            response_endpoints.append(endpoint_a)
+            (
+                response_endpoints.append(endpoint_a)
+                if endpoint_a not in response_endpoints
+                else None
+            )
 
         uni_z_port = breakdown.get("uni_z").get("port_id")
         uni_z_vlan = breakdown.get("uni_z").get("tag").get("value")
@@ -413,10 +420,17 @@ def get_connection_status(db, service_id: str):
         endpoints.append(endpoint_z)
 
         if request_uni_a_id == uni_z_port:
-            response_endpoints.append(endpoint_z)
+            (
+                response_endpoints.append(endpoint_z)
+                if endpoint_z not in response_endpoints
+                else None
+            )
         if request_uni_z_id == uni_z_port:
-            response_endpoints.append(endpoint_z)
-
+            (
+                response_endpoints.append(endpoint_z)
+                if endpoint_z not in response_endpoints
+                else None
+            )
         print(
             f"endpoints info: {request_uni_a_id}, {request_uni_z_id}, {uni_a_port}, {uni_z_port}"
         )
