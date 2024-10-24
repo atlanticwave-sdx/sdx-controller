@@ -151,7 +151,7 @@ def place_connection(body):
 
     response = {
         "service_id": service_id,
-        "status": "OK" if code == 200 else "Failure",
+        "status": "OK" if code == 201 else "Failure",
         "reason": reason,
     }
 
@@ -212,7 +212,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
         response = {
             "service_id": service_id,
-            "status": "OK" if code == 200 else "Failure",
+            "status": "OK" if code == 201 else "Failure",
             "reason": reason,
         }
     except Exception as e:
