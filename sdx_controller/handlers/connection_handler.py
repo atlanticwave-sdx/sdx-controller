@@ -448,6 +448,7 @@ def get_connection_status(db, service_id: str):
         "description": description,
         "endpoints": response_endpoints,
         "current_path": endpoints,
+        "archived_date": 0,
     }
     if qos_metrics:
         response[service_id]["qos_metrics"] = qos_metrics
