@@ -275,7 +275,7 @@ class TestL2vpnController(BaseTestCase):
             if idx in [0, 1]:
                 # Expect 400 failure because TEManager do not have all
                 # the topologies yet.
-                assert response.status_code // 100 == 2
+                assert response.status_code // 100 == 4
             if idx == 200:
                 # Expect 200 success now that TEManager should be set
                 # up with all the expected topology data.
