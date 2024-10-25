@@ -6,6 +6,7 @@ from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
+from sdx_pce.utils.exceptions import TEError
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_controller.models.simple_link import SimpleLink
@@ -143,7 +144,7 @@ class ConnectionHandler:
             connection_request=connection_request
         )
         if traffic_matrix is None:
-            return "Could not generate a traffic matrix", 400
+            return "Could not generate a traffic matrix", 402
 
         logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
@@ -152,7 +153,7 @@ class ConnectionHandler:
         logger.debug(f"TESolver result: {solution}")
 
         if solution is None or solution.connection_map is None:
-            return "Could not solve the request", 400
+            return "Could not solve the request", 410
 
         try:
             breakdown = te_manager.generate_connection_breakdown(
@@ -166,6 +167,8 @@ class ConnectionHandler:
             )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
+        except TEError as te_err:
+            return te_err
         except Exception as e:
             err = traceback.format_exc().replace("\n", ", ")
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")

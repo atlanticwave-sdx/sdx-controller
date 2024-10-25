@@ -140,10 +140,12 @@ def place_connection(body):
 
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    if code == 200:
+    if code // 100 == 2:
         db_instance.add_key_value_pair_to_db(
             "connections", service_id, json.dumps(body)
         )
+        # Service created successfully
+        code = 201
 
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
@@ -151,7 +153,7 @@ def place_connection(body):
 
     response = {
         "service_id": service_id,
-        "status": "OK" if code == 200 else "Failure",
+        "status": "OK" if code // 100 == 2 else "Failure",
         "reason": reason,
     }
 
@@ -163,7 +165,7 @@ def place_connection(body):
     # response = body
 
     # response["id"] = service_id
-    # response["status"] = "success" if code == 200 else "failure"
+    # response["status"] = "success" if code == 2xx else "failure"
     # response["reason"] = reason # `reason` is not present in schema though.
 
     return response, code
@@ -203,16 +205,18 @@ def patch_connection(service_id, body=None):  # noqa: E501
             f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
         )
         reason, code = connection_handler.place_connection(current_app.te_manager, body)
-        if code == 200:
+        if code // 100 == 2:
             db_instance.add_key_value_pair_to_db(
                 "connections", service_id, json.dumps(body)
             )
+            # Service created successfully
+            code = 201
         logger.info(
             f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
         )
         response = {
             "service_id": service_id,
-            "status": "OK" if code == 200 else "Failure",
+            "status": "OK" if code // 100 == 2 else "Failure",
             "reason": reason,
         }
     except Exception as e:
