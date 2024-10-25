@@ -209,6 +209,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             db_instance.add_key_value_pair_to_db(
                 "connections", service_id, json.dumps(body)
             )
+            # Service created successfully
             code = 201
         logger.info(
             f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
