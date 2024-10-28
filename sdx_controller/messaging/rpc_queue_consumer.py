@@ -74,7 +74,6 @@ class RpcConsumer(object):
         self.channel.start_consuming()
 
     def start_sdx_consumer(self, thread_queue, db_instance):
-        MESSAGE_ID = 0
         HEARTBEAT_ID = 0
 
         rpc = RpcConsumer(thread_queue, "", self.te_manager)
@@ -99,14 +98,16 @@ class RpcConsumer(object):
 
         if domain_list_from_db:
             domain_list = domain_list_from_db["domain_list"]
-            logger.debug("Read domain_list from db: ")
+            logger.debug("Domain list already exists in db: ")
             logger.debug(domain_list)
+            num_domain_topos = len(domain_list)
 
         if latest_topo_from_db:
             latest_topo = latest_topo_from_db["latest_topo"]
-            logger.debug("Read latest_topo from db: ")
+            logger.debug("Topology already exists in db: ")
             logger.debug(latest_topo)
 
+        # If topologies already saved in db, use them to initialize te_manager
         if num_domain_topos_from_db:
             num_domain_topos = num_domain_topos_from_db["num_domain_topos"]
             logger.debug("Read num_domain_topos from db: ")
@@ -115,12 +116,14 @@ class RpcConsumer(object):
                 db_key = f"LC-{topo}"
                 topology = db_instance.read_from_db("topologies", db_key)
 
-                if topology:
-                    # Get the actual thing minus the Mongo ObjectID.
-                    topology = topology[db_key]
-                    topo_json = json.loads(topology)
-                    self.te_manager.add_topology(topo_json)
-                    logger.debug(f"Read {db_key}: {topology}")
+                if not topology:
+                    continue
+
+                # Get the actual thing minus the Mongo ObjectID.
+                topology = topology[db_key]
+                topo_json = json.loads(topology)
+                self.te_manager.add_topology(topo_json)
+                logger.debug(f"Read {db_key}: {topology}")
 
         while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.
@@ -130,18 +133,20 @@ class RpcConsumer(object):
             if "Heart Beat" in str(msg):
                 HEARTBEAT_ID += 1
                 logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
-            else:
-                logger.info("Saving to database.")
-                if parse_helper.is_json(msg):
-                    if "version" in str(msg):
-                        lc_message_handler.process_lc_json_msg(
-                            msg,
-                            latest_topo,
-                            domain_list,
-                            num_domain_topos,
-                        )
-                    else:
-                        logger.info("got message from MQ: " + str(msg))
+                continue
+            
+            if not parse_helper.is_json(msg):
+                continue
+
+            if "version" not in str(msg):
+                logger.info("Got message (NO VERSION) from MQ: " + str(msg))
+            
+            lc_message_handler.process_lc_json_msg(
+                msg,
+                latest_topo,
+                domain_list,
+            )
+                
 
     def stop_threads(self):
         """

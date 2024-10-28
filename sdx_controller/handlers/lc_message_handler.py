@@ -19,8 +19,8 @@ class LcMessageHandler:
         msg,
         latest_topo,
         domain_list,
-        num_domain_topos,
     ):
+        num_domain_topos = 0
         logger.info("MQ received message:" + str(msg))
         msg_json = json.loads(msg)
         msg_id = msg_json["id"]
@@ -37,6 +37,7 @@ class LcMessageHandler:
 
         # Update existing topology
         if domain_name in domain_list:
+            num_domain_topos = len(domain_list)
             logger.info("Updating topo")
             logger.debug(msg_json)
             self.te_manager.update_topology(msg_json)
@@ -55,15 +56,11 @@ class LcMessageHandler:
 
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
-
-            if self.db_instance.read_from_db("topologies", "num_domain_topos") is None:
-                num_domain_topos = 1
-                self.db_instance.add_key_value_pair_to_db(
-                    "topologies", "num_domain_topos", num_domain_topos
-                )
-            else:
-                num_domain_topos = len(domain_list)
-
+            num_domain_topos = len(domain_list)
+        
+        self.db_instance.add_key_value_pair_to_db(
+                "topologies", "num_domain_topos", num_domain_topos
+            )
         db_key = "LC-" + str(num_domain_topos)
         logger.info(f"Adding topology {db_key} to db.")
         self.db_instance.add_key_value_pair_to_db(
