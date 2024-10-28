@@ -57,10 +57,10 @@ class LcMessageHandler:
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
             num_domain_topos = len(domain_list)
-        
+
         self.db_instance.add_key_value_pair_to_db(
-                "topologies", "num_domain_topos", num_domain_topos
-            )
+            "topologies", "num_domain_topos", num_domain_topos
+        )
         db_key = "LC-" + str(num_domain_topos)
         logger.info(f"Adding topology {db_key} to db.")
         self.db_instance.add_key_value_pair_to_db(

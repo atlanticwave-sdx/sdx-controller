@@ -134,19 +134,18 @@ class RpcConsumer(object):
                 HEARTBEAT_ID += 1
                 logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
                 continue
-            
+
             if not parse_helper.is_json(msg):
                 continue
 
             if "version" not in str(msg):
                 logger.info("Got message (NO VERSION) from MQ: " + str(msg))
-            
+
             lc_message_handler.process_lc_json_msg(
                 msg,
                 latest_topo,
                 domain_list,
             )
-                
 
     def stop_threads(self):
         """
