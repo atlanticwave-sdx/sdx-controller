@@ -85,22 +85,17 @@ class RpcConsumer(object):
 
         latest_topo = {}
         domain_list = []
-        num_domain_topos = 0
 
         # This part reads from DB when SDX controller initially starts.
-        # It looks for domain_list, and num_domain_topos, if they are already in DB,
+        # It looks for domain_list, if already in DB,
         # Then use the existing ones from DB.
         domain_list_from_db = db_instance.read_from_db("domains", "domain_list")
         latest_topo_from_db = db_instance.read_from_db("topologies", "latest_topo")
-        num_domain_topos_from_db = db_instance.read_from_db(
-            "topologies", "num_domain_topos"
-        )
 
         if domain_list_from_db:
             domain_list = domain_list_from_db["domain_list"]
             logger.debug("Domain list already exists in db: ")
             logger.debug(domain_list)
-            num_domain_topos = len(domain_list)
 
         if latest_topo_from_db:
             latest_topo = latest_topo_from_db["latest_topo"]
@@ -108,22 +103,18 @@ class RpcConsumer(object):
             logger.debug(latest_topo)
 
         # If topologies already saved in db, use them to initialize te_manager
-        if num_domain_topos_from_db:
-            num_domain_topos = num_domain_topos_from_db["num_domain_topos"]
-            logger.debug("Read num_domain_topos from db: ")
-            logger.debug(num_domain_topos)
-            for topo in range(1, num_domain_topos + 1):
-                db_key = f"LC-{topo}"
-                topology = db_instance.read_from_db("topologies", db_key)
+        if domain_list:
+            for domain in domain_list:
+                topology = db_instance.read_from_db("topologies", domain)
 
                 if not topology:
                     continue
 
                 # Get the actual thing minus the Mongo ObjectID.
-                topology = topology[db_key]
+                topology = topology[domain]
                 topo_json = json.loads(topology)
                 self.te_manager.add_topology(topo_json)
-                logger.debug(f"Read {db_key}: {topology}")
+                logger.debug(f"Read {domain}: {topology}")
 
         while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.
