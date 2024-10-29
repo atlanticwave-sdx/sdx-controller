@@ -19,7 +19,6 @@ class LcMessageHandler:
         msg,
         latest_topo,
         domain_list,
-        num_domain_topos,
     ):
         logger.info("MQ received message:" + str(msg))
         msg_json = json.loads(msg)
@@ -40,6 +39,7 @@ class LcMessageHandler:
             logger.info("Updating topo")
             logger.debug(msg_json)
             self.te_manager.update_topology(msg_json)
+            logger.info("Updating topology in TE manager")
             failed_links = self.te_manager.get_failed_links()
             if failed_links:
                 logger.info("Processing link failure.")
@@ -52,22 +52,12 @@ class LcMessageHandler:
             self.db_instance.add_key_value_pair_to_db(
                 "domains", "domain_list", domain_list
             )
-
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
 
-            if self.db_instance.read_from_db("topologies", "num_domain_topos") is None:
-                num_domain_topos = 1
-                self.db_instance.add_key_value_pair_to_db(
-                    "topologies", "num_domain_topos", num_domain_topos
-                )
-            else:
-                num_domain_topos = len(domain_list)
-
-        db_key = "LC-" + str(num_domain_topos)
-        logger.info(f"Adding topology {db_key} to db.")
+        logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
-            "topologies", db_key, json.dumps(msg_json)
+            "topologies", domain_name, json.dumps(msg_json)
         )
 
         # TODO: use TEManager API directly; but TEManager does not
