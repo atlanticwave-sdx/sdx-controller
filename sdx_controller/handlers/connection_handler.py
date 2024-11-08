@@ -272,7 +272,9 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    self.place_connection(te_manager, connection)
+                    _reason, code = self.place_connection(te_manager, connection)
+                    if code // 100 == 2:
+                        self.db_instance.add_key("connections", connection["id"], json.dumps(connection))
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.read_from_db(
