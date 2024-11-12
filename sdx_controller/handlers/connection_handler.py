@@ -274,7 +274,7 @@ class ConnectionHandler:
                     logger.debug(connection)
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
-                        self.db_instance.add_key(
+                        self.db_instance.add_key_value_pair_to_db(
                             "connections", connection["id"], json.dumps(connection)
                         )
 
