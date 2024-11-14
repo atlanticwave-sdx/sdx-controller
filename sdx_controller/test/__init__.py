@@ -42,3 +42,7 @@ class TestData:
     CONNECTION_REQ_V2_AMLIGHT_ZAOXI = (
         REQUESTS_DIR / "test_request-amlight_zaoxi-p2p-v2.json"
     )
+
+    TOPOLOGY_FILE_AMLIGHT_v2 = TOPOLOGY_DIR / "ampath_v2.json"
+    TOPOLOGY_FILE_SAX_v2 = TOPOLOGY_DIR / "sax_v2.json"
+    TOPOLOGY_FILE_ZAOXI_v2 = TOPOLOGY_DIR / "zaoxi_v2.json"
