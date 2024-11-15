@@ -609,7 +609,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        # self.assertStatus(response, 200)
+        self.assertStatus(response, 200)
 
 
 if __name__ == "__main__":
