@@ -594,7 +594,7 @@ class TestL2vpnController(BaseTestCase):
         connection_request = {
             "name": "VLAN between AMPATH/300 and TENET/300",
             "endpoints": [
-                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "300"},
+                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "30000"},
                 {"port_id": "urn:sdx:port:tenet.ac.za:Tenet03:50", "vlan": "any"},
             ],
         }
