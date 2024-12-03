@@ -199,7 +199,16 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     try:
         logger.info("Removing connection")
-        connection_handler.remove_connection(current_app.te_manager, service_id)
+        remove_conn_reason, remove_conn_code = connection_handler.remove_connection(current_app.te_manager, service_id)
+        
+        if remove_conn_code // 100 != 2:
+            response = {
+                "service_id": service_id,
+                "status": "Failure",
+                "reason": remove_conn_reason,
+            }
+            return response, remove_conn_code
+        
         logger.info(f"Removed connection: {service_id}")
         logger.info(
             f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
@@ -211,9 +220,21 @@ def patch_connection(service_id, body=None):  # noqa: E501
             )
             # Service created successfully
             code = 201
-        logger.info(
-            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
-        )
+            logger.info(
+                f"Place connection result: ID: {service_id} reason='{reason}', code={code}"
+            )
+        else:
+            logger.info(f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}")
+            logger.info("Rolling back to old connection.")
+            rollback_conn_body = db_instance.read_from_db("connections", service_id)
+            rollback_conn_reason, rollback_conn_code = connection_handler.place_connection(current_app.te_manager, rollback_conn_body)
+            if rollback_conn_code // 100 == 2:
+                db_instance.add_key_value_pair_to_db(
+                    "connections", service_id, json.dumps(rollback_conn_body)
+                )
+            logger.info(
+                f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
+            )
         response = {
             "service_id": service_id,
             "status": "OK" if code // 100 == 2 else "Failure",
