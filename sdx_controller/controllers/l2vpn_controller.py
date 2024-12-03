@@ -232,11 +232,13 @@ def patch_connection(service_id, body=None):  # noqa: E501
                 f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
             )
             logger.info("Rolling back to old connection.")
-            print(rollback_conn_body)
+
             if rollback_conn_body:
+                conn_request = json.loads(rollback_conn_body[service_id])
+                conn_request["id"] = service_id
                 rollback_conn_reason, rollback_conn_code = (
                     connection_handler.place_connection(
-                        current_app.te_manager, rollback_conn_body
+                        current_app.te_manager, conn_request
                     )
                 )
                 if rollback_conn_code // 100 == 2:
