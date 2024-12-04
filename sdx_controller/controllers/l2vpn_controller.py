@@ -137,7 +137,8 @@ def place_connection(body):
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
-
+    print("-----PLACE CONNECTION-----")
+    print(body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
@@ -199,30 +200,81 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     try:
         logger.info("Removing connection")
-        connection_handler.remove_connection(current_app.te_manager, service_id)
+        # Get roll back connection before removing connection
+        rollback_conn_body = db_instance.read_from_db("connections", service_id)
+        remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
+            current_app.te_manager, service_id
+        )
+
+        if remove_conn_code // 100 != 2:
+            response = {
+                "service_id": service_id,
+                "status": "Failure",
+                "reason": remove_conn_reason,
+            }
+            return response, remove_conn_code
+
         logger.info(f"Removed connection: {service_id}")
-        logger.info(
-            f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
-        )
-        reason, code = connection_handler.place_connection(current_app.te_manager, body)
-        if code // 100 == 2:
-            db_instance.add_key_value_pair_to_db(
-                "connections", service_id, json.dumps(body)
-            )
-            # Service created successfully
-            code = 201
-        logger.info(
-            f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
-        )
-        response = {
-            "service_id": service_id,
-            "status": "OK" if code // 100 == 2 else "Failure",
-            "reason": reason,
-        }
     except Exception as e:
         logger.info(f"Delete failed (connection id: {service_id}): {e}")
         return f"Failed, reason: {e}", 500
 
+    logger.info(
+        f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
+    )
+
+    reason, code = connection_handler.place_connection(current_app.te_manager, body)
+
+    if code // 100 == 2:
+        db_instance.add_key_value_pair_to_db(
+            "connections", service_id, json.dumps(body)
+        )
+        # Service created successfully
+        code = 201
+        logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
+        response = {
+            "service_id": service_id,
+            "status": "OK",
+            "reason": reason,
+        }
+        return response, code
+
+    logger.info(
+        f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
+    )
+    logger.info("Rolling back to old connection.")
+
+    if not rollback_conn_body:
+        response = {
+            "service_id": service_id,
+            "status": "Failure, unable to rollback to last successful L2VPN connection",
+            "reason": reason,
+        }
+        return response, code
+
+    conn_request = json.loads(rollback_conn_body[service_id])
+    conn_request["id"] = service_id
+
+    try:
+        rollback_conn_reason, rollback_conn_code = connection_handler.place_connection(
+            current_app.te_manager, conn_request
+        )
+        if rollback_conn_code // 100 == 2:
+            db_instance.add_key_value_pair_to_db(
+                "connections", service_id, json.dumps(conn_request)
+            )
+        logger.info(
+            f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
+        )
+    except Exception as e:
+        logger.info(f"Rollback failed (connection id: {service_id}): {e}")
+        return f"Rollback failed, reason: {e}", 500
+
+    response = {
+        "service_id": service_id,
+        "status": "Failure, rolled back to last successful L2VPN connection",
+        "reason": reason,
+    }
     return response, code
 
 
