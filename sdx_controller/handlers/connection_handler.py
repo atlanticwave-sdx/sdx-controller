@@ -168,7 +168,10 @@ class ConnectionHandler:
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except TEError as te_err:
-            return te_err
+            # We could probably return te_err.te_code instead of 400,
+            # but I don't think PCE should use HTTP error codes,
+            # because that violates abstraction boundaries.
+            return f"PCE error: {te_err}", 400
         except Exception as e:
             err = traceback.format_exc().replace("\n", ", ")
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
@@ -274,7 +277,7 @@ class ConnectionHandler:
                     logger.debug(connection)
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
-                        self.db_instance.add_key(
+                        self.db_instance.add_key_value_pair_to_db(
                             "connections", connection["id"], json.dumps(connection)
                         )
 

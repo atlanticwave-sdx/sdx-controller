@@ -48,6 +48,21 @@ class TestL2vpnController(BaseTestCase):
             print(f"Adding topology: {topology.get('id')}")
             self.te_manager.add_topology(topology)
 
+    def __add_the_three_v2_topologies(self):
+        """
+        A helper to add the three known topologies.
+        """
+        for idx, topology_file in enumerate(
+            [
+                TestData.TOPOLOGY_FILE_AMLIGHT_v2,
+                TestData.TOPOLOGY_FILE_SAX_v2,
+                TestData.TOPOLOGY_FILE_ZAOXI_v2,
+            ]
+        ):
+            topology = json.loads(topology_file.read_text())
+            print(f"Adding topology: {topology.get('id')}")
+            self.te_manager.add_topology(topology)
+
     def test_delete_connection_with_setup(self):
         """
         Test case for delete_connection()
@@ -568,6 +583,33 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 2
 
         assert len(response.get_json()) != 0
+
+    def test_issue_356(self):
+        """
+        See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
+        """
+
+        self.__add_the_three_v2_topologies()
+
+        connection_request = {
+            "name": "VLAN between AMPATH/300 and TENET/300",
+            "endpoints": [
+                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "30000"},
+                {"port_id": "urn:sdx:port:tenet.ac.za:Tenet03:50", "vlan": "any"},
+            ],
+        }
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0",
+            method="POST",
+            data=json.dumps(connection_request),
+            content_type="application/json",
+        )
+
+        print(f"POST response body is : {response.data.decode('utf-8')}")
+        print(f"POST Response JSON is : {response.get_json()}")
+
+        self.assertStatus(response, 400)
 
 
 if __name__ == "__main__":
