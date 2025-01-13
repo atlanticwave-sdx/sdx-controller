@@ -382,7 +382,6 @@ def get_connection_status(db, service_id: str):
         notifications = request_dict.get("notifications")
         oxp_response_code = request_dict.get("oxp_response_code")
         oxp_response = request_dict.get("oxp_response")
-        print(f"request_dict: {request_dict}")
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
