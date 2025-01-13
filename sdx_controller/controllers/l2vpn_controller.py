@@ -137,8 +137,6 @@ def place_connection(body):
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
-    print("-----PLACE CONNECTION-----")
-    print(body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:

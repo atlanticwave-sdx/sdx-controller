@@ -109,7 +109,11 @@ class ConnectionHandler:
                 f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
-            mq_link = {"operation": operation, "link": link}
+            mq_link = {
+                "operation": operation,
+                "service_id": connection_request.get("id"),
+                "link": link,
+            }
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
@@ -376,7 +380,8 @@ def get_connection_status(db, service_id: str):
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
-        print(f"request_dict: {request_dict}")
+        oxp_response_code = request_dict.get("oxp_response_code")
+        oxp_response = request_dict.get("oxp_response")
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
@@ -468,6 +473,12 @@ def get_connection_status(db, service_id: str):
 
     if notifications:
         response[service_id]["notifications"] = notifications
+
+    if oxp_response_code:
+        response[service_id]["oxp_response_code"] = oxp_response_code
+
+    if oxp_response:
+        response[service_id]["oxp_response"] = oxp_response
 
     logger.info(f"Formed a response: {response}")
 

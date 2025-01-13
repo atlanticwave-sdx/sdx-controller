@@ -64,13 +64,6 @@ class TopicQueueProducer(object):
             self.response = body
 
     def call(self, body):
-        # if not self.connection or self.connection.is_closed:
-        #     # print("Reopening connection...")
-        #     self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=MQ_HOST))
-        #     self.channel = self.connection.channel()
-        #     # print("Connection reopened.")
-        #     # channel.exchange_declare(exchange=self.exchange_name)
-
         self.response = None
         self.corr_id = str(uuid.uuid4())
         self.channel.exchange_declare(
