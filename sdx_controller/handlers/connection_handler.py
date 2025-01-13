@@ -109,7 +109,7 @@ class ConnectionHandler:
                 f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
-            mq_link = {"operation": operation, "link": link}
+            mq_link = {"operation": operation, "service_id": connection_request.get("id"), "link": link}
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
