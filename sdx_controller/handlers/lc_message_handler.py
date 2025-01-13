@@ -22,6 +22,27 @@ class LcMessageHandler:
     ):
         logger.info("MQ received message:" + str(msg))
         msg_json = json.loads(msg)
+
+        if msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
+            logger.info("Received OXP connection response.")
+            service_id = msg_json.get("service_id")
+
+            if not service_id:
+                return
+            
+            connection = self.db_instance.read_from_db("connections", service_id)
+
+            if not connection:
+                return
+            
+            connection_json = json.loads(connection[service_id])
+            connection_json["oxp_response_code"] = msg_json.get("oxp_response_code")
+            connection_json["oxp_response"] = msg_json.get("oxp_response")
+            self.db_instance.add_key_value_pair_to_db("connections", service_id, json.dumps(connection_json))
+            logger.info("Connection updated: " + service_id)
+            print(self.db_instance.read_from_db("connections", service_id))
+            return
+
         msg_id = msg_json["id"]
         msg_version = msg_json["version"]
 
