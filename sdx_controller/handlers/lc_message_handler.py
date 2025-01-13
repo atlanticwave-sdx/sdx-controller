@@ -29,16 +29,18 @@ class LcMessageHandler:
 
             if not service_id:
                 return
-            
+
             connection = self.db_instance.read_from_db("connections", service_id)
 
             if not connection:
                 return
-            
+
             connection_json = json.loads(connection[service_id])
             connection_json["oxp_response_code"] = msg_json.get("oxp_response_code")
             connection_json["oxp_response"] = msg_json.get("oxp_response")
-            self.db_instance.add_key_value_pair_to_db("connections", service_id, json.dumps(connection_json))
+            self.db_instance.add_key_value_pair_to_db(
+                "connections", service_id, json.dumps(connection_json)
+            )
             logger.info("Connection updated: " + service_id)
             print(self.db_instance.read_from_db("connections", service_id))
             return
