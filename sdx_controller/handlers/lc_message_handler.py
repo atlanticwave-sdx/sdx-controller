@@ -42,7 +42,6 @@ class LcMessageHandler:
                 "connections", service_id, json.dumps(connection_json)
             )
             logger.info("Connection updated: " + service_id)
-            print(self.db_instance.read_from_db("connections", service_id))
             return
 
         msg_id = msg_json["id"]
