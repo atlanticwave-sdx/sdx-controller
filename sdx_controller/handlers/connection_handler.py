@@ -151,7 +151,10 @@ class ConnectionHandler:
             return f"Error: {request_err}", request_err.request_code
 
         if traffic_matrix is None:
-            return "Could not generate a traffic matrix", 402
+            return (
+                "Request does not have a valid JSON or body is incomplete/incorrect",
+                400,
+            )
 
         logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
