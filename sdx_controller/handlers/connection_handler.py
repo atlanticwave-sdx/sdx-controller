@@ -145,8 +145,10 @@ class ConnectionHandler:
             )
         except RequestValidationError as request_err:
             err = traceback.format_exc().replace("\n", ", ")
-            logger.error(f"Error when parsing and validating request: {e} - {err}")
-            return f"Error: {e}", request_err.request_code
+            logger.error(
+                f"Error when parsing and validating request: {request_err} - {err}"
+            )
+            return f"Error: {request_err}", request_err.request_code
 
         if traffic_matrix is None:
             return "Could not generate a traffic matrix", 402
