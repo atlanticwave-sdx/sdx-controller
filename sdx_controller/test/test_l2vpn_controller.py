@@ -333,7 +333,8 @@ class TestL2vpnController(BaseTestCase):
             "Failure",
         )
         self.assertEqual(
-            response.get_json().get("reason"), "Could not generate a traffic matrix"
+            response.get_json().get("reason"),
+            "Request does not have a valid JSON or body is incomplete/incorrect",
         )
 
         # Returned connection ID should be different from the original
