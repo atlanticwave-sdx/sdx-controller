@@ -6,7 +6,7 @@ from typing import Tuple
 
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
-from sdx_pce.utils.exceptions import TEError
+from sdx_pce.utils.exceptions import RequestValidationError, TEError
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_controller.models.simple_link import SimpleLink
@@ -143,12 +143,22 @@ class ConnectionHandler:
         graph = te_manager.generate_graph_te()
         if graph is None:
             return "No SDX topology found", 424
+        try:
+            traffic_matrix = te_manager.generate_traffic_matrix(
+                connection_request=connection_request
+            )
+        except RequestValidationError as request_err:
+            err = traceback.format_exc().replace("\n", ", ")
+            logger.error(
+                f"Error when parsing and validating request: {request_err} - {err}"
+            )
+            return f"Error: {request_err}", request_err.request_code
 
-        traffic_matrix = te_manager.generate_traffic_matrix(
-            connection_request=connection_request
-        )
         if traffic_matrix is None:
-            return "Could not generate a traffic matrix", 402
+            return (
+                "Request does not have a valid JSON or body is incomplete/incorrect",
+                400,
+            )
 
         logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
 
@@ -175,7 +185,7 @@ class ConnectionHandler:
             # We could probably return te_err.te_code instead of 400,
             # but I don't think PCE should use HTTP error codes,
             # because that violates abstraction boundaries.
-            return f"PCE error: {te_err}", 400
+            return f"PCE error: {te_err}", te_err.te_code
         except Exception as e:
             err = traceback.format_exc().replace("\n", ", ")
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
