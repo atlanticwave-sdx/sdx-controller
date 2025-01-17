@@ -39,7 +39,7 @@ class LcMessageHandler:
             oxp_response_code = msg_json.get("oxp_response_code")
             connection_json["oxp_response_code"] = oxp_response_code
             connection_json["oxp_response"] = msg_json.get("oxp_response")
-            
+
             if oxp_response_code // 100 != 2:
                 connection_json["status"] = "down"
             elif not connection_json.get("status"):
