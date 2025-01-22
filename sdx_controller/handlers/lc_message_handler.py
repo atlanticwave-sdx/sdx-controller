@@ -36,8 +36,15 @@ class LcMessageHandler:
                 return
 
             connection_json = json.loads(connection[service_id])
-            connection_json["oxp_response_code"] = msg_json.get("oxp_response_code")
+            oxp_response_code = msg_json.get("oxp_response_code")
+            connection_json["oxp_response_code"] = oxp_response_code
             connection_json["oxp_response"] = msg_json.get("oxp_response")
+
+            if oxp_response_code // 100 != 2:
+                connection_json["status"] = "down"
+            elif not connection_json.get("status"):
+                connection_json["status"] = "up"
+
             self.db_instance.add_key_value_pair_to_db(
                 "connections", service_id, json.dumps(connection_json)
             )
