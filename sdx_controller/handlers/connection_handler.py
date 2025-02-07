@@ -7,6 +7,9 @@ from typing import Tuple
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 from sdx_pce.utils.exceptions import RequestValidationError, TEError
+from sdx_datamodel.parsing.exceptions import (
+    ServiceNotSupportedException,
+)
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_controller.models.simple_link import SimpleLink
@@ -153,6 +156,12 @@ class ConnectionHandler:
                 f"Error when parsing and validating request: {request_err} - {err}"
             )
             return f"Error: {request_err}", request_err.request_code
+        except ServiceNotSupportedException as service_err:
+            err = traceback.format_exc().replace("\n", ", ")
+            logger.error(
+                f"Error when parsing and validating request: {service_err} - {err}"
+            )
+            return f"Error: {service_err}", 402
 
         if traffic_matrix is None:
             return (
@@ -161,6 +170,13 @@ class ConnectionHandler:
             )
 
         logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
+        try:
+            conn = temanager.requests_connectivity(traffic_matrix)
+            if conn is False:
+                logger.error(f"Graph connectivity: {conn}")
+                raise TEError("No path is available, the graph is not connected", 412)
+        except TEError as te_err:
+            return f"PCE error: {te_err}", te_err.te_code
 
         solver = TESolver(graph, traffic_matrix)
         solution = solver.solve()
@@ -189,7 +205,7 @@ class ConnectionHandler:
         except Exception as e:
             err = traceback.format_exc().replace("\n", ", ")
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
-            return f"Error: {e}", 400
+            return f"Error: {e}", 410
 
     def archive_connection(self, service_id) -> None:
         connection_request = self.db_instance.read_from_db("connections", service_id)
