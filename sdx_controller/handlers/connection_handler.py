@@ -303,7 +303,9 @@ class ConnectionHandler:
                     try:
                         self.remove_connection(te_manager, connection["id"])
                     except Exception as err:
-                        logger.info(f"Encountered error when deleting connection: {err}")
+                        logger.info(
+                            f"Encountered error when deleting connection: {err}"
+                        )
                         continue
 
                     del link_connections_dict[simple_link][index]
