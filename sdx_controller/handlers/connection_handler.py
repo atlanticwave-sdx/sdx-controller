@@ -169,7 +169,7 @@ class ConnectionHandler:
 
         logger.info(f"Generated graph: '{graph}', traffic matrix: '{traffic_matrix}'")
         try:
-            conn = temanager.requests_connectivity(traffic_matrix)
+            conn = te_manager.requests_connectivity(traffic_matrix)
             if conn is False:
                 logger.error(f"Graph connectivity: {conn}")
                 raise TEError("No path is available, the graph is not connected", 412)
