@@ -60,7 +60,7 @@ def delete_connection(service_id):
         connection = db_instance.read_from_db("connections", f"{service_id}")
         if not connection:
             return "Did not find connection", 404
-        connection_handler.remove_connection(current_app.te_manager, service_id)
+        connection_handler.remove_connection(current_app.te_manager, service_id, "API")
         db_instance.mark_deleted("connections", f"{service_id}")
         db_instance.mark_deleted("breakdowns", f"{service_id}")
     except Exception as e:
@@ -201,7 +201,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         # Get roll back connection before removing connection
         rollback_conn_body = db_instance.read_from_db("connections", service_id)
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
-            current_app.te_manager, service_id
+            current_app.te_manager, service_id, "API"
         )
 
         if remove_conn_code // 100 != 2:

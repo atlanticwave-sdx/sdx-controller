@@ -191,7 +191,7 @@ class ConnectionHandler:
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
             return f"Error: {e}", 400
 
-    def archive_connection(self, service_id) -> None:
+    def archive_connection(self, service_id, reason) -> None:
         connection_request = self.db_instance.read_from_db("connections", service_id)
         if not connection_request:
             return
@@ -221,7 +221,7 @@ class ConnectionHandler:
             )
         logger.debug(f"Archived connection: {service_id}")
 
-    def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
+    def remove_connection(self, te_manager, service_id, reason) -> Tuple[str, int]:
         te_manager.delete_connection(service_id)
         connection_request = self.db_instance.read_from_db("connections", service_id)
         if not connection_request:
@@ -239,7 +239,7 @@ class ConnectionHandler:
                 breakdown, "delete", json.loads(connection_request)
             )
             self.db_instance.delete_one_entry("breakdowns", service_id)
-            self.archive_connection(service_id)
+            self.archive_connection(service_id, reason)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
         except Exception as e:
@@ -285,7 +285,7 @@ class ConnectionHandler:
                     )
                     if "id" not in connection:
                         continue
-                    self.remove_connection(te_manager, connection["id"])
+                    self.remove_connection(te_manager, connection["id"], "Failure")
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
