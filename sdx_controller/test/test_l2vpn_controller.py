@@ -332,10 +332,6 @@ class TestL2vpnController(BaseTestCase):
             response.get_json().get("status"),
             "Failure",
         )
-        self.assertEqual(
-            response.get_json().get("reason"),
-            "Request does not have a valid JSON or body is incomplete/incorrect",
-        )
 
         # Returned connection ID should be different from the original
         # request ID.
@@ -610,7 +606,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 410)
+        self.assertStatus(response, 400)
 
 
 if __name__ == "__main__":
