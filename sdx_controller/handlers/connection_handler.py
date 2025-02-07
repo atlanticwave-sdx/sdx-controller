@@ -236,7 +236,12 @@ class ConnectionHandler:
         logger.debug(f"Archived connection: {service_id}")
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
-        te_manager.delete_connection(service_id)
+        try:
+            te_manager.delete_connection(service_id)
+        except Exception as err:
+            logger.info(f"Encountered error when deleting connection: {err}")
+            return f"Error when removing connection: {err}", 400
+
         connection_request = self.db_instance.read_from_db("connections", service_id)
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
@@ -258,7 +263,7 @@ class ConnectionHandler:
             return status, code
         except Exception as e:
             logger.debug(f"Error when removing breakdown: {e}")
-            return f"Error: {e}", 400
+            return f"Error when removing breakdown: {e}", 400
 
     def handle_link_failure(self, te_manager, failed_links):
         logger.debug("---Handling connections that contain failed link.---")
