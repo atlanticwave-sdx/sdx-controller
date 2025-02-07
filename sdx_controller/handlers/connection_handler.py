@@ -258,7 +258,7 @@ class ConnectionHandler:
             return status, code
         except Exception as e:
             logger.debug(f"Error when removing breakdown: {e}")
-            return f"Error: {e}", 400
+            return f"Error when removing breakdown: {e}", 400
 
     def handle_link_failure(self, te_manager, failed_links):
         logger.debug("---Handling connections that contain failed link.---")
@@ -299,7 +299,15 @@ class ConnectionHandler:
                     )
                     if "id" not in connection:
                         continue
-                    self.remove_connection(te_manager, connection["id"])
+
+                    try:
+                        self.remove_connection(te_manager, connection["id"])
+                    except Exception as err:
+                        logger.info(
+                            f"Encountered error when deleting connection: {err}"
+                        )
+                        continue
+
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)

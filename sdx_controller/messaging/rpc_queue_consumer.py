@@ -58,13 +58,16 @@ class RpcConsumer(object):
         )
         self.channel = self.connection.channel()
 
-        ch.basic_publish(
-            exchange=self.exchange_name,
-            routing_key=props.reply_to,
-            properties=pika.BasicProperties(correlation_id=props.correlation_id),
-            body=str(response),
-        )
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        try:
+            ch.basic_publish(
+                exchange=self.exchange_name,
+                routing_key=props.reply_to,
+                properties=pika.BasicProperties(correlation_id=props.correlation_id),
+                body=str(response),
+            )
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+        except Exception as err:
+            self.logger.info(f"[MQ] encountered error when publishing: {err}")
 
     def start_consumer(self):
         self.channel.basic_qos(prefetch_count=1)
