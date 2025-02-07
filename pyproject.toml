@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "sdx-controller"
-version = "3.0.0.dev0"
+version = "3.0.0.dev1"
 description = "AtlanticWave-SDX project's main controller"
 authors = [
     { name = "Yufeng Xin", email = "yxin@renci.org" },
@@ -13,7 +13,7 @@ authors = [
     { name = "Italo Valcy", email = "italo@ampath.net" },
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -29,7 +29,7 @@ dependencies = [
     "pika >= 1.2.0",
     "dataset",
     "pymongo > 3.0",
-    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@3.0.0.dev7",
+    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@3.0.0.dev8",
 ]
 
 [project.optional-dependencies]
