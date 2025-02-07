@@ -4,7 +4,7 @@
 # things we don't need in them.
 
 # The builder image.
-FROM python:3.9-slim-bullseye AS sdx-builder-image
+FROM python:3.11-slim-bullseye AS sdx-builder-image
 
 RUN apt-get update \
     && apt-get -y upgrade \
@@ -27,7 +27,7 @@ COPY . /usr/src/app
 RUN pip install --no-cache-dir .[wsgi]
 
 # The final image.
-FROM python:3.9-slim-bullseye AS sdx-runtime-image
+FROM python:3.11-slim-bullseye AS sdx-runtime-image
 
 COPY --from=sdx-builder-image /opt/venv /opt/venv
 
