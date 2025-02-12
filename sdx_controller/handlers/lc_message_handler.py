@@ -75,6 +75,13 @@ class LcMessageHandler:
                 self.connection_handler.handle_link_failure(
                     self.te_manager, failed_links
                 )
+            #check topology modification:
+            #node, port or link modification
+            #new version of topology
+            if latest_topo:
+                self.db_instance.add_key_value_pair_to_db(
+                    "topologies", "latest_topo", latest_topo
+                )
         # Add new topology
         else:
             domain_list.append(domain_name)
@@ -91,6 +98,8 @@ class LcMessageHandler:
 
         # TODO: use TEManager API directly; but TEManager does not
         # expose a `get_topology()` method yet.
+        # Get latest topology and save to db
+        # and individual OXP topology
         latest_topo = json.dumps(
             self.te_manager.topology_manager.get_topology().to_dict()
         )
