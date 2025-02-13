@@ -78,10 +78,6 @@ class LcMessageHandler:
             #check topology modification:
             #node, port or link modification
             #new version of topology
-            if latest_topo:
-                self.db_instance.add_key_value_pair_to_db(
-                    "topologies", "latest_topo", latest_topo
-                )
         # Add new topology
         else:
             domain_list.append(domain_name)
