@@ -4,7 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
-from sdx_controller.utils.constants import MongoCollections
+from sdx_controller.utils.constants import MongoCollections, Constants
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -31,10 +31,10 @@ class ConnectionHandler:
 
         link_connections_dict_json = (
             self.db_instance.read_from_db(
-                MongoCollections.LINKS, "link_connections_dict"
-            )["link_connections_dict"]
+                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
+            )[Constants.LINK_CONNECTIONS_DICT]
             if self.db_instance.read_from_db(
-                MongoCollections.LINKS, "link_connections_dict"
+                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
             )
             else None
         )
@@ -71,7 +71,7 @@ class ConnectionHandler:
 
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.LINKS,
-                    "link_connections_dict",
+                    Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
                 )
 
@@ -100,7 +100,7 @@ class ConnectionHandler:
 
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.LINKS,
-                    "link_connections_dict",
+                    Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
                 )
 
@@ -278,18 +278,18 @@ class ConnectionHandler:
     def handle_link_failure(self, te_manager, failed_links):
         logger.debug("Handling connections that contain failed link.")
         link_connections_dict_str = self.db_instance.read_from_db(
-            MongoCollections.LINKS, "link_connections_dict"
+            MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
 
         if (
             not link_connections_dict_str
-            or not link_connections_dict_str["link_connections_dict"]
+            or not link_connections_dict_str[Constants.LINK_CONNECTIONS_DICT]
         ):
             logger.debug("No connection has been placed yet.")
             return
 
         link_connections_dict = json.loads(
-            link_connections_dict_str["link_connections_dict"]
+            link_connections_dict_str[Constants.LINK_CONNECTIONS_DICT]
         )
 
         for link in failed_links:

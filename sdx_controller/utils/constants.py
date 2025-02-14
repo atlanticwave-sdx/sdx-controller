@@ -10,3 +10,4 @@ class MongoCollections:
 class Constants:
     DOMAIN_LIST = "domain_list"
     LATEST_TOPO = "latest_topo"
+    LINK_CONNECTIONS_DICT = "link_connections_dict"

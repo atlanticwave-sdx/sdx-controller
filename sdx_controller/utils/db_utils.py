@@ -1,7 +1,7 @@
 import logging
 import os
 from urllib.parse import urlparse
-from constants import MongoCollections
+from sdx_controller.utils.constants import MongoCollections
 
 import pymongo
 
