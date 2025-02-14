@@ -14,6 +14,7 @@ from sdx_controller.utils.db_utils import DbUtils
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 
 
 def create_rpc_thread(app):
@@ -50,9 +51,9 @@ def create_app(run_listener: bool = True):
     threads, which is when run_listener param might be useful.
     """
     if LOG_FILE:
-        logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
+        logging.basicConfig(filename=LOG_FILE, level=logging.getLevelName(LOG_LEVEL))
     else:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.getLevelName(LOG_LEVEL))
 
     logging.getLogger("sdx_pce.topology.temanager").setLevel(logging.INFO)
     app = connexion.App(__name__, specification_dir="./swagger/")

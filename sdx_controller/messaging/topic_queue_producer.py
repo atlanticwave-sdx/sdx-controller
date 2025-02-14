@@ -84,8 +84,6 @@ class TopicQueueProducer(object):
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG)
-
     producer = TopicQueueProducer(5, "connection", "lc1_q1")
     body = "test body"
     print("Published Message: {}".format(body))

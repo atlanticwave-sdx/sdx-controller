@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import uuid
 
 import connexion
@@ -21,7 +22,7 @@ LOG_FORMAT = (
 )
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.getLevelName(os.getenv("LOG_LEVEL", "DEBUG")))
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
