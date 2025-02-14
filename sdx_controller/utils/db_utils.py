@@ -1,17 +1,19 @@
 import logging
 import os
 from urllib.parse import urlparse
+from enum import Enum
 
 import pymongo
 
-COLLECTION_NAMES = [
-    "topologies",
-    "connections",
-    "breakdowns",
-    "domains",
-    "links",
-    "historical_connections",
-]
+
+class MongoCollections(Enum):
+    TOPOLOGIES = "topologies"
+    CONNECTIONS = "connections"
+    BREAKDOWNS = "breakdowns"
+    DOMAINS = "domains"
+    LINKS = "links"
+    HISTORICAL_CONNECTIONS = "historical_connections"
+
 
 pymongo_logger = logging.getLogger("pymongo")
 pymongo_logger.setLevel(logging.INFO)
@@ -70,9 +72,9 @@ class DbUtils(object):
 
         self.sdxdb = self.mongo_client[self.db_name]
         # config_col = self.sdxdb[self.config_table_name]
-        for name in COLLECTION_NAMES:
-            if name not in self.sdxdb.list_collection_names():
-                self.sdxdb.create_collection(name)
+        for collection in MongoCollections:
+            if collection not in self.sdxdb.list_collection_names():
+                self.sdxdb.create_collection(collection.value)
 
         self.logger.debug(f"DB {self.db_name} initialized")
 
