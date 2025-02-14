@@ -1,18 +1,9 @@
 import logging
 import os
 from urllib.parse import urlparse
-from enum import Enum
+from constants import MongoCollections
 
 import pymongo
-
-
-class MongoCollections(Enum):
-    TOPOLOGIES = "topologies"
-    CONNECTIONS = "connections"
-    BREAKDOWNS = "breakdowns"
-    DOMAINS = "domains"
-    LINKS = "links"
-    HISTORICAL_CONNECTIONS = "historical_connections"
 
 
 pymongo_logger = logging.getLogger("pymongo")

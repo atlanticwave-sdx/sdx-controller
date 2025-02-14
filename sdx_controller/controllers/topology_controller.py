@@ -2,6 +2,7 @@ from flask import current_app
 from sdx_pce.topology.grenmlconverter import GrenmlConverter
 
 from sdx_controller.utils.db_utils import DbUtils
+from sdx_controller.utils.constants import MongoCollections
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
@@ -16,7 +17,9 @@ def get_topology():  # noqa: E501
 
     :rtype: str
     """
-    topo_val = db_instance.read_from_db("topologies", "latest_topo")
+    topo_val = db_instance.read_from_db(
+        MongoCollections.TOPOLOGIES.value, "latest_topo"
+    )
 
     # TODO: this is a workaround because of the way we read values
     # from MongoDB; refactor and test this more.

@@ -3,6 +3,7 @@ import logging
 
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.parse_helper import ParseHelper
+from sdx_controller.utils.constants import MongoCollections
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,9 @@ class LcMessageHandler:
 
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db
-        self.db_instance.add_key_value_pair_to_db("topologies", db_msg_id, msg)
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.TOPOLOGIES.value, db_msg_id, msg
+        )
         logger.info("Save to database complete.")
         logger.info("message ID:" + str(db_msg_id))
 
@@ -86,7 +89,7 @@ class LcMessageHandler:
 
         logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
-            "topologies", domain_name, json.dumps(msg_json)
+            MongoCollections.TOPOLOGIES.value, domain_name, json.dumps(msg_json)
         )
 
         # TODO: use TEManager API directly; but TEManager does not
@@ -96,6 +99,6 @@ class LcMessageHandler:
         )
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db(
-            "topologies", "latest_topo", latest_topo
+            MongoCollections.TOPOLOGIES.value, "latest_topo", latest_topo
         )
         logger.info("Save to database complete.")
