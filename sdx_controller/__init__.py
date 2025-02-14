@@ -9,8 +9,8 @@ from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
 from sdx_controller.messaging.rpc_queue_consumer import RpcConsumer
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
-from sdx_controller.utils.constants import MongoCollections, Constants
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)

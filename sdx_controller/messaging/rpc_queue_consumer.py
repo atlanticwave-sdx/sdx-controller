@@ -8,8 +8,8 @@ from queue import Queue
 import pika
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.parse_helper import ParseHelper
-from sdx_controller.utils.constants import MongoCollections, Constants
 
 MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672

@@ -1,8 +1,8 @@
 from flask import current_app
 from sdx_pce.topology.grenmlconverter import GrenmlConverter
 
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
-from sdx_controller.utils.constants import MongoCollections, Constants
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()

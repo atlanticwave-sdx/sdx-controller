@@ -1,10 +1,10 @@
 import logging
 import os
 from urllib.parse import urlparse
-from sdx_controller.utils.constants import MongoCollections
 
 import pymongo
 
+from sdx_controller.utils.constants import MongoCollections
 
 pymongo_logger = logging.getLogger("pymongo")
 pymongo_logger.setLevel(logging.INFO)

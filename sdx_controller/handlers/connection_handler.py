@@ -4,7 +4,6 @@ import time
 import traceback
 from typing import Tuple
 
-from sdx_controller.utils.constants import MongoCollections, Constants
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -12,6 +11,7 @@ from sdx_pce.utils.exceptions import RequestValidationError, TEError
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_controller.models.simple_link import SimpleLink
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.parse_helper import ParseHelper
 
 logger = logging.getLogger(__name__)
