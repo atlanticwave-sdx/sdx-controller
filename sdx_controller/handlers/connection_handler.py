@@ -30,10 +30,12 @@ class ConnectionHandler:
             return "Could not break down the solution", 400
 
         link_connections_dict_json = (
-            self.db_instance.read_from_db("links", "link_connections_dict")[
-                "link_connections_dict"
-            ]
-            if self.db_instance.read_from_db("links", "link_connections_dict")
+            self.db_instance.read_from_db(
+                MongoCollections.LINKS.value, "link_connections_dict"
+            )["link_connections_dict"]
+            if self.db_instance.read_from_db(
+                MongoCollections.LINKS.value, "link_connections_dict"
+            )
             else None
         )
 
@@ -68,7 +70,9 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].remove(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
-                    "links", "link_connections_dict", json.dumps(link_connections_dict)
+                    MongoCollections.LINKS.value,
+                    "link_connections_dict",
+                    json.dumps(link_connections_dict),
                 )
 
             if interdomain_a:
@@ -95,7 +99,9 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].remove(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
-                    "links", "link_connections_dict", json.dumps(link_connections_dict)
+                    MongoCollections.LINKS.value,
+                    "link_connections_dict",
+                    json.dumps(link_connections_dict),
                 )
 
                 interdomain_a = link.get("uni_z", {}).get("port_id")
@@ -219,7 +225,7 @@ class ConnectionHandler:
         )
 
         historical_connections = self.db_instance.read_from_db(
-            "historical_connections", service_id
+            MongoCollections.HISTORICAL_CONNECTIONS.value, service_id
         )
         # Current timestamp in seconds
         timestamp = int(time.time())
@@ -230,11 +236,13 @@ class ConnectionHandler:
                 json.dumps({timestamp: json.loads(connection_request_str)})
             )
             self.db_instance.add_key_value_pair_to_db(
-                "historical_connections", service_id, historical_connections_list
+                MongoCollections.HISTORICAL_CONNECTIONS.value,
+                service_id,
+                historical_connections_list,
             )
         else:
             self.db_instance.add_key_value_pair_to_db(
-                "historical_connections",
+                MongoCollections.HISTORICAL_CONNECTIONS.value,
                 service_id,
                 [json.dumps({timestamp: json.loads(connection_request_str)})],
             )
@@ -272,9 +280,9 @@ class ConnectionHandler:
             return f"Error when removing breakdown: {e}", 400
 
     def handle_link_failure(self, te_manager, failed_links):
-        logger.debug("---Handling connections that contain failed link.---")
+        logger.debug("Handling connections that contain failed link.")
         link_connections_dict_str = self.db_instance.read_from_db(
-            "links", "link_connections_dict"
+            MongoCollections.LINKS.value, "link_connections_dict"
         )
 
         if (
@@ -332,7 +340,7 @@ class ConnectionHandler:
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.read_from_db(
-            "historical_connections", service_id
+            MongoCollections.HISTORICAL_CONNECTIONS.value, service_id
         )
         if not historical_connections:
             return None
