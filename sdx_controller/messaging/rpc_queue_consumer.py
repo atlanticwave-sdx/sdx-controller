@@ -93,7 +93,9 @@ class RpcConsumer(object):
         # This part reads from DB when SDX controller initially starts.
         # It looks for domain_list, if already in DB,
         # Then use the existing ones from DB.
-        domain_list_from_db = db_instance.read_from_db("domains", "domain_list")
+        domain_list_from_db = db_instance.read_from_db(
+            MongoCollections.DOMAINS.value, "domain_list"
+        )
         latest_topo_from_db = db_instance.read_from_db(
             MongoCollections.TOPOLOGIES.value, "latest_topo"
         )

@@ -86,7 +86,7 @@ class LcMessageHandler:
         else:
             domain_list.append(domain_name)
             self.db_instance.add_key_value_pair_to_db(
-                "domains", "domain_list", domain_list
+                MongoCollections.DOMAINS.value, "domain_list", domain_list
             )
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
