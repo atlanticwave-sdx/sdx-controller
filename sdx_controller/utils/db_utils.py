@@ -63,8 +63,8 @@ class DbUtils(object):
 
         self.sdxdb = self.mongo_client[self.db_name]
         # config_col = self.sdxdb[self.config_table_name]
-        for collection in MongoCollections:
-            if collection not in self.sdxdb.list_collection_names():
+        for key, collection in MongoCollections.__dict__.items():
+            if not key.startswith("__") and collection not in self.sdxdb.list_collection_names():
                 self.sdxdb.create_collection(collection)
 
         self.logger.debug(f"DB {self.db_name} initialized")
