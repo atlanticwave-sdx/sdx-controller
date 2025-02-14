@@ -65,7 +65,7 @@ def delete_connection(service_id):
             return "Did not find connection", 404
         connection_handler.remove_connection(current_app.te_manager, service_id)
         db_instance.mark_deleted(MongoCollections.CONNECTIONS.value, f"{service_id}")
-        db_instance.mark_deleted("breakdowns", f"{service_id}")
+        db_instance.mark_deleted(MongoCollections.BREAKDOWNS.value, f"{service_id}")
     except Exception as e:
         logger.info(f"Delete failed (connection id: {service_id}): {e}")
         return f"Failed, reason: {e}", 500

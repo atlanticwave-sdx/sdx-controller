@@ -189,7 +189,7 @@ class ConnectionHandler:
                 solution, connection_request
             )
             self.db_instance.add_key_value_pair_to_db(
-                "breakdowns", connection_request["id"], breakdown
+                MongoCollections.BREAKDOWNS.value, connection_request["id"], breakdown
             )
             status, code = self._send_breakdown_to_lc(
                 breakdown, "post", connection_request
@@ -250,7 +250,9 @@ class ConnectionHandler:
 
         connection_request = connection_request[service_id]
 
-        breakdown = self.db_instance.read_from_db("breakdowns", service_id)
+        breakdown = self.db_instance.read_from_db(
+            MongoCollections.BREAKDOWNS.value, service_id
+        )
         if not breakdown:
             return "Did not find breakdown, cannot remove connection", 404
         breakdown = breakdown[service_id]
@@ -259,7 +261,9 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", json.loads(connection_request)
             )
-            self.db_instance.delete_one_entry("breakdowns", service_id)
+            self.db_instance.delete_one_entry(
+                MongoCollections.BREAKDOWNS.value, service_id
+            )
             self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
@@ -342,7 +346,7 @@ def get_connection_status(db, service_id: str):
     assert db is not None
     assert service_id is not None
 
-    breakdown = db.read_from_db("breakdowns", service_id)
+    breakdown = db.read_from_db(MongoCollections.BREAKDOWNS.value, service_id)
     if not breakdown:
         logger.info(f"Could not find breakdown for {service_id}")
         return None
