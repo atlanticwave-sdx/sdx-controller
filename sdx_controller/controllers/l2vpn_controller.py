@@ -14,6 +14,7 @@ from sdx_controller.models.connection import Connection  # noqa: E501
 from sdx_controller.models.l2vpn_body import L2vpnBody  # noqa: E501
 from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
 from sdx_controller.utils.db_utils import DbUtils
+from sdx_controller.utils.constants import MongoCollections
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
@@ -57,11 +58,13 @@ def delete_connection(service_id):
         # service_id is not found.  This should in fact be an error.
         #
         # https://github.com/atlanticwave-sdx/pce/issues/180
-        connection = db_instance.read_from_db("connections", f"{service_id}")
+        connection = db_instance.read_from_db(
+            MongoCollections.CONNECTIONS.value, f"{service_id}"
+        )
         if not connection:
             return "Did not find connection", 404
         connection_handler.remove_connection(current_app.te_manager, service_id)
-        db_instance.mark_deleted("connections", f"{service_id}")
+        db_instance.mark_deleted(MongoCollections.CONNECTIONS.value, f"{service_id}")
         db_instance.mark_deleted("breakdowns", f"{service_id}")
     except Exception as e:
         logger.info(f"Delete failed (connection id: {service_id}): {e}")
@@ -95,7 +98,9 @@ def get_connections():  # noqa: E501
 
     :rtype: Connection
     """
-    values = db_instance.get_all_entries_in_collection("connections")
+    values = db_instance.get_all_entries_in_collection(
+        MongoCollections.CONNECTIONS.value
+    )
     if not values:
         return "No connection was found", 404
     return_values = {}
@@ -141,7 +146,7 @@ def place_connection(body):
 
     if code // 100 == 2:
         db_instance.add_key_value_pair_to_db(
-            "connections", service_id, json.dumps(body)
+            MongoCollections.CONNECTIONS.value, service_id, json.dumps(body)
         )
         # Service created successfully
         code = 201
@@ -182,7 +187,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db("connections", f"{service_id}")
+    value = db_instance.read_from_db(
+        MongoCollections.CONNECTIONS.value, f"{service_id}"
+    )
     if not value:
         return "Connection not found", 404
 
@@ -199,7 +206,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
-        rollback_conn_body = db_instance.read_from_db("connections", service_id)
+        rollback_conn_body = db_instance.read_from_db(
+            MongoCollections.CONNECTIONS.value, service_id
+        )
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
             current_app.te_manager, service_id
         )
@@ -225,7 +234,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     if code // 100 == 2:
         db_instance.add_key_value_pair_to_db(
-            "connections", service_id, json.dumps(body)
+            MongoCollections.CONNECTIONS.value, service_id, json.dumps(body)
         )
         # Service created successfully
         code = 201
@@ -259,7 +268,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
         if rollback_conn_code // 100 == 2:
             db_instance.add_key_value_pair_to_db(
-                "connections", service_id, json.dumps(conn_request)
+                MongoCollections.CONNECTIONS.value, service_id, json.dumps(conn_request)
             )
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"

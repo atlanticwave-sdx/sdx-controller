@@ -4,6 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
+from sdx_controller.utils.constants import MongoCollections
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -206,12 +207,16 @@ class ConnectionHandler:
             return f"Error: {e}", 410
 
     def archive_connection(self, service_id) -> None:
-        connection_request = self.db_instance.read_from_db("connections", service_id)
+        connection_request = self.db_instance.read_from_db(
+            MongoCollections.CONNECTIONS.value, service_id
+        )
         if not connection_request:
             return
 
         connection_request_str = connection_request[service_id]
-        self.db_instance.delete_one_entry("connections", service_id)
+        self.db_instance.delete_one_entry(
+            MongoCollections.CONNECTIONS.value, service_id
+        )
 
         historical_connections = self.db_instance.read_from_db(
             "historical_connections", service_id
@@ -237,7 +242,9 @@ class ConnectionHandler:
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.delete_connection(service_id)
-        connection_request = self.db_instance.read_from_db("connections", service_id)
+        connection_request = self.db_instance.read_from_db(
+            MongoCollections.CONNECTIONS.value, service_id
+        )
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
 
@@ -314,7 +321,9 @@ class ConnectionHandler:
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
                         self.db_instance.add_key_value_pair_to_db(
-                            "connections", connection["id"], json.dumps(connection)
+                            MongoCollections.CONNECTIONS.value,
+                            connection["id"],
+                            json.dumps(connection),
                         )
 
     def get_archived_connections(self, service_id: str):
@@ -398,7 +407,7 @@ def get_connection_status(db, service_id: str):
     request_uni_a_id = None
     request_uni_z_id = None
 
-    request = db.read_from_db("connections", service_id)
+    request = db.read_from_db(MongoCollections.CONNECTIONS.value, service_id)
     if not request:
         logger.error(f"Can't find a connection request for {service_id}")
         # TODO: we're in a strange state here. Should we panic?

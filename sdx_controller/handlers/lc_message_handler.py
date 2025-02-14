@@ -31,7 +31,9 @@ class LcMessageHandler:
             if not service_id:
                 return
 
-            connection = self.db_instance.read_from_db("connections", service_id)
+            connection = self.db_instance.read_from_db(
+                MongoCollections.CONNECTIONS.value, service_id
+            )
 
             if not connection:
                 return
@@ -47,7 +49,9 @@ class LcMessageHandler:
                 connection_json["status"] = "up"
 
             self.db_instance.add_key_value_pair_to_db(
-                "connections", service_id, json.dumps(connection_json)
+                MongoCollections.CONNECTIONS.value,
+                service_id,
+                json.dumps(connection_json),
             )
             logger.info("Connection updated: " + service_id)
             return
