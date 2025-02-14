@@ -3,7 +3,7 @@ import logging
 
 from sdx_controller.handlers.connection_handler import ConnectionHandler
 from sdx_controller.utils.parse_helper import ParseHelper
-from sdx_controller.utils.constants import MongoCollections
+from sdx_controller.utils.constants import MongoCollections, Constants
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class LcMessageHandler:
                 return
 
             connection = self.db_instance.read_from_db(
-                MongoCollections.CONNECTIONS.value, service_id
+                MongoCollections.CONNECTIONS, service_id
             )
 
             if not connection:
@@ -49,7 +49,7 @@ class LcMessageHandler:
                 connection_json["status"] = "up"
 
             self.db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS.value,
+                MongoCollections.CONNECTIONS,
                 service_id,
                 json.dumps(connection_json),
             )
@@ -65,7 +65,7 @@ class LcMessageHandler:
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES.value, db_msg_id, msg
+            MongoCollections.TOPOLOGIES, db_msg_id, msg
         )
         logger.info("Save to database complete.")
         logger.info("message ID:" + str(db_msg_id))
@@ -86,14 +86,14 @@ class LcMessageHandler:
         else:
             domain_list.append(domain_name)
             self.db_instance.add_key_value_pair_to_db(
-                MongoCollections.DOMAINS.value, "domain_list", domain_list
+                MongoCollections.DOMAINS, Constants.DOMAIN_LIST, domain_list
             )
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
 
         logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES.value, domain_name, json.dumps(msg_json)
+            MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
         )
 
         # TODO: use TEManager API directly; but TEManager does not
@@ -103,6 +103,6 @@ class LcMessageHandler:
         )
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES.value, "latest_topo", latest_topo
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO, latest_topo
         )
         logger.info("Save to database complete.")

@@ -65,7 +65,7 @@ class DbUtils(object):
         # config_col = self.sdxdb[self.config_table_name]
         for collection in MongoCollections:
             if collection not in self.sdxdb.list_collection_names():
-                self.sdxdb.create_collection(collection.value)
+                self.sdxdb.create_collection(collection)
 
         self.logger.debug(f"DB {self.db_name} initialized")
 

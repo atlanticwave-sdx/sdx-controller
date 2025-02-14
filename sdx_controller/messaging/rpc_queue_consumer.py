@@ -9,7 +9,7 @@ import pika
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
-from sdx_controller.utils.constants import MongoCollections
+from sdx_controller.utils.constants import MongoCollections, Constants
 
 MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
@@ -94,28 +94,26 @@ class RpcConsumer(object):
         # It looks for domain_list, if already in DB,
         # Then use the existing ones from DB.
         domain_list_from_db = db_instance.read_from_db(
-            MongoCollections.DOMAINS.value, "domain_list"
+            MongoCollections.DOMAINS, Constants.DOMAIN_LIST
         )
         latest_topo_from_db = db_instance.read_from_db(
-            MongoCollections.TOPOLOGIES.value, "latest_topo"
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO
         )
 
         if domain_list_from_db:
-            domain_list = domain_list_from_db["domain_list"]
+            domain_list = domain_list_from_db[Constants.DOMAIN_LIST]
             logger.debug("Domain list already exists in db: ")
             logger.debug(domain_list)
 
         if latest_topo_from_db:
-            latest_topo = latest_topo_from_db["latest_topo"]
+            latest_topo = latest_topo_from_db[Constants.LATEST_TOPO]
             logger.debug("Topology already exists in db: ")
             logger.debug(latest_topo)
 
         # If topologies already saved in db, use them to initialize te_manager
         if domain_list:
             for domain in domain_list:
-                topology = db_instance.read_from_db(
-                    MongoCollections.TOPOLOGIES.value, domain
-                )
+                topology = db_instance.read_from_db(MongoCollections.TOPOLOGIES, domain)
 
                 if not topology:
                     continue
