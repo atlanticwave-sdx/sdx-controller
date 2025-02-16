@@ -4,14 +4,7 @@ from urllib.parse import urlparse
 
 import pymongo
 
-COLLECTION_NAMES = [
-    "topologies",
-    "connections",
-    "breakdowns",
-    "domains",
-    "links",
-    "historical_connections",
-]
+from sdx_controller.utils.constants import MongoCollections
 
 pymongo_logger = logging.getLogger("pymongo")
 pymongo_logger.setLevel(logging.INFO)
@@ -70,9 +63,12 @@ class DbUtils(object):
 
         self.sdxdb = self.mongo_client[self.db_name]
         # config_col = self.sdxdb[self.config_table_name]
-        for name in COLLECTION_NAMES:
-            if name not in self.sdxdb.list_collection_names():
-                self.sdxdb.create_collection(name)
+        for key, collection in MongoCollections.__dict__.items():
+            if (
+                not key.startswith("__")
+                and collection not in self.sdxdb.list_collection_names()
+            ):
+                self.sdxdb.create_collection(collection)
 
         self.logger.debug(f"DB {self.db_name} initialized")
 

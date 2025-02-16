@@ -9,6 +9,7 @@ from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
 from sdx_controller.messaging.rpc_queue_consumer import RpcConsumer
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
 
 logger = logging.getLogger(__name__)
@@ -65,11 +66,13 @@ def create_app(run_listener: bool = True):
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
 
-    topo_val = app.db_instance.read_from_db("topologies", "latest_topo")
+    topo_val = app.db_instance.read_from_db(
+        MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO
+    )
 
     # Get a handle to PCE.
     app.te_manager = (
-        TEManager(topology_data=json.loads(topo_val["latest_topo"]))
+        TEManager(topology_data=json.loads(topo_val[Constants.LATEST_TOPO]))
         if topo_val
         else TEManager(topology_data=None)
     )

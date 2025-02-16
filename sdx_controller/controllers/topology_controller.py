@@ -1,6 +1,7 @@
 from flask import current_app
 from sdx_pce.topology.grenmlconverter import GrenmlConverter
 
+from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
 
 # Get DB connection and tables set up.
@@ -16,14 +17,16 @@ def get_topology():  # noqa: E501
 
     :rtype: str
     """
-    topo_val = db_instance.read_from_db("topologies", "latest_topo")
+    topo_val = db_instance.read_from_db(
+        MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO
+    )
 
     # TODO: this is a workaround because of the way we read values
     # from MongoDB; refactor and test this more.
     if not topo_val:
         return None
 
-    return topo_val["latest_topo"]
+    return topo_val[Constants.LATEST_TOPO]
 
 
 def get_topologyby_grenml():  # noqa: E501
@@ -58,8 +61,10 @@ def topology_version(topology_id):  # noqa: E501
 
 
 def get_topology_domains():
-    domain_list = db_instance.read_from_db("domains", "domain_list")
+    domain_list = db_instance.read_from_db(
+        MongoCollections.DOMAINS, Constants.DOMAIN_LIST
+    )
     if not domain_list:
         return []
 
-    return domain_list["domain_list"]
+    return domain_list[Constants.DOMAIN_LIST]
