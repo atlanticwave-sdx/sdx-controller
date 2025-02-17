@@ -46,7 +46,7 @@ class DbUtils(object):
             )
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.getLevelName(os.getenv("LOG_LEVEL", "DEBUG")))
 
         # Log DB URI, without a password.
         self.logger.info(f"[DB] Using {obfuscate_password_in_uri(mongo_connstring)}")

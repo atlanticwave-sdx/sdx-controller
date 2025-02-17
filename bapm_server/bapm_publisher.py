@@ -3,6 +3,7 @@
 import functools
 import json
 import logging
+import os
 
 import pika
 from pika.exchange_type import ExchangeType
@@ -235,7 +236,9 @@ class BAPMPublisher(object):
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    logging.basicConfig(
+        level=logging.getLevelName(os.getenv("LOG_LEVEL", "DEBUG")), format=LOG_FORMAT
+    )
 
     # Connect to localhost:5672 as guest with the password guest and virtual host "/" (%2F)
     publisher = BAPMPublisher("amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F")
