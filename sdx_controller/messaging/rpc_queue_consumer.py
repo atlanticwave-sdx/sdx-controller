@@ -6,7 +6,7 @@ import threading
 from queue import Queue
 
 import pika
-from sdx_datamodel.constants import Constants, MongoCollections, MessageQueueNames
+from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
