@@ -1,8 +1,9 @@
 import json
 import logging
 
+from sdx_datamodel.constants import Constants, MongoCollections
+
 from sdx_controller.handlers.connection_handler import ConnectionHandler
-from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.parse_helper import ParseHelper
 
 logger = logging.getLogger(__name__)

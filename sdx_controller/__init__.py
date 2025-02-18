@@ -5,11 +5,11 @@ import threading
 from queue import Queue
 
 import connexion
+from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
 from sdx_controller.messaging.rpc_queue_consumer import RpcConsumer
-from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
 
 logger = logging.getLogger(__name__)
