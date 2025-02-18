@@ -4,7 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
-from sdx_datamodel.constants import Constants, MongoCollections, MessageQueueNames
+from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
