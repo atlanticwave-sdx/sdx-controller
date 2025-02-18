@@ -104,6 +104,6 @@ class LcMessageHandler:
         )
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO, latest_topo
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
         )
         logger.info("Save to database complete.")

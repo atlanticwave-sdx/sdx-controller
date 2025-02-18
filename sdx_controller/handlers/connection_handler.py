@@ -4,7 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
-from sdx_datamodel.constants import Constants, MongoCollections
+from sdx_datamodel.constants import Constants, MongoCollections, MessageQueueNames
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -111,7 +111,7 @@ class ConnectionHandler:
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
             domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
-            exchange_name = "connection"
+            exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
                 f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "

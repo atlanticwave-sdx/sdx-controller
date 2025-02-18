@@ -5,6 +5,7 @@ import threading
 import uuid
 
 import pika
+from sdx_datamodel.constants import MessageQueueNames
 
 MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
@@ -84,7 +85,7 @@ class TopicQueueProducer(object):
 
 
 if __name__ == "__main__":
-    producer = TopicQueueProducer(5, "connection", "lc1_q1")
+    producer = TopicQueueProducer(5, MessageQueueNames.CONNECTIONS, "lc1_q1")
     body = "test body"
     print("Published Message: {}".format(body))
     response = producer.call(body)
