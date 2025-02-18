@@ -6,7 +6,7 @@ import threading
 from queue import Queue
 
 import pika
-from sdx_datamodel.constants import Constants, MongoCollections
+from sdx_datamodel.constants import Constants, MongoCollections, MessageQueueNames
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
@@ -17,7 +17,7 @@ MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 # subscribe to the corresponding queue
-SUB_QUEUE = os.getenv("SUB_QUEUE")
+SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
 
