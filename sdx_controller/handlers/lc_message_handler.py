@@ -1,8 +1,9 @@
 import json
 import logging
 
+from sdx_datamodel.constants import Constants, MongoCollections
+
 from sdx_controller.handlers.connection_handler import ConnectionHandler
-from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.parse_helper import ParseHelper
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,6 @@ class LcMessageHandler:
         )
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO, latest_topo
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
         )
         logger.info("Save to database complete.")

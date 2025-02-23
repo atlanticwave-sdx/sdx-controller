@@ -54,7 +54,6 @@ services:
       # MQ settings
       - MQ_HOST=${MQ_HOST}
       - MQ_PORT=${MQ_PORT:-5672}
-      - SUB_QUEUE=${SUB_QUEUE}
 
 volumes:
   mongodb:

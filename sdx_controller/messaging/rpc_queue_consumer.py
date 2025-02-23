@@ -6,9 +6,9 @@ import threading
 from queue import Queue
 
 import pika
+from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
-from sdx_controller.utils.constants import Constants, MongoCollections
 from sdx_controller.utils.parse_helper import ParseHelper
 
 MQ_HOST = os.getenv("MQ_HOST")
@@ -17,7 +17,7 @@ MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 # subscribe to the corresponding queue
-SUB_QUEUE = os.getenv("SUB_QUEUE")
+SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ class RpcConsumer(object):
             MongoCollections.DOMAINS, Constants.DOMAIN_LIST
         )
         latest_topo_from_db = db_instance.read_from_db(
-            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPO
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
         )
 
         if domain_list_from_db:
@@ -106,7 +106,7 @@ class RpcConsumer(object):
             logger.debug(domain_list)
 
         if latest_topo_from_db:
-            latest_topo = latest_topo_from_db[Constants.LATEST_TOPO]
+            latest_topo = latest_topo_from_db[Constants.LATEST_TOPOLOGY]
             logger.debug("Topology already exists in db: ")
             logger.debug(latest_topo)
 

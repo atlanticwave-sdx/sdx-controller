@@ -2,8 +2,8 @@ import os
 import unittest
 
 import pymongo
+from sdx_datamodel.constants import MongoCollections
 
-from sdx_controller.utils.constants import MongoCollections
 from sdx_controller.utils.db_utils import DbUtils
 
 
