@@ -5,6 +5,7 @@ import threading
 from queue import Queue
 
 import connexion
+from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
@@ -14,6 +15,7 @@ from sdx_controller.utils.db_utils import DbUtils
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 LOG_FILE = os.environ.get("LOG_FILE")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 
 
 def create_rpc_thread(app):
@@ -50,9 +52,9 @@ def create_app(run_listener: bool = True):
     threads, which is when run_listener param might be useful.
     """
     if LOG_FILE:
-        logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
+        logging.basicConfig(filename=LOG_FILE, level=logging.getLevelName(LOG_LEVEL))
     else:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.getLevelName(LOG_LEVEL))
 
     logging.getLogger("sdx_pce.topology.temanager").setLevel(logging.INFO)
     app = connexion.App(__name__, specification_dir="./swagger/")
@@ -65,11 +67,13 @@ def create_app(run_listener: bool = True):
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
 
-    topo_val = app.db_instance.read_from_db("topologies", "latest_topo")
+    topo_val = app.db_instance.read_from_db(
+        MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+    )
 
     # Get a handle to PCE.
     app.te_manager = (
-        TEManager(topology_data=json.loads(topo_val["latest_topo"]))
+        TEManager(topology_data=json.loads(topo_val[Constants.LATEST_TOPOLOGY]))
         if topo_val
         else TEManager(topology_data=None)
     )

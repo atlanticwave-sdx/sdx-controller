@@ -204,7 +204,6 @@ class BAPMConsumer(object):
 
 
 def main():
-    # logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     amqp_url = "amqp://guest:guest@aw-sdx-monitor.renci.org:5672/%2F"
 
     thread_queue = Queue()

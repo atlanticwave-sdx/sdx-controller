@@ -4,6 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
+from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
@@ -29,10 +30,12 @@ class ConnectionHandler:
             return "Could not break down the solution", 400
 
         link_connections_dict_json = (
-            self.db_instance.read_from_db("links", "link_connections_dict")[
-                "link_connections_dict"
-            ]
-            if self.db_instance.read_from_db("links", "link_connections_dict")
+            self.db_instance.read_from_db(
+                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
+            )[Constants.LINK_CONNECTIONS_DICT]
+            if self.db_instance.read_from_db(
+                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
+            )
             else None
         )
 
@@ -67,7 +70,9 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].remove(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
-                    "links", "link_connections_dict", json.dumps(link_connections_dict)
+                    MongoCollections.LINKS,
+                    Constants.LINK_CONNECTIONS_DICT,
+                    json.dumps(link_connections_dict),
                 )
 
             if interdomain_a:
@@ -94,7 +99,9 @@ class ConnectionHandler:
                     link_connections_dict[simple_link].remove(connection_request)
 
                 self.db_instance.add_key_value_pair_to_db(
-                    "links", "link_connections_dict", json.dumps(link_connections_dict)
+                    MongoCollections.LINKS,
+                    Constants.LINK_CONNECTIONS_DICT,
+                    json.dumps(link_connections_dict),
                 )
 
                 interdomain_a = link.get("uni_z", {}).get("port_id")
@@ -104,7 +111,7 @@ class ConnectionHandler:
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
             domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
-            exchange_name = "connection"
+            exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
                 f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
@@ -188,7 +195,7 @@ class ConnectionHandler:
                 solution, connection_request
             )
             self.db_instance.add_key_value_pair_to_db(
-                "breakdowns", connection_request["id"], breakdown
+                MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
             )
             status, code = self._send_breakdown_to_lc(
                 breakdown, "post", connection_request
@@ -206,15 +213,17 @@ class ConnectionHandler:
             return f"Error: {e}", 410
 
     def archive_connection(self, service_id) -> None:
-        connection_request = self.db_instance.read_from_db("connections", service_id)
+        connection_request = self.db_instance.read_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
         if not connection_request:
             return
 
         connection_request_str = connection_request[service_id]
-        self.db_instance.delete_one_entry("connections", service_id)
+        self.db_instance.delete_one_entry(MongoCollections.CONNECTIONS, service_id)
 
         historical_connections = self.db_instance.read_from_db(
-            "historical_connections", service_id
+            MongoCollections.HISTORICAL_CONNECTIONS, service_id
         )
         # Current timestamp in seconds
         timestamp = int(time.time())
@@ -225,11 +234,13 @@ class ConnectionHandler:
                 json.dumps({timestamp: json.loads(connection_request_str)})
             )
             self.db_instance.add_key_value_pair_to_db(
-                "historical_connections", service_id, historical_connections_list
+                MongoCollections.HISTORICAL_CONNECTIONS,
+                service_id,
+                historical_connections_list,
             )
         else:
             self.db_instance.add_key_value_pair_to_db(
-                "historical_connections",
+                MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
                 [json.dumps({timestamp: json.loads(connection_request_str)})],
             )
@@ -237,13 +248,17 @@ class ConnectionHandler:
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
         te_manager.delete_connection(service_id)
-        connection_request = self.db_instance.read_from_db("connections", service_id)
+        connection_request = self.db_instance.read_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
 
         connection_request = connection_request[service_id]
 
-        breakdown = self.db_instance.read_from_db("breakdowns", service_id)
+        breakdown = self.db_instance.read_from_db(
+            MongoCollections.BREAKDOWNS, service_id
+        )
         if not breakdown:
             return "Did not find breakdown, cannot remove connection", 404
         breakdown = breakdown[service_id]
@@ -252,7 +267,7 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", json.loads(connection_request)
             )
-            self.db_instance.delete_one_entry("breakdowns", service_id)
+            self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
             self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             return status, code
@@ -261,20 +276,20 @@ class ConnectionHandler:
             return f"Error when removing breakdown: {e}", 400
 
     def handle_link_failure(self, te_manager, failed_links):
-        logger.debug("---Handling connections that contain failed link.---")
+        logger.debug("Handling connections that contain failed link.")
         link_connections_dict_str = self.db_instance.read_from_db(
-            "links", "link_connections_dict"
+            MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
 
         if (
             not link_connections_dict_str
-            or not link_connections_dict_str["link_connections_dict"]
+            or not link_connections_dict_str[Constants.LINK_CONNECTIONS_DICT]
         ):
             logger.debug("No connection has been placed yet.")
             return
 
         link_connections_dict = json.loads(
-            link_connections_dict_str["link_connections_dict"]
+            link_connections_dict_str[Constants.LINK_CONNECTIONS_DICT]
         )
 
         for link in failed_links:
@@ -314,12 +329,14 @@ class ConnectionHandler:
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
                         self.db_instance.add_key_value_pair_to_db(
-                            "connections", connection["id"], json.dumps(connection)
+                            MongoCollections.CONNECTIONS,
+                            connection["id"],
+                            json.dumps(connection),
                         )
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.read_from_db(
-            "historical_connections", service_id
+            MongoCollections.HISTORICAL_CONNECTIONS, service_id
         )
         if not historical_connections:
             return None
@@ -333,7 +350,7 @@ def get_connection_status(db, service_id: str):
     assert db is not None
     assert service_id is not None
 
-    breakdown = db.read_from_db("breakdowns", service_id)
+    breakdown = db.read_from_db(MongoCollections.BREAKDOWNS, service_id)
     if not breakdown:
         logger.info(f"Could not find breakdown for {service_id}")
         return None
@@ -398,7 +415,7 @@ def get_connection_status(db, service_id: str):
     request_uni_a_id = None
     request_uni_z_id = None
 
-    request = db.read_from_db("connections", service_id)
+    request = db.read_from_db(MongoCollections.CONNECTIONS, service_id)
     if not request:
         logger.error(f"Can't find a connection request for {service_id}")
         # TODO: we're in a strange state here. Should we panic?

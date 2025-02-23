@@ -83,7 +83,7 @@ jobs:
           MQ_PORT: '5672'
           MQ_USER: 'guest'
           MQ_PASS: 'guest'
-          SUB_QUEUE: 'sdx-controller-test-queue'
+          SUB_QUEUE: 'oxp_update'
           MONGO_HOST: 'localhost'
           MONGO_PORT: '27017'
           MONGO_USER: 'guest'

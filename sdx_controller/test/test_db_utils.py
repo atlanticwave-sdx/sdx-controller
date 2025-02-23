@@ -2,6 +2,7 @@ import os
 import unittest
 
 import pymongo
+from sdx_datamodel.constants import MongoCollections
 
 from sdx_controller.utils.db_utils import DbUtils
 
@@ -39,7 +40,7 @@ class DbUtilsTests(unittest.TestCase):
     def test_db_updates(self):
         # Set up the necessary environment variables.
         os.environ["DB_NAME"] = self.env.get("DB_NAME")
-        os.environ["DB_CONFIG_TABLE_NAME"] = "topologies"
+        os.environ["DB_CONFIG_TABLE_NAME"] = MongoCollections.TOPOLOGIES
 
         os.environ["MONGO_HOST"] = self.env.get("MONGO_HOST")
         os.environ["MONGO_PORT"] = self.env.get("MONGO_PORT")

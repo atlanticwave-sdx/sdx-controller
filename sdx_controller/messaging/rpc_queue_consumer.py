@@ -6,6 +6,7 @@ import threading
 from queue import Queue
 
 import pika
+from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
@@ -16,7 +17,7 @@ MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
 
 # subscribe to the corresponding queue
-SUB_QUEUE = os.getenv("SUB_QUEUE")
+SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
 
@@ -92,23 +93,27 @@ class RpcConsumer(object):
         # This part reads from DB when SDX controller initially starts.
         # It looks for domain_list, if already in DB,
         # Then use the existing ones from DB.
-        domain_list_from_db = db_instance.read_from_db("domains", "domain_list")
-        latest_topo_from_db = db_instance.read_from_db("topologies", "latest_topo")
+        domain_list_from_db = db_instance.read_from_db(
+            MongoCollections.DOMAINS, Constants.DOMAIN_LIST
+        )
+        latest_topo_from_db = db_instance.read_from_db(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
 
         if domain_list_from_db:
-            domain_list = domain_list_from_db["domain_list"]
+            domain_list = domain_list_from_db[Constants.DOMAIN_LIST]
             logger.debug("Domain list already exists in db: ")
             logger.debug(domain_list)
 
         if latest_topo_from_db:
-            latest_topo = latest_topo_from_db["latest_topo"]
+            latest_topo = latest_topo_from_db[Constants.LATEST_TOPOLOGY]
             logger.debug("Topology already exists in db: ")
             logger.debug(latest_topo)
 
         # If topologies already saved in db, use them to initialize te_manager
         if domain_list:
             for domain in domain_list:
-                topology = db_instance.read_from_db("topologies", domain)
+                topology = db_instance.read_from_db(MongoCollections.TOPOLOGIES, domain)
 
                 if not topology:
                     continue
