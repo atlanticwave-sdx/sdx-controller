@@ -5,7 +5,10 @@ import traceback
 from typing import Tuple
 
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
-from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
+from sdx_datamodel.parsing.exceptions import (
+    AttributeNotSupportedException,
+    ServiceNotSupportedException,
+)
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 from sdx_pce.utils.exceptions import RequestValidationError, TEError
@@ -167,6 +170,12 @@ class ConnectionHandler:
                 f"Error when parsing and validating request: {service_err} - {err}"
             )
             return f"Error: {service_err}", 402
+        except AttributeNotSupportedException as attr_err:
+            err = traceback.format_exc().replace("\n", ", ")
+            logger.error(
+                f"Error when parsing and validating request: {attr_err} - {err}"
+            )
+            return f"Error: {attr_err}", 422
 
         if traffic_matrix is None:
             return (
