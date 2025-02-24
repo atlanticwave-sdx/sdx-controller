@@ -7,6 +7,7 @@ import uuid
 from unittest.mock import patch
 
 from flask import json
+from sdx_datamodel.constants import MongoCollections
 from six import BytesIO
 
 from sdx_controller.models.connection import Connection
