@@ -360,7 +360,7 @@ def topology_db_update(db_instance, te_manager):
     # update OXP topology in DB:
     oxp_topology_map = te_manager.topology_manager.get_topology_map()
     for domain_name, topology in oxp_topology_map.items():
-        msg_json = topology.to_dict
+        msg_json = topology.to_dict()
         db_instance.add_key_value_pair_to_db(
             MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
         )
