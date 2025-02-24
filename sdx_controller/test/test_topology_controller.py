@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from sdx_datamodel.constants import MongoCollections
+from sdx_datamodel.constants import Constants, MongoCollections
 
 from sdx_controller.test import BaseTestCase
 
