@@ -272,6 +272,10 @@ class TestL2vpnController(BaseTestCase):
         topologies.  The first few requests should fail, and the final
         one eventually succeed.
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
         for idx, topology_file in enumerate(
             [
                 TestData.TOPOLOGY_FILE_AMLIGHT,
