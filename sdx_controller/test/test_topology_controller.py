@@ -16,7 +16,7 @@ class TestTopologyController(BaseTestCase):
         """
         self.te_manager.topology_manager.clear_topology()
         self.db_instance.delete_one_entry(
-            (MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY)
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
         )
         response = self.client.open("/SDX-Controller/topology", method="GET")
         # There's nothing corresponding to `latest_topo` in DB at this

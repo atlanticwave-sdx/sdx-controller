@@ -165,7 +165,7 @@ class TestL2vpnController(BaseTestCase):
         """
         self.te_manager.topology_manager.clear_topology()
         self.db_instance.delete_one_entry(
-            (MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY)
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
         )
 
         topology = json.loads(topology_file.read_text())
