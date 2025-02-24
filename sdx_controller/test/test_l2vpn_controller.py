@@ -162,6 +162,11 @@ class TestL2vpnController(BaseTestCase):
         """
         A helper method to test place_connection() with just one topology.
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            (MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY)
+        )
+
         topology = json.loads(topology_file.read_text())
         self.te_manager.add_topology(topology)
 
