@@ -90,11 +90,11 @@ class LcMessageHandler:
                 self.connection_handler.handle_link_failure(
                     self.te_manager, failed_links
                 )
-            # update topology in DB:
+            # update OXP topology in DB:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
             )
-            # use 'latest_topo' as PK to save latest topo to db
+            # use 'latest_topo' as PK to save latest full topo to db
             latest_topo = json.dumps(
                 self.te_manager.topology_manager.get_topology().to_dict()
             )
