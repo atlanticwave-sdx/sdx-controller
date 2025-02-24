@@ -211,7 +211,7 @@ class ConnectionHandler:
             )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             # update topology in DB with updated states (bandwidth and available vlan pool)
-            topology_db_update(self.db_instance, te_manager)
+            #topology_db_update(self.db_instance, te_manager)
             return status, code
         except TEError as te_err:
             # We could probably return te_err.te_code instead of 400,
@@ -282,7 +282,7 @@ class ConnectionHandler:
             self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             # update topology in DB with updated states (bandwidth and available vlan pool)
-            topology_db_update(self.db_instance, te_manager)
+            #topology_db_update(self.db_instance, te_manager)
             return status, code
         except Exception as e:
             logger.debug(f"Error when removing breakdown: {e}")
