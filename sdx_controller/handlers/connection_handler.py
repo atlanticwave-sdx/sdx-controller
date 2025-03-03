@@ -306,12 +306,12 @@ class ConnectionHandler:
         )
 
         for link in failed_links:
-            logger.info(f"Handling link failure on {link['id']} ({link['ports']})")
+            logger.info(f"Handling link failure on {link.id}")
             port_list = []
-            if "ports" not in link:
+            if not link.ports:
                 continue
-            for port in link["ports"]:
-                port_id = port if isinstance(port, str) else port.get("id")
+            for port in link.ports:
+                port_id = port if isinstance(port, str) else port.id
                 if not port_id:
                     continue
                 port_list.append(port_id)
@@ -323,7 +323,7 @@ class ConnectionHandler:
                 connections = link_connections_dict[simple_link]
                 for index, connection in enumerate(connections):
                     logger.info(
-                        f"Connection {connection['id']} affected by link {link['id']}"
+                        f"Connection {connection['id']} affected by link {link.id}"
                     )
                     if "id" not in connection:
                         continue
