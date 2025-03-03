@@ -591,7 +591,7 @@ class TestL2vpnController(BaseTestCase):
 
         assert len(response.get_json()) != 0
 
-    def test_issue_356(self):
+    def test_place_connection_with_three_topologies_v2(self):
         """
         See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
         """
@@ -601,7 +601,7 @@ class TestL2vpnController(BaseTestCase):
         connection_request = {
             "name": "VLAN between AMPATH/300 and TENET/300",
             "endpoints": [
-                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "30000"},
+                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "any"},
                 {"port_id": "urn:sdx:port:tenet.ac.za:Tenet03:50", "vlan": "any"},
             ],
         }
@@ -616,7 +616,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 400)
+        self.assertStatus(response, 201)
 
 
 if __name__ == "__main__":
