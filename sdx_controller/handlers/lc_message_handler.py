@@ -79,7 +79,7 @@ class LcMessageHandler:
                 self.te_manager.update_topology(msg_json)
             )
             logger.info("Updating topology in TE manager")
-            if len(removed_links) > 0:
+            if removed_links and len(removed_links) > 0:
                 logger.info("Processing removed link.")
                 self.connection_handler.handle_link_failure(
                     self.te_manager, removed_links
