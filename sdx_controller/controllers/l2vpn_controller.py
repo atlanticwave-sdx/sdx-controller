@@ -6,6 +6,7 @@ import uuid
 import connexion
 from flask import current_app
 from sdx_datamodel.constants import MongoCollections
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
@@ -59,8 +60,12 @@ def delete_connection(service_id):
         connection = db_instance.read_from_db(
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
+
+        connection, _ = connection_state_achine(connection, self.State.DELETED)
+
         if not connection:
             return "Did not find connection", 404
+
         connection_handler.remove_connection(current_app.te_manager, service_id)
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
@@ -69,6 +74,15 @@ def delete_connection(service_id):
         return f"Failed, reason: {e}", 500
 
     return "OK", 200
+
+
+def connection_state_machine(connection, new_state):
+    conn_sm = ConnectionStateMachine()
+    status = connection.get("status")
+    conn_sm.set_state(status)
+    conn_sm.transition(new_state)
+    connection["status"] = conn_sm.get_state()
+    return connection, conn_sm
 
 
 def get_connection_by_id(service_id):
@@ -133,7 +147,7 @@ def place_connection(body):
         body["id"] = service_id
         logger.info(f"Request has no ID. Generated ID: {service_id}")
 
-    logger.info("Saving to database complete.")
+    body["status"] = ConnectionStateMachine.State.REQUESTED
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
@@ -141,19 +155,22 @@ def place_connection(body):
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
-        db_instance.add_key_value_pair_to_db(
-            MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        body, _ = connection_state_achine(
+            body, ConnectionStateMachine.State.UNDER_PROVISIONING
         )
-        # Service created successfully
-        code = 201
+    else:
+        body, _ = connection_state_achine(body, ConnectionStateMachine.State.REJECTED)
 
+    db_instance.add_key_value_pair_to_db(
+        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+    )
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
 
     response = {
         "service_id": service_id,
-        "status": "OK" if code // 100 == 2 else "Failure",
+        "status": status,
         "reason": reason,
     }
 
@@ -197,6 +214,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body["id"] = service_id
     logger.info(f"Request has no ID. Generated ID: {service_id}")
 
+    body, _ = connection_state_achine(body, ConnectionStateMachine.State.MODIFYING)
+
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
@@ -208,6 +227,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
 
         if remove_conn_code // 100 != 2:
+            body, _ = connection_state_achine(body, ConnectionStateMachine.State.DOWN)
             response = {
                 "service_id": service_id,
                 "status": "Failure",

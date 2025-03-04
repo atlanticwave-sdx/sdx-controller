@@ -75,9 +75,12 @@ class LcMessageHandler:
         if domain_name in domain_list:
             logger.info("Updating topo")
             logger.debug(msg_json)
-            (removed_nodes, added_nodes, removed_links, added_links) = (
-                self.te_manager.update_topology(msg_json)
-            )
+            (
+                removed_nodes,
+                added_nodes,
+                removed_links,
+                added_links,
+            ) = self.te_manager.update_topology(msg_json)
             logger.info("Updating topology in TE manager")
             if removed_links and len(removed_links) > 0:
                 logger.info("Processing removed link.")
