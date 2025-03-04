@@ -7,6 +7,7 @@ import uuid
 from unittest.mock import patch
 
 from flask import json
+from sdx_datamodel.constants import Constants, MongoCollections
 from six import BytesIO
 
 from sdx_controller.models.connection import Connection
@@ -162,6 +163,11 @@ class TestL2vpnController(BaseTestCase):
         """
         A helper method to test place_connection() with just one topology.
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
+
         topology = json.loads(topology_file.read_text())
         self.te_manager.add_topology(topology)
 
@@ -266,6 +272,10 @@ class TestL2vpnController(BaseTestCase):
         topologies.  The first few requests should fail, and the final
         one eventually succeed.
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
         for idx, topology_file in enumerate(
             [
                 TestData.TOPOLOGY_FILE_AMLIGHT,
@@ -581,7 +591,7 @@ class TestL2vpnController(BaseTestCase):
 
         assert len(response.get_json()) != 0
 
-    def test_issue_356(self):
+    def test_place_connection_with_three_topologies_v2(self):
         """
         See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
         """
@@ -591,7 +601,7 @@ class TestL2vpnController(BaseTestCase):
         connection_request = {
             "name": "VLAN between AMPATH/300 and TENET/300",
             "endpoints": [
-                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "30000"},
+                {"port_id": "urn:sdx:port:ampath.net:Ampath3:50", "vlan": "any"},
                 {"port_id": "urn:sdx:port:tenet.ac.za:Tenet03:50", "vlan": "any"},
             ],
         }
@@ -606,7 +616,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 400)
+        self.assertStatus(response, 201)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,10 @@ import traceback
 from typing import Tuple
 
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
-from sdx_datamodel.parsing.exceptions import ServiceNotSupportedException
+from sdx_datamodel.parsing.exceptions import (
+    AttributeNotSupportedException,
+    ServiceNotSupportedException,
+)
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 from sdx_pce.utils.exceptions import RequestValidationError, TEError
@@ -167,6 +170,12 @@ class ConnectionHandler:
                 f"Error when parsing and validating request: {service_err} - {err}"
             )
             return f"Error: {service_err}", 402
+        except AttributeNotSupportedException as attr_err:
+            err = traceback.format_exc().replace("\n", ", ")
+            logger.error(
+                f"Error when parsing and validating request: {attr_err} - {err}"
+            )
+            return f"Error: {attr_err}", 422
 
         if traffic_matrix is None:
             return (
@@ -201,6 +210,8 @@ class ConnectionHandler:
                 breakdown, "post", connection_request
             )
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
+            # update topology in DB with updated states (bandwidth and available vlan pool)
+            topology_db_update(self.db_instance, te_manager)
             return status, code
         except TEError as te_err:
             # We could probably return te_err.te_code instead of 400,
@@ -270,6 +281,8 @@ class ConnectionHandler:
             self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
             self.archive_connection(service_id)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
+            # update topology in DB with updated states (bandwidth and available vlan pool)
+            topology_db_update(self.db_instance, te_manager)
             return status, code
         except Exception as e:
             logger.debug(f"Error when removing breakdown: {e}")
@@ -293,12 +306,12 @@ class ConnectionHandler:
         )
 
         for link in failed_links:
-            logger.info(f"Handling link failure on {link['id']} ({link['ports']})")
+            logger.info(f"Handling link failure on {link.id}")
             port_list = []
-            if "ports" not in link:
+            if not link.ports:
                 continue
-            for port in link["ports"]:
-                port_id = port if isinstance(port, str) else port.get("id")
+            for port in link.ports:
+                port_id = port if isinstance(port, str) else port.id
                 if not port_id:
                     continue
                 port_list.append(port_id)
@@ -310,7 +323,7 @@ class ConnectionHandler:
                 connections = link_connections_dict[simple_link]
                 for index, connection in enumerate(connections):
                     logger.info(
-                        f"Connection {connection['id']} affected by link {link['id']}"
+                        f"Connection {connection['id']} affected by link {link.id}"
                     )
                     if "id" not in connection:
                         continue
@@ -341,6 +354,22 @@ class ConnectionHandler:
         if not historical_connections:
             return None
         return historical_connections[service_id]
+
+
+def topology_db_update(db_instance, te_manager):
+    # update OXP topology in DB:
+    oxp_topology_map = te_manager.topology_manager.get_topology_map()
+    for domain_name, topology in oxp_topology_map.items():
+        msg_json = topology.to_dict()
+        db_instance.add_key_value_pair_to_db(
+            MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
+        )
+    # use 'latest_topo' as PK to save latest full topo to db
+    latest_topo = json.dumps(te_manager.topology_manager.get_topology().to_dict())
+    db_instance.add_key_value_pair_to_db(
+        MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
+    )
+    logger.info("Save to database complete.")
 
 
 def get_connection_status(db, service_id: str):

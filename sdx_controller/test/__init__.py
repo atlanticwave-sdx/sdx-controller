@@ -25,7 +25,7 @@ class BaseTestCase(TestCase):
         # like a work-around.  There must be a better way to get a
         # handle to TEManager?
         self.te_manager = app.te_manager
-
+        self.db_instance = app.db_instance
         return app.app
 
 

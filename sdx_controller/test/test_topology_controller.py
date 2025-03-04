@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+from sdx_datamodel.constants import Constants, MongoCollections
+
 from sdx_controller.test import BaseTestCase
 
 
@@ -10,9 +12,12 @@ class TestTopologyController(BaseTestCase):
 
     def test_get_topology(self):
         """Test case for get_topology
-
         get an existing topology
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
         response = self.client.open("/SDX-Controller/topology", method="GET")
         # There's nothing corresponding to `latest_topo` in DB at this
         # point, so we get a 204 No Content response.  We should
