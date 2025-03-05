@@ -156,7 +156,7 @@ def place_connection(body):
         body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
 
     # used in lc_message_handler to count the oxp success response
-    body["oxp_response_count"] = 0
+    body["oxp_success_count"] = 0
     status_str = str(body["status"])
     body["status"] = status_str
     db_instance.add_key_value_pair_to_db(
