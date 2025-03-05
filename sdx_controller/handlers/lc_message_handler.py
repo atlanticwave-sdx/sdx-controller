@@ -2,6 +2,7 @@ import json
 import logging
 
 from sdx_datamodel.constants import Constants, MongoCollections
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
@@ -43,7 +44,9 @@ class LcMessageHandler:
             if not connection:
                 return
 
-            breakdown = db.read_from_db(MongoCollections.BREAKDOWNS, service_id)
+            breakdown = self.db_instance.read_from_db(
+                MongoCollections.BREAKDOWNS, service_id
+            )
             if not breakdown:
                 logger.info(f"Could not find breakdown for {service_id}")
                 return None
@@ -58,7 +61,7 @@ class LcMessageHandler:
             oxp_response = connection_json.get("oxp_response")
             if not oxp_response:
                 oxp_response = []
-            oxp_response.append((oxp_response_count, oxp_response_msg))
+            oxp_response.append((oxp_response_code, oxp_response_msg))
             connection_json["oxp_response"] = oxp_response
 
             if oxp_response_code // 100 == 2:

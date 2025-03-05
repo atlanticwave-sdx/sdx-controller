@@ -62,7 +62,9 @@ def delete_connection(service_id):
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
 
-        connection, _ = connection_state_achine(connection, self.State.DELETED)
+        connection, _ = connection_state_machine(
+            connection, ConnectionStateMachine.State.DELETED
+        )
 
         if not connection:
             return "Did not find connection", 404
@@ -164,7 +166,7 @@ def place_connection(body):
 
     response = {
         "service_id": service_id,
-        "status": status,
+        "status": body["status"],
         "reason": reason,
     }
 
