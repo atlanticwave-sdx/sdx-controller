@@ -166,7 +166,7 @@ def place_connection(body):
 
     response = {
         "service_id": service_id,
-        "status": body["status"],
+        "status": str(body["status"]),
         "reason": reason,
     }
 
@@ -248,14 +248,14 @@ def patch_connection(service_id, body=None):  # noqa: E501
         # Service created successfully
         code = 201
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
-        response = {
-            "service_id": service_id,
-            "status": "OK",
-            "reason": reason,
-        }
         body, _ = connection_state_machine(
             body, ConnectionStateMachine.State.UNDER_PROVISIONING
         )
+        response = {
+            "service_id": service_id,
+            "status": str(body["status"]),
+            "reason": reason,
+        }
         return response, code
     else:
         body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)

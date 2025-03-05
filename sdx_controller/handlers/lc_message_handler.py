@@ -79,7 +79,8 @@ class LcMessageHandler:
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
             # to finalize the status of the connection.
-
+            status_str = str(connection_json["status"])
+            connection_json["status"] = status_str
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
