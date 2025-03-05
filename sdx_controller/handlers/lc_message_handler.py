@@ -1,13 +1,13 @@
 import json
 import logging
 
-from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_datamodel.connection_sm import ConnectionStateMachine
+from sdx_datamodel.constants import Constants, MongoCollections
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
-    get_connection_status,
     connection_state_machine,
+    get_connection_status,
 )
 from sdx_controller.utils.parse_helper import ParseHelper
 

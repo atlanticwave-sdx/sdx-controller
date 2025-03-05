@@ -4,12 +4,12 @@ import time
 import traceback
 from typing import Tuple
 
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.parsing.exceptions import (
     AttributeNotSupportedException,
     ServiceNotSupportedException,
 )
-from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
 from sdx_pce.utils.exceptions import RequestValidationError, TEError
