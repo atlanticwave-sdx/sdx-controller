@@ -11,6 +11,7 @@ from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
     get_connection_status,
+    connection_state_machine,
 )
 from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
 from sdx_controller.utils.db_utils import DbUtils
@@ -74,15 +75,6 @@ def delete_connection(service_id):
         return f"Failed, reason: {e}", 500
 
     return "OK", 200
-
-
-def connection_state_machine(connection, new_state):
-    conn_sm = ConnectionStateMachine()
-    status = connection.get("status")
-    conn_sm.set_state(status)
-    conn_sm.transition(new_state)
-    connection["status"] = conn_sm.get_state()
-    return connection, conn_sm
 
 
 def get_connection_by_id(service_id):
@@ -161,6 +153,8 @@ def place_connection(body):
     else:
         body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
 
+    # used in lc_message_handler to count the oxp success response
+    body["oxp_response_count"] = 0
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
     )
@@ -227,7 +221,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
 
         if remove_conn_code // 100 != 2:
-            body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
             response = {
                 "service_id": service_id,
                 "status": "Failure",
@@ -258,7 +251,12 @@ def patch_connection(service_id, body=None):  # noqa: E501
             "status": "OK",
             "reason": reason,
         }
+        body, _ = connection_state_machine(
+            body, ConnectionStateMachine.State.UNDER_PROVISIONING
+        )
         return response, code
+    else:
+        body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
 
     logger.info(
         f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
@@ -273,6 +271,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         }
         return response, code
 
+    # because above placement failed, so re-place the original connection request.
     conn_request = json.loads(rollback_conn_body[service_id])
     conn_request["id"] = service_id
 
