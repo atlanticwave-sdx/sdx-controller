@@ -157,8 +157,8 @@ def place_connection(body):
 
     # used in lc_message_handler to count the oxp success response
     body["oxp_response_count"] = 0
-    status_str = str(connection_json["status"])
-    connection_json["status"] = status_str
+    status_str = str(body["status"])
+    body["status"] = status_str
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
     )
