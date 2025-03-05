@@ -5,10 +5,12 @@ import uuid
 
 import connexion
 from flask import current_app
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import MongoCollections
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
+    connection_state_machine,
     get_connection_status,
 )
 from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
@@ -59,8 +61,14 @@ def delete_connection(service_id):
         connection = db_instance.read_from_db(
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
+
+        connection, _ = connection_state_machine(
+            connection, ConnectionStateMachine.State.DELETED
+        )
+
         if not connection:
             return "Did not find connection", 404
+
         connection_handler.remove_connection(current_app.te_manager, service_id)
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
@@ -133,7 +141,7 @@ def place_connection(body):
         body["id"] = service_id
         logger.info(f"Request has no ID. Generated ID: {service_id}")
 
-    logger.info("Saving to database complete.")
+    body["status"] = ConnectionStateMachine.State.REQUESTED
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
@@ -141,19 +149,26 @@ def place_connection(body):
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
-        db_instance.add_key_value_pair_to_db(
-            MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        body, _ = connection_state_machine(
+            body, ConnectionStateMachine.State.UNDER_PROVISIONING
         )
-        # Service created successfully
-        code = 201
+    else:
+        body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
 
+    # used in lc_message_handler to count the oxp success response
+    body["oxp_success_count"] = 0
+    status_str = str(body["status"])
+    body["status"] = status_str
+    db_instance.add_key_value_pair_to_db(
+        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+    )
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
 
     response = {
         "service_id": service_id,
-        "status": "OK" if code // 100 == 2 else "Failure",
+        "status": body["status"],
         "reason": reason,
     }
 
@@ -197,6 +212,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body["id"] = service_id
     logger.info(f"Request has no ID. Generated ID: {service_id}")
 
+    body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
+    status_str = str(body["status"])
+    body["status"] = status_str
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
@@ -233,12 +251,17 @@ def patch_connection(service_id, body=None):  # noqa: E501
         # Service created successfully
         code = 201
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
+        body, _ = connection_state_machine(
+            body, ConnectionStateMachine.State.UNDER_PROVISIONING
+        )
         response = {
             "service_id": service_id,
-            "status": "OK",
+            "status": str(body["status"]),
             "reason": reason,
         }
         return response, code
+    else:
+        body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
 
     logger.info(
         f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
@@ -253,6 +276,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         }
         return response, code
 
+    # because above placement failed, so re-place the original connection request.
     conn_request = json.loads(rollback_conn_body[service_id])
     conn_request["id"] = service_id
 
