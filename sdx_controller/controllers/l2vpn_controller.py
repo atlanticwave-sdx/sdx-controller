@@ -62,12 +62,18 @@ def delete_connection(service_id):
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
 
-        connection, _ = connection_state_machine(
-            connection, ConnectionStateMachine.State.DELETED
-        )
-
         if not connection:
             return "Did not find connection", 404
+
+        logger.info(f"connection: {connection} {type(connection)}")
+        if connection.get("status") == None:
+            connection["status"] = str(ConnectionStateMachine.State.DELETED)
+        else:
+            connection, _ = connection_state_machine(
+                connection, ConnectionStateMachine.State.DELETED
+            )
+
+        logger.info(f"Removing connection: {service_id} {connection.get('status')}")
 
         connection_handler.remove_connection(current_app.te_manager, service_id)
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
@@ -110,6 +116,7 @@ def get_connections():  # noqa: E501
     return_values = {}
     for connection in values:
         service_id = next(iter(connection))
+        logger.info(f"service_id: {service_id}")
         return_values[service_id] = get_connection_status(db_instance, service_id)[
             service_id
         ]
