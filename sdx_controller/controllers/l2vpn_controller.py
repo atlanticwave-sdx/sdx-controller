@@ -117,9 +117,9 @@ def get_connections():  # noqa: E501
     for connection in values:
         service_id = next(iter(connection))
         logger.info(f"service_id: {service_id}")
-        return_values[service_id] = get_connection_status(db_instance, service_id)[
-            service_id
-        ]
+        connection_status = get_connection_status(db_instance, service_id)
+        if connection_status:
+            return_values[service_id] = connection_status.get(service_id)
     return return_values
 
 

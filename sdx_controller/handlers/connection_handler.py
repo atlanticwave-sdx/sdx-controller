@@ -383,7 +383,7 @@ def get_connection_status(db, service_id: str):
     breakdown = db.read_from_db(MongoCollections.BREAKDOWNS, service_id)
     if not breakdown:
         logger.info(f"Could not find breakdown for {service_id}")
-        return None
+        return {}
 
     logger.info(f"breakdown for {service_id}: {breakdown}")
 
