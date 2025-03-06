@@ -141,7 +141,7 @@ def place_connection(body):
         body["id"] = service_id
         logger.info(f"Request has no ID. Generated ID: {service_id}")
 
-    body["status"] = ConnectionStateMachine.State.REQUESTED
+    body["status"] = str(ConnectionStateMachine.State.REQUESTED)
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
@@ -157,8 +157,7 @@ def place_connection(body):
 
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
-    status_str = str(body["status"])
-    body["status"] = status_str
+
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
     )
@@ -213,8 +212,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(f"Request has no ID. Generated ID: {service_id}")
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
-    status_str = str(body["status"])
-    body["status"] = status_str
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
@@ -256,7 +253,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
         response = {
             "service_id": service_id,
-            "status": str(body["status"]),
+            "status": body["status"],
             "reason": reason,
         }
         return response, code

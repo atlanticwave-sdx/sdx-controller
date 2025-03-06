@@ -563,7 +563,8 @@ def get_connection_status(db, service_id: str):
 def connection_state_machine(connection, new_state):
     conn_sm = ConnectionStateMachine()
     status = connection.get("status")
-    conn_sm.set_state(status)
+    value = conn_sm.State[status]
+    conn_sm.set_state(value)
     conn_sm.transition(new_state)
-    connection["status"] = conn_sm.get_state()
+    connection["status"] = str(conn_sm.get_state())
     return connection, conn_sm
