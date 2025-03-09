@@ -11,7 +11,11 @@ from sdx_datamodel.parsing.exceptions import (
 )
 from sdx_pce.load_balancing.te_solver import TESolver
 from sdx_pce.topology.temanager import TEManager
-from sdx_pce.utils.exceptions import RequestValidationError, TEError
+from sdx_pce.utils.exceptions import (
+    RequestValidationError,
+    SameSwitchRequestError,
+    TEError,
+)
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
 from sdx_controller.models.simple_link import SimpleLink
@@ -176,7 +180,40 @@ class ConnectionHandler:
                 f"Error when parsing and validating request: {attr_err} - {err}"
             )
             return f"Error: {attr_err}", 422
+        except SameSwitchRequestError as ctx:
+            logger.debug(
+                f"{str(ctx)},{ctx.request_id},{ctx.domain_id},{ctx.ingress_port},{ctx.egress_port}, {ctx.ingress_user_port_tag}, {ctx.egress_user_port_tag}"
+            )
+            try:
+                breakdown = te_manager.generate_connection_breakdown_same_switch(
+                    ctx.request_id,
+                    ctx.domain_id,
+                    ctx.ingress_port,
+                    ctx.egress_port,
+                    ctx.ingress_user_port_tag,
+                    ctx.egress_user_port_tag,
+                )
+                self.db_instance.add_key_value_pair_to_db(
+                    MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
+                )
+                status, code = self._send_breakdown_to_lc(
+                    breakdown, "post", connection_request
+                )
+                logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
+                # update topology in DB with updated states (bandwidth and available vlan pool)
+                topology_db_update(self.db_instance, te_manager)
+                return status, code
+            except TEError as te_err:
+                # We could probably return te_err.te_code instead of 400,
+                # but I don't think PCE should use HTTP error codes,
+                # because that violates abstraction boundaries.
+                return f"PCE error: {te_err}", te_err.te_code
+            except Exception as e:
+                err = traceback.format_exc().replace("\n", ", ")
+                logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
+                return f"Error: {e}", 410
 
+        # General case: traffic_matrix is not None
         if traffic_matrix is None:
             return (
                 "Request does not have a valid JSON or body is incomplete/incorrect",
