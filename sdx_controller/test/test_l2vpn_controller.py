@@ -649,6 +649,10 @@ class TestL2vpnController(BaseTestCase):
         """
         See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
         """
+        self.te_manager.topology_manager.clear_topology()
+        self.db_instance.delete_one_entry(
+            MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
+        )
 
         self.__add_the_three_v2_topologies()
 
