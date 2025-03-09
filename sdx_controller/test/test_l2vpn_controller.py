@@ -617,7 +617,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST Response JSON is : {response.get_json()}")
 
         self.assertStatus(response, 201)
-        
+
     def test_place_connection_with_three_topologies_v2_same_port_invalid(self):
         """
         See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
