@@ -1,9 +1,14 @@
 import json
 import logging
 
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, MongoCollections
 
-from sdx_controller.handlers.connection_handler import ConnectionHandler
+from sdx_controller.handlers.connection_handler import (
+    ConnectionHandler,
+    connection_state_machine,
+    get_connection_status,
+)
 from sdx_controller.utils.parse_helper import ParseHelper
 
 logger = logging.getLogger(__name__)
@@ -39,16 +44,42 @@ class LcMessageHandler:
             if not connection:
                 return
 
+            breakdown = self.db_instance.read_from_db(
+                MongoCollections.BREAKDOWNS, service_id
+            )
+            if not breakdown:
+                logger.info(f"Could not find breakdown for {service_id}")
+                return None
+
+            domains = breakdown.get(service_id)
+            oxp_number = len(domains)
+
             connection_json = json.loads(connection[service_id])
+            oxp_success_count = connection_json["oxp_success_count"]
+            lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
-            connection_json["oxp_response_code"] = oxp_response_code
-            connection_json["oxp_response"] = msg_json.get("oxp_response")
+            oxp_response_msg = msg_json.get("oxp_response")
+            oxp_response = connection_json.get("oxp_response")
+            if not oxp_response:
+                oxp_response = {}
+            oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
+            connection_json["oxp_response"] = oxp_response
 
-            if oxp_response_code // 100 != 2:
-                connection_json["status"] = "down"
-            elif not connection_json.get("status"):
-                connection_json["status"] = "up"
+            if oxp_response_code // 100 == 2:
+                oxp_success_count += 1
+                connection_json["oxp_success_count"] = oxp_success_count
+                if oxp_success_count == oxp_number:
+                    connection_json, _ = connection_state_machine(
+                        connection_json, ConnectionStateMachine.State.UP
+                    )
+            else:
+                connection_json, _ = connection_state_machine(
+                    connection_json, ConnectionStateMachine.State.DOWN
+                )
 
+            # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
+            # release successful oxp circuits if some are down: remove_connection() (3) count the responses
+            # to finalize the status of the connection.
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
@@ -57,6 +88,7 @@ class LcMessageHandler:
             logger.info("Connection updated: " + service_id)
             return
 
+        # topology message RPC from OXP: no exchange name is defined.
         msg_id = msg_json["id"]
         msg_version = msg_json["version"]
 

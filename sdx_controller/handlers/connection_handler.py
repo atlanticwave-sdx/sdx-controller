@@ -4,6 +4,7 @@ import time
 import traceback
 from typing import Tuple
 
+from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.parsing.exceptions import (
     AttributeNotSupportedException,
@@ -419,7 +420,7 @@ def get_connection_status(db, service_id: str):
     breakdown = db.read_from_db(MongoCollections.BREAKDOWNS, service_id)
     if not breakdown:
         logger.info(f"Could not find breakdown for {service_id}")
-        return None
+        return {}
 
     logger.info(f"breakdown for {service_id}: {breakdown}")
 
@@ -495,7 +496,6 @@ def get_connection_status(db, service_id: str):
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
-        oxp_response_code = request_dict.get("oxp_response_code")
         oxp_response = request_dict.get("oxp_response")
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
@@ -589,12 +589,19 @@ def get_connection_status(db, service_id: str):
     if notifications:
         response[service_id]["notifications"] = notifications
 
-    if oxp_response_code:
-        response[service_id]["oxp_response_code"] = oxp_response_code
-
     if oxp_response:
         response[service_id]["oxp_response"] = oxp_response
 
     logger.info(f"Formed a response: {response}")
 
     return response
+
+
+def connection_state_machine(connection, new_state):
+    conn_sm = ConnectionStateMachine()
+    status = connection.get("status")
+    value = conn_sm.State[status]
+    conn_sm.set_state(value)
+    conn_sm.transition(new_state)
+    connection["status"] = str(conn_sm.get_state())
+    return connection, conn_sm

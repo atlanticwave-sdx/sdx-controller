@@ -340,7 +340,7 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 4
         self.assertEqual(
             response.get_json().get("status"),
-            "Failure",
+            "REJECTED",
         )
 
         # Returned connection ID should be different from the original
@@ -390,7 +390,7 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 2
         self.assertEqual(
             response.get_json().get("status"),
-            "OK",
+            "UNDER_PROVISIONING",
         )
         self.assertEqual(
             response.get_json().get("reason"),
@@ -616,7 +616,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 201)
+        self.assertStatus(response, 200)
 
     def test_place_connection_with_three_topologies_v2_same_port_invalid(self):
         """
@@ -674,7 +674,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 201)
+        self.assertStatus(response, 200)
 
 
 if __name__ == "__main__":
