@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "sdx-controller"
-version = "3.0.0.dev3"
+version = "3.1.0.dev1"
 description = "AtlanticWave-SDX project's main controller"
 authors = [
     { name = "Yufeng Xin", email = "yxin@renci.org" },
