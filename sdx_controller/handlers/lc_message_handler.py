@@ -133,17 +133,27 @@ class LcMessageHandler:
                 or failed_links is not None
             ):
                 logger.info("Update topology change in DB.")
-                # update OXP topology in DB:
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
-                )
-                # use 'latest_topo' as PK to save latest full topo to db
-                latest_topo = json.dumps(
-                    self.te_manager.topology_manager.get_topology().to_dict()
-                )
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
-                )
+                try:
+                    # update OXP topology in DB:
+                    topology = self.te_manager.get_topology_map().get(domain_name)
+                    topology_json = json.dumps(topology.to_dict())
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.TOPOLOGIES, domain_name, topology_json
+                    )
+                except Exception as e:
+                    logger.error(f"Error updating topology {domain_name} in DB:  {e}")
+                try:
+                    # use 'latest_topo' as PK to save latest full topo to db
+                    latest_topo = json.dumps(
+                        self.te_manager.topology_manager.get_topology().to_dict()
+                    )
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.TOPOLOGIES,
+                        Constants.LATEST_TOPOLOGY,
+                        latest_topo,
+                    )
+                except Exception as e:
+                    logger.error(f"Error updating latest topology in DB:  {e}")
                 logger.info("Save to database complete.")
         # Add new topology
         else:
