@@ -157,6 +157,9 @@ class ConnectionHandler:
         #     logger.debug(f"TE topology #{num}: {val}")
 
         graph = te_manager.generate_graph_te()
+        logger.debug(f"temanager.graph: {list(graph.nodes(data=True))}")
+        topology = te_manager.topology_manager.get_topology()
+        logger.debug(f"temanager.topology: {topology}")
         if graph is None:
             return "No SDX topology found", 424
         try:
