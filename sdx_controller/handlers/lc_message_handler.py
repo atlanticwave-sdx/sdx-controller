@@ -55,7 +55,7 @@ class LcMessageHandler:
             oxp_number = len(domains)
 
             connection_json = json.loads(connection[service_id])
-            oxp_success_count = connection_json["oxp_success_count"]
+            oxp_success_count = connection_json.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
