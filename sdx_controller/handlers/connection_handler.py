@@ -365,7 +365,7 @@ class ConnectionHandler:
                     )
                     if "id" not in connection:
                         continue
-
+                    service_id = connection["id"]
                     try:
                         if connection.get("status") == None:
                             connection["status"] = str(
@@ -388,7 +388,6 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    service_idconnection["id"]
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
                         connection, _ = connection_state_machine(
