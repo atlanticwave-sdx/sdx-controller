@@ -405,7 +405,7 @@ class ConnectionHandler:
                         MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
                     )
                     logger.info(
-                        f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
+                        f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
 
     def get_archived_connections(self, service_id: str):
