@@ -367,6 +367,17 @@ class ConnectionHandler:
                         continue
 
                     try:
+                        if connection.get("status") == None:
+                            connection["status"] = str(
+                                ConnectionStateMachine.State.DELETED
+                            )
+                        else:
+                            connection, _ = connection_state_machine(
+                                connection, ConnectionStateMachine.State.DELETED
+                            )
+                        logger.info(
+                            f"Removing connection: {service_id} {connection.get('status')}"
+                        )
                         self.remove_connection(te_manager, connection["id"])
                     except Exception as err:
                         logger.info(
@@ -377,13 +388,26 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
+                    service_idconnection["id"]
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
-                        self.db_instance.add_key_value_pair_to_db(
-                            MongoCollections.CONNECTIONS,
-                            connection["id"],
-                            json.dumps(connection),
+                        connection, _ = connection_state_machine(
+                            connection, ConnectionStateMachine.State.UNDER_PROVISIONING
                         )
+                    else:
+                        connection, _ = connection_state_machine(
+                            connection, ConnectionStateMachine.State.REJECTED
+                        )
+
+                    # count the oxp success response
+                    connection["oxp_success_count"] = 0
+
+                    db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
+                    )
+                    logger.info(
+                        f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
+                    )
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.read_from_db(
