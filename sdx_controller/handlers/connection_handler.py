@@ -401,7 +401,7 @@ class ConnectionHandler:
                     # count the oxp success response
                     connection["oxp_success_count"] = 0
 
-                    db_instance.add_key_value_pair_to_db(
+                    self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
                     )
                     logger.info(
