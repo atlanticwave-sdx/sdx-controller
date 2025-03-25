@@ -75,7 +75,7 @@ class LcMessageHandler:
             else:
                 if (
                     connection_json.get("status")
-                    is not ConnectionStateMachine.State.Down
+                    is not ConnectionStateMachine.State.DOWN
                 ):
                     connection_json, _ = connection_state_machine(
                         connection_json, ConnectionStateMachine.State.DOWN
