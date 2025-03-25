@@ -7,7 +7,6 @@ from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
     connection_state_machine,
-    get_connection_status,
 )
 from sdx_controller.utils.parse_helper import ParseHelper
 
@@ -55,7 +54,7 @@ class LcMessageHandler:
             oxp_number = len(domains)
 
             connection_json = json.loads(connection[service_id])
-            oxp_success_count = connection_json["oxp_success_count"]
+            oxp_success_count = connection_json.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
@@ -73,9 +72,13 @@ class LcMessageHandler:
                         connection_json, ConnectionStateMachine.State.UP
                     )
             else:
-                connection_json, _ = connection_state_machine(
-                    connection_json, ConnectionStateMachine.State.DOWN
-                )
+                if connection_json.get("status") and (
+                    connection_json.get("status")
+                    != str(ConnectionStateMachine.State.DOWN)
+                ):
+                    connection_json, _ = connection_state_machine(
+                        connection_json, ConnectionStateMachine.State.DOWN
+                    )
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
@@ -116,7 +119,7 @@ class LcMessageHandler:
             logger.info("Updating topology in TE manager")
             if removed_links and len(removed_links) > 0:
                 logger.info("Processing removed link.")
-                self.connection_handler.handle_link_failure(
+                self.connection_handler.handle_link_removal(
                     self.te_manager, removed_links
                 )
             failed_links = self.te_manager.get_failed_links()

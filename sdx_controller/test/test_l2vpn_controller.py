@@ -8,11 +8,9 @@ from unittest.mock import patch
 
 from flask import json
 from sdx_datamodel.constants import Constants, MongoCollections
-from six import BytesIO
 
 from sdx_controller.models.connection import Connection
 from sdx_controller.models.connection_v2 import ConnectionV2
-from sdx_controller.models.l2vpn_body import L2vpnBody  # noqa: E501
 from sdx_controller.test import BaseTestCase, TestData
 
 BASE_PATH = "/SDX-Controller"
@@ -502,7 +500,7 @@ class TestL2vpnController(BaseTestCase):
             try:
                 int(s)
                 return True
-            except:
+            except ValueError:
                 return False
 
         vlan0 = endpoints[0].get("vlan")

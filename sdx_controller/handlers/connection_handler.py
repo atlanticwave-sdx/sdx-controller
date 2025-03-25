@@ -326,8 +326,17 @@ class ConnectionHandler:
             logger.debug(f"Error when removing breakdown: {e}")
             return f"Error when removing breakdown: {e}", 400
 
+    def handle_link_removal(self, te_manager, removed_links):
+        logger.debug("Handling connections that contain removed links.")
+        failed_links = []
+        links = te_manager.get_topology().links
+        for link in links:
+            failed_links.append({"id": link.id, "ports": link.ports})
+
+        self.handle_link_failure(te_manager, failed_links)
+
     def handle_link_failure(self, te_manager, failed_links):
-        logger.debug("Handling connections that contain failed link.")
+        logger.debug("Handling connections that contain failed links.")
         link_connections_dict_str = self.db_instance.read_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
@@ -365,8 +374,19 @@ class ConnectionHandler:
                     )
                     if "id" not in connection:
                         continue
-
+                    service_id = connection["id"]
                     try:
+                        if connection.get("status") is None:
+                            connection["status"] = str(
+                                ConnectionStateMachine.State.DELETED
+                            )
+                        else:
+                            connection, _ = connection_state_machine(
+                                connection, ConnectionStateMachine.State.DELETED
+                            )
+                        logger.info(
+                            f"Removing connection: {service_id} {connection.get('status')}"
+                        )
                         self.remove_connection(te_manager, connection["id"])
                     except Exception as err:
                         logger.info(
@@ -379,11 +399,23 @@ class ConnectionHandler:
                     logger.debug(connection)
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 == 2:
-                        self.db_instance.add_key_value_pair_to_db(
-                            MongoCollections.CONNECTIONS,
-                            connection["id"],
-                            json.dumps(connection),
+                        connection, _ = connection_state_machine(
+                            connection, ConnectionStateMachine.State.UNDER_PROVISIONING
                         )
+                    else:
+                        connection, _ = connection_state_machine(
+                            connection, ConnectionStateMachine.State.REJECTED
+                        )
+
+                    # count the oxp success response
+                    connection["oxp_success_count"] = 0
+
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
+                    )
+                    logger.info(
+                        f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
+                    )
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.read_from_db(

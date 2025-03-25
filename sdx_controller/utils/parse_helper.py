@@ -8,7 +8,7 @@ class ParseHelper:
     def is_json(self, json_str):
         try:
             json.loads(json_str)
-        except ValueError as e:
+        except ValueError:
             return False
         return True
 

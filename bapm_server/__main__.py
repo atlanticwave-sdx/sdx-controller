@@ -21,7 +21,7 @@ MQ_HOST = os.environ.get("BAPM_MQ_HOST")
 def is_json(myjson):
     try:
         json.loads(myjson)
-    except ValueError as e:
+    except ValueError:
         return False
     return True
 
