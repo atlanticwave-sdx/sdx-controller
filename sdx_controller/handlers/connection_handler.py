@@ -376,6 +376,7 @@ class ConnectionHandler:
                         continue
                     service_id = connection["id"]
                     try:
+                        logger.debug(f"Link Failure: Removing connection: {connection}")
                         if connection.get("status") is None:
                             connection["status"] = str(
                                 ConnectionStateMachine.State.DELETED
