@@ -7,7 +7,6 @@ from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
     connection_state_machine,
-    get_connection_status,
 )
 from sdx_controller.utils.parse_helper import ParseHelper
 
@@ -120,7 +119,7 @@ class LcMessageHandler:
             logger.info("Updating topology in TE manager")
             if removed_links and len(removed_links) > 0:
                 logger.info("Processing removed link.")
-                self.connection_handler.handle_link_failure(
+                self.connection_handler.handle_link_removal(
                     self.te_manager, removed_links
                 )
             failed_links = self.te_manager.get_failed_links()

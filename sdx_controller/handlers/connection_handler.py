@@ -326,8 +326,17 @@ class ConnectionHandler:
             logger.debug(f"Error when removing breakdown: {e}")
             return f"Error when removing breakdown: {e}", 400
 
+    def handle_link_removal(self, te_manager, removed_links):
+        logger.debug("Handling connections that contain removed links.")
+        failed_links = []
+        links = te_manager.get_topology().links
+        for link in links:
+            failed_links.append({"id": link.id, "ports": link.ports})
+
+        self.handle_link_failure(te_manager, failed_links)
+
     def handle_link_failure(self, te_manager, failed_links):
-        logger.debug("Handling connections that contain failed link.")
+        logger.debug("Handling connections that contain failed links.")
         link_connections_dict_str = self.db_instance.read_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
@@ -367,7 +376,7 @@ class ConnectionHandler:
                         continue
                     service_id = connection["id"]
                     try:
-                        if connection.get("status") == None:
+                        if connection.get("status") is None:
                             connection["status"] = str(
                                 ConnectionStateMachine.State.DELETED
                             )

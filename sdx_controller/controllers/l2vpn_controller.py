@@ -66,7 +66,7 @@ def delete_connection(service_id):
             return "Did not find connection", 404
 
         logger.info(f"connection: {connection} {type(connection)}")
-        if connection.get("status") == None:
+        if connection.get("status") is None:
             connection["status"] = str(ConnectionStateMachine.State.DELETED)
         else:
             connection, _ = connection_state_machine(
