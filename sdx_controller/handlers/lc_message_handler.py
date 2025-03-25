@@ -73,9 +73,13 @@ class LcMessageHandler:
                         connection_json, ConnectionStateMachine.State.UP
                     )
             else:
-                connection_json, _ = connection_state_machine(
-                    connection_json, ConnectionStateMachine.State.DOWN
-                )
+                if (
+                    connection_json.get("status")
+                    is not ConnectionStateMachine.State.Down
+                ):
+                    connection_json, _ = connection_state_machine(
+                        connection_json, ConnectionStateMachine.State.DOWN
+                    )
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
