@@ -138,7 +138,7 @@ class ConnectionHandler:
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
-        return "Connection published", 200
+        return "Connection published", 201
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
