@@ -71,7 +71,7 @@ class DbUtils(object):
 
         self.logger.debug(f"DB {self.db_name} initialized")
 
-    def add_key_value_pair_to_db(self, collection, key, value):
+    def add_to_db(self, collection, key, value):
         key = str(key)
         obj = self.read_from_db(collection, key)
         if obj is None:

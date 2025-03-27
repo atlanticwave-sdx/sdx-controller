@@ -83,7 +83,7 @@ class LcMessageHandler:
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
             # to finalize the status of the connection.
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.add_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
                 json.dumps(connection_json),
@@ -100,7 +100,7 @@ class LcMessageHandler:
 
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db
-        self.db_instance.add_key_value_pair_to_db(
+        self.db_instance.add_to_db(
             MongoCollections.TOPOLOGIES, db_msg_id, msg
         )
         logger.info("Save to database complete.")
@@ -137,28 +137,28 @@ class LcMessageHandler:
             ):
                 logger.info("Update topology change in DB.")
                 # update OXP topology in DB:
-                self.db_instance.add_key_value_pair_to_db(
+                self.db_instance.add_to_db(
                     MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
                 )
                 # use 'latest_topo' as PK to save latest full topo to db
                 latest_topo = json.dumps(
                     self.te_manager.topology_manager.get_topology().to_dict()
                 )
-                self.db_instance.add_key_value_pair_to_db(
+                self.db_instance.add_to_db(
                     MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
                 )
                 logger.info("Save to database complete.")
         # Add new topology
         else:
             domain_list.append(domain_name)
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.add_to_db(
                 MongoCollections.DOMAINS, Constants.DOMAIN_LIST, domain_list
             )
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
 
         logger.info(f"Adding topology {domain_name} to db.")
-        self.db_instance.add_key_value_pair_to_db(
+        self.db_instance.add_to_db(
             MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
         )
 
@@ -168,7 +168,7 @@ class LcMessageHandler:
             self.te_manager.topology_manager.get_topology().to_dict()
         )
         # use 'latest_topo' as PK to save latest topo to db
-        self.db_instance.add_key_value_pair_to_db(
+        self.db_instance.add_to_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
         )
         logger.info("Save to database complete.")

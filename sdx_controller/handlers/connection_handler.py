@@ -32,7 +32,7 @@ class ConnectionHandler:
         self.parse_helper = ParseHelper()
 
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
-        logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
+        logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
             return "Could not break down the solution", 400
@@ -53,6 +53,8 @@ class ConnectionHandler:
             link_connections_dict = {}
 
         interdomain_a, interdomain_b = None, None
+        connection_service_id = connection_request.get("id")
+
         for domain, link in breakdown.items():
             port_list = []
             for key in link.keys():
@@ -67,17 +69,19 @@ class ConnectionHandler:
 
                 if (
                     operation == "post"
+                    and connection_service_id
                     and connection_request not in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].append(connection_request)
+                    link_connections_dict[simple_link].append(connection_service_id)
 
                 if (
                     operation == "delete"
+                    and connection_service_id
                     and connection_request in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].remove(connection_request)
+                    link_connections_dict[simple_link].remove(connection_service_id)
 
-                self.db_instance.add_key_value_pair_to_db(
+                self.db_instance.add_to_db(
                     MongoCollections.LINKS,
                     Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
@@ -106,7 +110,7 @@ class ConnectionHandler:
                 ):
                     link_connections_dict[simple_link].remove(connection_request)
 
-                self.db_instance.add_key_value_pair_to_db(
+                self.db_instance.add_to_db(
                     MongoCollections.LINKS,
                     Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
@@ -127,7 +131,7 @@ class ConnectionHandler:
             )
             mq_link = {
                 "operation": operation,
-                "service_id": connection_request.get("id"),
+                "service_id": connection_service_id,
                 "link": link,
             }
             producer = TopicQueueProducer(
@@ -194,7 +198,7 @@ class ConnectionHandler:
                     ctx.ingress_user_port_tag,
                     ctx.egress_user_port_tag,
                 )
-                self.db_instance.add_key_value_pair_to_db(
+                self.db_instance.add_to_db(
                     MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
                 )
                 status, code = self._send_breakdown_to_lc(
@@ -241,7 +245,7 @@ class ConnectionHandler:
             breakdown = te_manager.generate_connection_breakdown(
                 solution, connection_request
             )
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.add_to_db(
                 MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
             )
             status, code = self._send_breakdown_to_lc(
@@ -282,13 +286,13 @@ class ConnectionHandler:
             historical_connections_list.append(
                 json.dumps({timestamp: json.loads(connection_request_str)})
             )
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.add_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
                 historical_connections_list,
             )
         else:
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.add_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
                 [json.dumps({timestamp: json.loads(connection_request_str)})],
@@ -368,13 +372,19 @@ class ConnectionHandler:
             if simple_link in link_connections_dict:
                 logger.debug("Found failed link record!")
                 connections = link_connections_dict[simple_link]
-                for index, connection in enumerate(connections):
+                for index, service_id in enumerate(connections):
                     logger.info(
                         f"Connection {connection['id']} affected by link {link['id']}"
                     )
-                    if "id" not in connection:
+                    connection_str = self.db_instance.read_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
+                    if not connection:
+                        logger.debug(f"Did not find connection from db: {service_id}")
                         continue
-                    service_id = connection["id"]
+
+                    connection = json.loads(connection_str)
+                    
                     try:
                         if connection.get("status") is None:
                             connection["status"] = str(
@@ -410,7 +420,7 @@ class ConnectionHandler:
                     # count the oxp success response
                     connection["oxp_success_count"] = 0
 
-                    self.db_instance.add_key_value_pair_to_db(
+                    self.db_instance.add_to_db(
                         MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
                     )
                     logger.info(
@@ -431,12 +441,12 @@ def topology_db_update(db_instance, te_manager):
     oxp_topology_map = te_manager.topology_manager.get_topology_map()
     for domain_name, topology in oxp_topology_map.items():
         msg_json = topology.to_dict()
-        db_instance.add_key_value_pair_to_db(
+        db_instance.add_to_db(
             MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
         )
     # use 'latest_topo' as PK to save latest full topo to db
     latest_topo = json.dumps(te_manager.topology_manager.get_topology().to_dict())
-    db_instance.add_key_value_pair_to_db(
+    db_instance.add_to_db(
         MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
     )
     logger.info("Save to database complete.")

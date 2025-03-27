@@ -165,7 +165,7 @@ def place_connection(body):
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
 
-    db_instance.add_key_value_pair_to_db(
+    db_instance.add_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
     )
     logger.info(
@@ -249,7 +249,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
-        db_instance.add_key_value_pair_to_db(
+        db_instance.add_to_db(
             MongoCollections.CONNECTIONS, service_id, json.dumps(body)
         )
         # Service created successfully
@@ -289,7 +289,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             current_app.te_manager, conn_request
         )
         if rollback_conn_code // 100 == 2:
-            db_instance.add_key_value_pair_to_db(
+            db_instance.add_to_db(
                 MongoCollections.CONNECTIONS, service_id, json.dumps(conn_request)
             )
         logger.info(

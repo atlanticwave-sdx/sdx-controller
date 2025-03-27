@@ -53,7 +53,7 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting empty strings as key:value
         key = ""
         val = ""
-        res = dbutils.add_key_value_pair_to_db(
+        res = dbutils.add_to_db(
             self.env.get("DB_CONFIG_TABLE_NAME"), key, val
         )
         self.assertTrue(
@@ -70,7 +70,7 @@ class DbUtilsTests(unittest.TestCase):
         # Try inserting non-empty strings as key:value
         key = "test-key"
         val = "test-val"
-        res = dbutils.add_key_value_pair_to_db(
+        res = dbutils.add_to_db(
             self.env.get("DB_CONFIG_TABLE_NAME"), key, val
         )
         self.assertTrue(
