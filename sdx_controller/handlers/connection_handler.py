@@ -138,7 +138,7 @@ class ConnectionHandler:
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
-        return "Connection published", 200
+        return "Connection published", 201
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
@@ -329,8 +329,7 @@ class ConnectionHandler:
     def handle_link_removal(self, te_manager, removed_links):
         logger.debug("Handling connections that contain removed links.")
         failed_links = []
-        links = te_manager.get_topology().links
-        for link in links:
+        for link in removed_links:
             failed_links.append({"id": link.id, "ports": link.ports})
 
         self.handle_link_failure(te_manager, failed_links)
@@ -376,6 +375,7 @@ class ConnectionHandler:
                         continue
                     service_id = connection["id"]
                     try:
+                        logger.debug(f"Link Failure: Removing connection: {connection}")
                         if connection.get("status") is None:
                             connection["status"] = str(
                                 ConnectionStateMachine.State.DELETED
