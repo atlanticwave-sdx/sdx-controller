@@ -122,18 +122,17 @@ class LcMessageHandler:
                 self.connection_handler.handle_link_removal(
                     self.te_manager, removed_links
                 )
-            failed_links = self.te_manager.get_failed_links()
-            if failed_links:
-                logger.info("Processing link failure.")
-                self.connection_handler.handle_link_failure(
-                    self.te_manager, failed_links
-                )
+            # failed_links = self.te_manager.get_failed_links()
+            # if failed_links:
+            #    logger.info("Processing link failure.")
+            #    self.connection_handler.handle_link_failure(
+            #        self.te_manager, failed_links
+            #    )
             if (
                 len(added_links) > 0
                 or len(removed_links) > 0
                 or len(added_nodes) > 0
                 or len(removed_nodes) > 0
-                or failed_links is not None
             ):
                 logger.info("Update topology change in DB.")
                 # update OXP topology in DB:
