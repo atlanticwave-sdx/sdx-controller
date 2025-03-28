@@ -329,8 +329,7 @@ class ConnectionHandler:
     def handle_link_removal(self, te_manager, removed_links):
         logger.debug("Handling connections that contain removed links.")
         failed_links = []
-        links = te_manager.topology_manager.get_topology().links
-        for link in links:
+        for link in removed_links:
             failed_links.append({"id": link.id, "ports": link.ports})
 
         self.handle_link_failure(te_manager, failed_links)
