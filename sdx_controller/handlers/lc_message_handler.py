@@ -128,25 +128,7 @@ class LcMessageHandler:
             #    self.connection_handler.handle_link_failure(
             #        self.te_manager, failed_links
             #    )
-            if (
-                len(added_links) > 0
-                or len(removed_links) > 0
-                or len(added_nodes) > 0
-                or len(removed_nodes) > 0
-            ):
-                logger.info("Update topology change in DB.")
-                # update OXP topology in DB:
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
-                )
-                # use 'latest_topo' as PK to save latest full topo to db
-                latest_topo = json.dumps(
-                    self.te_manager.topology_manager.get_topology().to_dict()
-                )
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
-                )
-                logger.info("Save to database complete.")
+
         # Add new topology
         else:
             domain_list.append(domain_name)
@@ -156,13 +138,13 @@ class LcMessageHandler:
             logger.info("Adding topology to TE manager")
             self.te_manager.add_topology(msg_json)
 
+        # Save to database
+        # ToDo: check if there is any change in topology update, if not, do not re-save to db.
         logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
             MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
         )
 
-        # TODO: use TEManager API directly; but TEManager does not
-        # expose a `get_topology()` method yet.
         latest_topo = json.dumps(
             self.te_manager.topology_manager.get_topology().to_dict()
         )
