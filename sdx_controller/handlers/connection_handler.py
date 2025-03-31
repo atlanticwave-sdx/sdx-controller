@@ -53,6 +53,8 @@ class ConnectionHandler:
             link_connections_dict = {}
 
         interdomain_a, interdomain_b = None, None
+        connection_service_id = connection_request.get("id")
+
         for domain, link in breakdown.items():
             port_list = []
             for key in link.keys():
@@ -67,21 +69,25 @@ class ConnectionHandler:
 
                 if (
                     operation == "post"
+                    and connection_service_id
                     and connection_request not in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].append(connection_request)
+                    link_connections_dict[simple_link].append(connection_service_id)
 
                 if (
                     operation == "delete"
+                    and connection_service_id
                     and connection_request in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].remove(connection_request)
+                    link_connections_dict[simple_link].remove(connection_service_id)
 
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.LINKS,
                     Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
                 )
+                print("link_connections_dict:-----")
+                print(link_connections_dict)
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
@@ -127,7 +133,7 @@ class ConnectionHandler:
             )
             mq_link = {
                 "operation": operation,
-                "service_id": connection_request.get("id"),
+                "service_id": connection_service_id,
                 "link": link,
             }
             producer = TopicQueueProducer(
@@ -366,14 +372,18 @@ class ConnectionHandler:
 
             if simple_link in link_connections_dict:
                 logger.debug("Found failed link record!")
-                connections = link_connections_dict[simple_link]
-                for index, connection in enumerate(connections):
+                service_ids = link_connections_dict[simple_link]
+                for index, service_id in enumerate(service_ids):
                     logger.info(
-                        f"Connection {connection['id']} affected by link {link['id']}"
+                        f"Connection {service_id} affected by link {link['id']}"
                     )
-                    if "id" not in connection:
+                    connection_str = self.db_instance.read_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
+                    if not connection_str:
+                        logger.debug(f"Did not find connection from db: {service_id}")
                         continue
-                    service_id = connection["id"]
+                    connection = json.loads(connection_str)
                     try:
                         logger.debug(f"Link Failure: Removing connection: {connection}")
                         if connection.get("status") is None:
