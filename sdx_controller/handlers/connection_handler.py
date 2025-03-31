@@ -86,8 +86,6 @@ class ConnectionHandler:
                     Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
                 )
-                print("link_connections_dict:-----")
-                print(link_connections_dict)
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
