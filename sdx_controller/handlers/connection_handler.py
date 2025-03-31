@@ -86,6 +86,8 @@ class ConnectionHandler:
                     Constants.LINK_CONNECTIONS_DICT,
                     json.dumps(link_connections_dict),
                 )
+                print("link_connections_dict:-----")
+                print(link_connections_dict)
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
@@ -370,15 +372,15 @@ class ConnectionHandler:
 
             if simple_link in link_connections_dict:
                 logger.debug("Found failed link record!")
-                connections = link_connections_dict[simple_link]
-                for index, service_id in enumerate(connections):
+                service_ids = link_connections_dict[simple_link]
+                for index, service_id in enumerate(service_ids):
                     logger.info(
-                        f"Connection {connection['id']} affected by link {link['id']}"
+                        f"Connection {service_id} affected by link {link['id']}"
                     )
                     connection_str = self.db_instance.read_from_db(
                         MongoCollections.CONNECTIONS, service_id
                     )
-                    if not connection:
+                    if not connection_str:
                         logger.debug(f"Did not find connection from db: {service_id}")
                         continue
                     connection = json.loads(connection_str)
