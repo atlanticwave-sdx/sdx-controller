@@ -407,7 +407,9 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    connection, _ = connection_state_machine(connection, ConnectionStateMachine.State.RECOVERING)
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.RECOVERING
+                    )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
                         connection, _ = connection_state_machine(
