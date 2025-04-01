@@ -74,6 +74,13 @@ class LcMessageHandler:
             else:
                 if connection_json.get("status") and (
                     connection_json.get("status")
+                    == str(ConnectionStateMachine.State.RECOVERING)
+                ):
+                    connection_json, _ = connection_state_machine(
+                        connection_json, ConnectionStateMachine.State.ERROR
+                    )
+                elif connection_json.get("status") and (
+                    connection_json.get("status")
                     != str(ConnectionStateMachine.State.DOWN)
                 ):
                     connection_json, _ = connection_state_machine(
@@ -122,12 +129,12 @@ class LcMessageHandler:
                 self.connection_handler.handle_link_removal(
                     self.te_manager, removed_links
                 )
-            # failed_links = self.te_manager.get_failed_links()
-            # if failed_links:
-            #    logger.info("Processing link failure.")
-            #    self.connection_handler.handle_link_failure(
-            #        self.te_manager, failed_links
-            #    )
+            failed_links = self.te_manager.get_failed_links()
+            if failed_links:
+                logger.info("Processing link failure.")
+                self.connection_handler.handle_link_failure(
+                    self.te_manager, failed_links
+                )
 
         # Add new topology
         else:

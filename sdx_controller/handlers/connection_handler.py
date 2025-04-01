@@ -100,15 +100,17 @@ class ConnectionHandler:
 
                 if (
                     operation == "post"
+                    and connection_service_id
                     and connection_request not in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].append(connection_request)
+                    link_connections_dict[simple_link].append(connection_service_id)
 
                 if (
                     operation == "delete"
+                    and connection_service_id
                     and connection_request in link_connections_dict[simple_link]
                 ):
-                    link_connections_dict[simple_link].remove(connection_request)
+                    link_connections_dict[simple_link].remove(connection_service_id)
 
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.LINKS,
@@ -381,16 +383,16 @@ class ConnectionHandler:
                     if not connection_str:
                         logger.debug(f"Did not find connection from db: {service_id}")
                         continue
-                    connection = json.loads(connection_str)
+                    connection = json.loads(connection_str[service_id])
                     try:
                         logger.debug(f"Link Failure: Removing connection: {connection}")
                         if connection.get("status") is None:
                             connection["status"] = str(
-                                ConnectionStateMachine.State.DELETED
+                                ConnectionStateMachine.State.ERROR
                             )
                         else:
                             connection, _ = connection_state_machine(
-                                connection, ConnectionStateMachine.State.DELETED
+                                connection, ConnectionStateMachine.State.ERROR
                             )
                         logger.info(
                             f"Removing connection: {service_id} {connection.get('status')}"
@@ -405,14 +407,11 @@ class ConnectionHandler:
                     del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
+                    connection, _ = connection_state_machine(connection, ConnectionStateMachine.State.RECOVERING)
                     _reason, code = self.place_connection(te_manager, connection)
-                    if code // 100 == 2:
+                    if code // 100 != 2:
                         connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.UNDER_PROVISIONING
-                        )
-                    else:
-                        connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.REJECTED
+                            connection, ConnectionStateMachine.State.ERROR
                         )
 
                     # count the oxp success response
