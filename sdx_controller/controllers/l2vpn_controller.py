@@ -150,10 +150,20 @@ def place_connection(body):
 
     body["status"] = str(ConnectionStateMachine.State.REQUESTED)
 
+    # used in lc_message_handler to count the oxp success response
+    body["oxp_success_count"] = 0
+
+    db_instance.add_key_value_pair_to_db(
+        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+    )
+
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
+
+    value = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
+    body = value[service_id] if value else body
 
     if code // 100 == 2:
         body, _ = connection_state_machine(
@@ -161,9 +171,6 @@ def place_connection(body):
         )
     else:
         body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
-
-    # used in lc_message_handler to count the oxp success response
-    body["oxp_success_count"] = 0
 
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
