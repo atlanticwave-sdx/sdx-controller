@@ -41,9 +41,11 @@ class ConnectionHandler:
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
 
-        link_connections_dict = json.loads(
-            link_connections_dict_json[Constants.LINK_CONNECTIONS_DICT]
-        ) if link_connections_dict_json else {}
+        link_connections_dict = (
+            json.loads(link_connections_dict_json[Constants.LINK_CONNECTIONS_DICT])
+            if link_connections_dict_json
+            else {}
+        )
 
         interdomain_a, interdomain_b = None, None
         connection_service_id = connection_request.get("id")
