@@ -614,7 +614,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 200)
+        self.assertStatus(response, 201)
 
     def test_place_connection_with_three_topologies_v2_same_port_invalid(self):
         """
@@ -672,7 +672,7 @@ class TestL2vpnController(BaseTestCase):
         print(f"POST response body is : {response.data.decode('utf-8')}")
         print(f"POST Response JSON is : {response.get_json()}")
 
-        self.assertStatus(response, 200)
+        self.assertStatus(response, 201)
 
 
 if __name__ == "__main__":
