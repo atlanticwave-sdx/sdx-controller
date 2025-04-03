@@ -408,7 +408,9 @@ class ConnectionHandler:
                             connection, ConnectionStateMachine.State.ERROR
                         )
                         self.db_instance.add_key_value_pair_to_db(
-                            MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
+                            MongoCollections.CONNECTIONS,
+                            service_id,
+                            json.dumps(connection),
                         )
 
                     logger.info(
