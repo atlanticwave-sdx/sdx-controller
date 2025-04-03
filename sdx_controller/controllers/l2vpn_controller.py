@@ -153,6 +153,10 @@ def place_connection(body):
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
 
+    body, _ = connection_state_machine(
+        body, ConnectionStateMachine.State.UNDER_PROVISIONING
+    )
+
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
     )
@@ -163,13 +167,9 @@ def place_connection(body):
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     value = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
-    body = value[service_id] if value else body
+    body = json.loads(value[service_id]) if value else body
 
-    if code // 100 == 2:
-        body, _ = connection_state_machine(
-            body, ConnectionStateMachine.State.UNDER_PROVISIONING
-        )
-    else:
+    if code // 100 != 2:
         body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
 
     db_instance.add_key_value_pair_to_db(

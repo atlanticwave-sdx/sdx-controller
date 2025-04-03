@@ -407,6 +407,9 @@ class ConnectionHandler:
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.ERROR
                         )
+                        self.db_instance.add_key_value_pair_to_db(
+                            MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
+                        )
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
