@@ -65,12 +65,13 @@ class LcMessageHandler:
             connection_json["oxp_response"] = oxp_response
 
             if oxp_response_code // 100 == 2:
-                oxp_success_count += 1
-                connection_json["oxp_success_count"] = oxp_success_count
-                if oxp_success_count == oxp_number:
-                    connection_json, _ = connection_state_machine(
-                        connection_json, ConnectionStateMachine.State.UP
-                    )
+                if msg_json.get("operation") != "delete":
+                    oxp_success_count += 1
+                    connection_json["oxp_success_count"] = oxp_success_count
+                    if oxp_success_count == oxp_number:
+                        connection_json, _ = connection_state_machine(
+                            connection_json, ConnectionStateMachine.State.UP
+                        )
             else:
                 if connection_json.get("status") and (
                     connection_json.get("status")
