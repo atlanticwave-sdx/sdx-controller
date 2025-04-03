@@ -37,20 +37,15 @@ class ConnectionHandler:
         if breakdown is None:
             return "Could not break down the solution", 400
 
-        link_connections_dict_json = (
-            self.db_instance.read_from_db(
-                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
-            )[Constants.LINK_CONNECTIONS_DICT]
-            if self.db_instance.read_from_db(
-                MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
-            )
-            else None
+        link_connections_dict_json = self.db_instance.read_from_db(
+            MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
 
-        if link_connections_dict_json:
-            link_connections_dict = json.loads(link_connections_dict_json)
-        else:
-            link_connections_dict = {}
+        link_connections_dict = (
+            json.loads(link_connections_dict_json[Constants.LINK_CONNECTIONS_DICT])
+            if link_connections_dict_json
+            else {}
+        )
 
         interdomain_a, interdomain_b = None, None
         connection_service_id = connection_request.get("id")
@@ -70,22 +65,16 @@ class ConnectionHandler:
                 if (
                     operation == "post"
                     and connection_service_id
-                    and connection_request not in link_connections_dict[simple_link]
+                    and connection_service_id not in link_connections_dict[simple_link]
                 ):
                     link_connections_dict[simple_link].append(connection_service_id)
 
                 if (
                     operation == "delete"
                     and connection_service_id
-                    and connection_request in link_connections_dict[simple_link]
+                    and connection_service_id in link_connections_dict[simple_link]
                 ):
                     link_connections_dict[simple_link].remove(connection_service_id)
-
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.LINKS,
-                    Constants.LINK_CONNECTIONS_DICT,
-                    json.dumps(link_connections_dict),
-                )
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
@@ -101,24 +90,24 @@ class ConnectionHandler:
                 if (
                     operation == "post"
                     and connection_service_id
-                    and connection_request not in link_connections_dict[simple_link]
+                    and connection_service_id not in link_connections_dict[simple_link]
                 ):
                     link_connections_dict[simple_link].append(connection_service_id)
 
                 if (
                     operation == "delete"
                     and connection_service_id
-                    and connection_request in link_connections_dict[simple_link]
+                    and connection_service_id in link_connections_dict[simple_link]
                 ):
                     link_connections_dict[simple_link].remove(connection_service_id)
 
-                self.db_instance.add_key_value_pair_to_db(
-                    MongoCollections.LINKS,
-                    Constants.LINK_CONNECTIONS_DICT,
-                    json.dumps(link_connections_dict),
-                )
-
                 interdomain_a = link.get("uni_z", {}).get("port_id")
+
+            self.db_instance.add_key_value_pair_to_db(
+                MongoCollections.LINKS,
+                Constants.LINK_CONNECTIONS_DICT,
+                json.dumps(link_connections_dict),
+            )
 
             logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
 
@@ -513,6 +502,7 @@ def get_connection_status(db, service_id: str):
     # request for this service_id.
     name = "unknown"
     description = "unknown"
+    status = "unknown"
     qos_metrics = {}
     scheduling = {}
     notifications = {}
@@ -534,6 +524,7 @@ def get_connection_status(db, service_id: str):
         request_dict = json.loads(request.get(service_id))
         name = request_dict.get("name")
         description = request_dict.get("description")
+        status = request_dict.get("status")
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
@@ -617,6 +608,7 @@ def get_connection_status(db, service_id: str):
         "service_id": service_id,
         "name": name,
         "description": description,
+        "status": status,
         "endpoints": response_endpoints,
         "current_path": endpoints,
         "archived_date": 0,
