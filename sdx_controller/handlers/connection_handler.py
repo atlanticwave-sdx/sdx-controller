@@ -393,7 +393,6 @@ class ConnectionHandler:
                         )
                         continue
 
-                    del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
                     connection, _ = connection_state_machine(
