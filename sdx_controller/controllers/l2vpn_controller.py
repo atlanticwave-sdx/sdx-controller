@@ -218,23 +218,20 @@ def patch_connection(service_id, body=None):  # noqa: E501
     if not connexion.request.is_json:
         return "Request body must be JSON", 400
 
-    new_body = connexion.request.get_json()
+    body = L2vpnServiceIdBody.from_dict(connexion.request.get_json())  # noqa: E501
 
-    logger.info(f"Gathered connexion JSON: {new_body}")
+    logger.info(f"Gathered connexion JSON: {body}")
 
-    body = json.loads(value[service_id])
-    body.update(new_body)
+    body["id"] = service_id
+    logger.info(f"Request has no ID. Generated ID: {service_id}")
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
-    body["oxp_success_count"] = 0
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
-
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
-        rollback_conn_body = value
+        rollback_conn_body = db_instance.read_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
             current_app.te_manager, service_id
         )
@@ -256,18 +253,18 @@ def patch_connection(service_id, body=None):  # noqa: E501
         f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
 
-    body, _ = connection_state_machine(
-        body, ConnectionStateMachine.State.UNDER_PROVISIONING
-    )
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
+        db_instance.add_key_value_pair_to_db(
+            MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        )
         # Service created successfully
         code = 201
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
+        body, _ = connection_state_machine(
+            body, ConnectionStateMachine.State.UNDER_PROVISIONING
+        )
         response = {
             "service_id": service_id,
             "status": body["status"],
