@@ -502,6 +502,7 @@ def get_connection_status(db, service_id: str):
     # request for this service_id.
     name = "unknown"
     description = "unknown"
+    status = "unknown"
     qos_metrics = {}
     scheduling = {}
     notifications = {}
@@ -523,6 +524,7 @@ def get_connection_status(db, service_id: str):
         request_dict = json.loads(request.get(service_id))
         name = request_dict.get("name")
         description = request_dict.get("description")
+        status = request_dict.get("status")
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
@@ -606,6 +608,7 @@ def get_connection_status(db, service_id: str):
         "service_id": service_id,
         "name": name,
         "description": description,
+        "status": status,
         "endpoints": response_endpoints,
         "current_path": endpoints,
         "archived_date": 0,
