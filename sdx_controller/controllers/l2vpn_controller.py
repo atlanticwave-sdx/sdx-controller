@@ -170,7 +170,7 @@ def place_connection(body):
     body = json.loads(value[service_id]) if value else body
 
     if code // 100 != 2:
-        body, _ = connection_state_machine(body, ConnectionStateMachine.State.REJECTED)
+        body["status"] = str(ConnectionStateMachine.State.REJECTED)
 
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, json.dumps(body)
