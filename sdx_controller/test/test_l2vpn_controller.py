@@ -388,7 +388,7 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 2
         self.assertEqual(
             response.get_json().get("status"),
-            "UNDER_PROVISIONING",
+            "under provisioning",
         )
         self.assertEqual(
             response.get_json().get("reason"),
