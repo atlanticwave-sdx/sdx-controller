@@ -12,6 +12,7 @@ from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
     connection_state_machine,
     get_connection_status,
+    parse_conn_status,
 )
 from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
 from sdx_controller.utils.db_utils import DbUtils
@@ -181,7 +182,7 @@ def place_connection(body):
 
     response = {
         "service_id": service_id,
-        "status": body["status"],
+        "status": parse_conn_status(body["status"]),
         "reason": reason,
     }
 
@@ -240,10 +241,14 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
 
         if remove_conn_code // 100 != 2:
+            body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
+            db_instance.add_key_value_pair_to_db(
+                MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+            )
             response = {
                 "service_id": service_id,
-                "status": "Failure",
-                "reason": remove_conn_reason,
+                "status": parse_conn_status(body["status"]),
+                "reason": f"Failure to modify L2VPN during removal: {remove_conn_reason}",
             }
             return response, remove_conn_code
 
@@ -270,7 +275,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
         response = {
             "service_id": service_id,
-            "status": body["status"],
+            "status": parse_conn_status(body["status"]),
             "reason": reason,
         }
         return response, code
@@ -285,8 +290,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
     if not rollback_conn_body:
         response = {
             "service_id": service_id,
-            "status": "Failure, unable to rollback to last successful L2VPN connection",
-            "reason": reason,
+            "status": parse_conn_status(body["status"]),
+            "reason": f"Failure, unable to rollback to last successful L2VPN: {reason}",
         }
         return response, code
 
@@ -311,8 +316,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     response = {
         "service_id": service_id,
-        "status": "Failure, rolled back to last successful L2VPN connection",
-        "reason": reason,
+        "reason": f"Failure, rolled back to last successful L2VPN: {reason}",
+        "status": parse_conn_status(conn_request["status"]),
     }
     return response, code
 
