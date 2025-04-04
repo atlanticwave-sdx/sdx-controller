@@ -11,8 +11,8 @@ from sdx_datamodel.constants import MongoCollections
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
     connection_state_machine,
-    parse_conn_status,
     get_connection_status,
+    parse_conn_status,
 )
 from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
 from sdx_controller.utils.db_utils import DbUtils
