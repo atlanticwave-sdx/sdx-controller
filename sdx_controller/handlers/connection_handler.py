@@ -393,24 +393,26 @@ class ConnectionHandler:
                         )
                         continue
 
-                    del link_connections_dict[simple_link][index]
                     logger.debug("Removed connection:")
                     logger.debug(connection)
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
+                    )
+                    connection["oxp_success_count"] = 0
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
                     )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.ERROR
                         )
+                        self.db_instance.add_key_value_pair_to_db(
+                            MongoCollections.CONNECTIONS,
+                            service_id,
+                            json.dumps(connection),
+                        )
 
-                    # count the oxp success response
-                    connection["oxp_success_count"] = 0
-
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
-                    )
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
