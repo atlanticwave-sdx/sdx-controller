@@ -531,6 +531,7 @@ def get_connection_status(db, service_id: str):
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
         oxp_response = request_dict.get("oxp_response")
+        status = parse_conn_status(request_dict.get("status"))
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
@@ -614,6 +615,7 @@ def get_connection_status(db, service_id: str):
         "endpoints": response_endpoints,
         "current_path": endpoints,
         "archived_date": 0,
+        "status": status,
     }
     if qos_metrics:
         response[service_id]["qos_metrics"] = qos_metrics
@@ -640,3 +642,23 @@ def connection_state_machine(connection, new_state):
     conn_sm.transition(new_state)
     connection["status"] = str(conn_sm.get_state())
     return connection, conn_sm
+
+
+def parse_conn_status(conn_state):
+    """Parse connection from state to status as specified on the
+    Provisioning Data Model Spec 1.0a. As per the spec:
+    - up: if the L2VPN is operational
+    - down: if the L2VPN is not operational due to topology issues/lack of path, or endpoints being down,
+    - error: when there is an error with the L2VPN,
+    - under provisioning: when the L2VPN is still being provisioned by the OXPs
+    - maintenance: when the L2VPN is being affected by a network maintenance
+    """
+    state2status = {
+        "UP": "up",
+        "UNDER_PROVISIONING": "under provisioning",
+        "RECOVERING": "down",
+        "DOWN": "down",
+        "ERROR": "down",
+        "MODIFYING": "under provisioning",
+    }
+    return state2status.get(conn_state, "error")

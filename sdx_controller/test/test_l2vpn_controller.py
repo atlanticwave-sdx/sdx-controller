@@ -338,7 +338,7 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 4
         self.assertEqual(
             response.get_json().get("status"),
-            "REJECTED",
+            "error",
         )
 
         # Returned connection ID should be different from the original
@@ -388,7 +388,7 @@ class TestL2vpnController(BaseTestCase):
         assert response.status_code // 100 == 2
         self.assertEqual(
             response.get_json().get("status"),
-            "UNDER_PROVISIONING",
+            "under provisioning",
         )
         self.assertEqual(
             response.get_json().get("reason"),
