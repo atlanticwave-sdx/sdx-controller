@@ -152,7 +152,8 @@ def place_connection(body):
     body["status"] = str(ConnectionStateMachine.State.REQUESTED)
 
     # used in lc_message_handler to count the oxp success response
-    body["oxp_success_count"] = 0
+    if "oxp_success_count" not in body:
+        body["oxp_success_count"] = 0
 
     body, _ = connection_state_machine(
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
