@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from urllib.parse import urlparse
 
 import pymongo
@@ -71,15 +72,45 @@ class DbUtils(object):
 
         self.logger.debug(f"DB {self.db_name} initialized")
 
-    def add_key_value_pair_to_db(self, collection, key, value):
+    def add_key_value_pair_to_db(self, collection, key, value, max_retries=3):
         key = str(key)
-        obj = self.read_from_db(collection, key)
-        if obj is None:
-            return self.sdxdb[collection].insert_one({key: value})
-
-        query = {"_id": obj["_id"]}
-        result = self.sdxdb[collection].replace_one(query, {key: value})
-        return result
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                obj = self.read_from_db(collection, key)
+                
+                if obj is None:
+                    # Document doesn't exist, create a new one
+                    document = {key: value}
+                    result = self.sdxdb[collection].insert_one(document)
+                    
+                    if result.acknowledged and result.inserted_id:
+                        return result
+                    logging.error("Insert operation not acknowledged")
+                    
+                else:
+                    # Document exists, replace with new key-value pair
+                    new_document = {key: value}
+                    new_document["_id"] = obj["_id"]
+                    
+                    query = {"_id": obj["_id"]}
+                    result = self.sdxdb[collection].replace_one(query, new_document)
+                    
+                    if result.acknowledged and result.modified_count == 1:
+                        return result
+                    logging.error(f"Replace operation not successful: modified_count={result.modified_count}")
+                    
+            except Exception as e:
+                retry_count += 1
+                if retry_count >= max_retries:
+                    logging.error(f"Failed to add key-value pair after {max_retries} attempts. Collection: {collection}, Key: {key}. Error: {str(e)}")
+                    return None
+                
+                time.sleep(0.5 * (2 ** retry_count))
+                logging.warning(f"Retry {retry_count}/{max_retries} for adding key-value pair. Collection: {collection}, Key: {key}")
+        
+        return None
 
     def read_from_db(self, collection, key):
         key = str(key)
