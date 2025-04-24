@@ -159,9 +159,7 @@ def place_connection(body):
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
     )
 
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, body
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
@@ -173,9 +171,7 @@ def place_connection(body):
     if code // 100 != 2:
         body["status"] = str(ConnectionStateMachine.State.REJECTED)
 
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, body
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
@@ -231,9 +227,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     if "oxp_success_count" not in body:
         body["oxp_success_count"] = 0
 
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, body
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     try:
         logger.info("Removing connection")
@@ -267,9 +261,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body, _ = connection_state_machine(
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
     )
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, body
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
