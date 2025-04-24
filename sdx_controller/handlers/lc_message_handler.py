@@ -53,7 +53,7 @@ class LcMessageHandler:
             domains = breakdown.get(service_id)
             oxp_number = len(domains)
 
-            connection_json = json.loads(connection[service_id])
+            connection_json = connection[service_id]
             oxp_success_count = connection_json.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
@@ -94,7 +94,7 @@ class LcMessageHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
-                json.dumps(connection_json),
+                connection_json,
             )
             logger.info("Connection updated: " + service_id)
             return

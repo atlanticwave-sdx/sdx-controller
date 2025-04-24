@@ -263,7 +263,7 @@ class ConnectionHandler:
         if not connection_request:
             return
 
-        connection_request_str = connection_request[service_id]
+        connection_request = connection_request[service_id]
         self.db_instance.delete_one_entry(MongoCollections.CONNECTIONS, service_id)
 
         historical_connections = self.db_instance.read_from_db(
@@ -275,7 +275,7 @@ class ConnectionHandler:
         if historical_connections:
             historical_connections_list = historical_connections[service_id]
             historical_connections_list.append(
-                json.dumps({timestamp: json.loads(connection_request_str)})
+                json.dumps({timestamp: connection_request})
             )
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
@@ -286,7 +286,7 @@ class ConnectionHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
-                [json.dumps({timestamp: json.loads(connection_request_str)})],
+                [json.dumps({timestamp: connection_request})],
             )
         logger.debug(f"Archived connection: {service_id}")
 
@@ -309,7 +309,7 @@ class ConnectionHandler:
 
         try:
             status, code = self._send_breakdown_to_lc(
-                breakdown, "delete", json.loads(connection_request)
+                breakdown, "delete", connection_request
             )
             self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
             self.archive_connection(service_id)
@@ -366,13 +366,13 @@ class ConnectionHandler:
                     logger.info(
                         f"Connection {service_id} affected by link {link['id']}"
                     )
-                    connection_str = self.db_instance.read_from_db(
+                    connection = self.db_instance.read_from_db(
                         MongoCollections.CONNECTIONS, service_id
                     )
-                    if not connection_str:
+                    if not connection:
                         logger.debug(f"Did not find connection from db: {service_id}")
                         continue
-                    connection = json.loads(connection_str[service_id])
+                    connection = connection[service_id]
                     try:
                         logger.debug(f"Link Failure: Removing connection: {connection}")
                         if connection.get("status") is None:
@@ -400,7 +400,7 @@ class ConnectionHandler:
                     )
                     connection["oxp_success_count"] = 0
                     self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, json.dumps(connection)
+                        MongoCollections.CONNECTIONS, service_id, connection
                     )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
@@ -410,7 +410,7 @@ class ConnectionHandler:
                         self.db_instance.add_key_value_pair_to_db(
                             MongoCollections.CONNECTIONS,
                             service_id,
-                            json.dumps(connection),
+                            connection,
                         )
 
                     logger.info(
@@ -523,7 +523,7 @@ def get_connection_status(db, service_id: str):
         logger.info(f"Found request for {service_id}: {request}")
         # We seem to have saved the original request in the form of a
         # string into the DB, not a record.
-        request_dict = json.loads(request.get(service_id))
+        request_dict = request.get(service_id)
         name = request_dict.get("name")
         description = request_dict.get("description")
         status = request_dict.get("status")

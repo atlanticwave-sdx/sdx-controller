@@ -160,7 +160,7 @@ def place_connection(body):
     )
 
     db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        MongoCollections.CONNECTIONS, service_id, body
     )
 
     logger.info(
@@ -168,14 +168,13 @@ def place_connection(body):
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    value = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
-    body = json.loads(value[service_id]) if value else body
+    body = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
 
     if code // 100 != 2:
         body["status"] = str(ConnectionStateMachine.State.REJECTED)
 
     db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        MongoCollections.CONNECTIONS, service_id, body
     )
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
@@ -224,7 +223,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
-    body = json.loads(value[service_id])
+    body = value[service_id]
     body.update(new_body)
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
@@ -233,7 +232,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         body["oxp_success_count"] = 0
 
     db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        MongoCollections.CONNECTIONS, service_id, body
     )
 
     try:
@@ -247,7 +246,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         if remove_conn_code // 100 != 2:
             body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
             db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+                MongoCollections.CONNECTIONS, service_id, body
             )
             response = {
                 "service_id": service_id,
@@ -269,7 +268,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
     )
     db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+        MongoCollections.CONNECTIONS, service_id, body
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
@@ -309,7 +308,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
         if rollback_conn_code // 100 == 2:
             db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS, service_id, json.dumps(conn_request)
+                MongoCollections.CONNECTIONS, service_id, conn_request
             )
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
