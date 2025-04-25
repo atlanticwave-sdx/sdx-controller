@@ -224,8 +224,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
 
-    if "oxp_success_count" not in body:
-        body["oxp_success_count"] = 0
+    body["oxp_success_count"] = 0
 
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
