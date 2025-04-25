@@ -166,12 +166,14 @@ def place_connection(body):
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    body = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
-
     if code // 100 != 2:
-        body["status"] = str(ConnectionStateMachine.State.REJECTED)
+        db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "status",
+            str(ConnectionStateMachine.State.REJECTED),
+        )
 
-    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )

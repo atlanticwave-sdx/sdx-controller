@@ -73,6 +73,9 @@ class DbUtils(object):
         self.logger.debug(f"DB {self.db_name} initialized")
 
     def add_key_value_pair_to_db(self, collection, key, value, max_retries=3):
+        """
+        Adds or replaces a key-value pair in the database.
+        """
         key = str(key)
         retry_count = 0
 
@@ -117,6 +120,37 @@ class DbUtils(object):
                 )
 
         return None
+
+    def update_field_in_json(self, collection, key, field_name, field_value):
+        """
+        Updates a single field in a JSON object.
+        """
+        key = str(key)
+
+        try:
+            # Update a nested field directly
+            # Format: {key}.{field_name} targets a specific field within a JSON object
+            update_query = {"$set": {f"{key}.{field_name}": field_value}}
+
+            # Perform atomic update operation
+            result = self.sdxdb[collection].update_one(
+                {key: {"$exists": True}},  # Find document where the key exists
+                update_query,
+            )
+
+            if result.matched_count == 0:
+                logging.error(
+                    f"Document with key '{key}' not found in collection '{collection}'"
+                )
+                return None
+
+            return result
+
+        except Exception as e:
+            logging.error(
+                f"Failed to update field. Collection: {collection}, Key: {key}, Field: {field_name}. Error: {str(e)}"
+            )
+            return None
 
     def read_from_db(self, collection, key):
         key = str(key)
