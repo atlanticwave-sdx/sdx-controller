@@ -155,9 +155,7 @@ def place_connection(body):
     body["oxp_success_count"] = 0
 
     conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-    body, _ = connection_state_machine(
-        body, conn_status
-    )
+    body, _ = connection_state_machine(body, conn_status)
 
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
