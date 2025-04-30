@@ -59,7 +59,7 @@ def delete_connection(service_id):
         # service_id is not found.  This should in fact be an error.
         #
         # https://github.com/atlanticwave-sdx/pce/issues/180
-        connection = db_instance.read_from_db(
+        connection = db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
 
@@ -208,8 +208,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db(MongoCollections.CONNECTIONS, f"{service_id}")
-    if not value:
+    body = db_instance.get_value_from_db(MongoCollections.CONNECTIONS, f"{service_id}")
+    if not body:
         return "Connection not found", 404
 
     if not connexion.request.is_json:
@@ -219,7 +219,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
-    body = value[service_id]
     body.update(new_body)
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)

@@ -54,6 +54,9 @@ class DbUtils(object):
         self.mongo_client = pymongo.MongoClient(mongo_connstring)
 
     def initialize_db(self):
+        """
+        Creates collections if not exist in DB
+        """
         self.logger.debug(f"Trying to load {self.db_name} from DB")
 
         if self.db_name not in self.mongo_client.list_database_names():
@@ -153,18 +156,45 @@ class DbUtils(object):
             return None
 
     def read_from_db(self, collection, key):
+        """
+        Reads a document from the database using the specified key.
+        """
         key = str(key)
-        return self.sdxdb[collection].find_one(
-            {key: {"$exists": 1}, "deleted": {"$ne": True}}
-        )
+        try:
+            # Find document where the key exists and not marked as deleted
+            result = self.sdxdb[collection].find_one(
+                {key: {"$exists": 1}, "deleted": {"$ne": True}}
+            )
+            return result
+        except Exception as e:
+            logging.error(
+                f"Error reading from database. Collection: {collection}, Key: {key}. Error: {str(e)}"
+            )
+            return None
+
+    def get_value_from_db(self, collection, key):
+        """
+        Gets just the value for a specific key from the database.
+        """
+        document = self.read_from_db(collection, key)
+
+        if document and key in document:
+            return document[key]
+        return None
 
     def get_all_entries_in_collection(self, collection):
+        """
+        Gets all entries in a Mongo collection
+        """
         db_collection = self.sdxdb[collection]
         # MongoDB has an ObjectId for each item, so need to exclude the ObjectIds
         all_entries = db_collection.find({"deleted": {"$ne": True}}, {"_id": 0})
         return all_entries
 
     def mark_deleted(self, collection, key):
+        """
+        Marks an entry deleted
+        """
         db_collection = self.sdxdb[collection]
         key = str(key)
         item_to_delete = self.read_from_db(collection, key)
@@ -176,6 +206,9 @@ class DbUtils(object):
         return True
 
     def delete_one_entry(self, collection, key):
+        """
+        Actually deletes one entry
+        """
         key = str(key)
         db_collection = self.sdxdb[collection]
         db_collection.delete_one({key: {"$exists": True}})

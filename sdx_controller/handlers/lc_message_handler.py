@@ -36,56 +36,52 @@ class LcMessageHandler:
             if not service_id:
                 return
 
-            connection = self.db_instance.read_from_db(
+            connection = self.db_instance.get_value_from_db(
                 MongoCollections.CONNECTIONS, service_id
             )
 
             if not connection:
                 return
 
-            breakdown = self.db_instance.read_from_db(
+            breakdown = self.db_instance.get_value_from_db(
                 MongoCollections.BREAKDOWNS, service_id
             )
             if not breakdown:
                 logger.info(f"Could not find breakdown for {service_id}")
                 return None
 
-            domains = breakdown.get(service_id)
-            oxp_number = len(domains)
-
-            connection_json = connection[service_id]
-            oxp_success_count = connection_json.get("oxp_success_count", 0)
+            oxp_number = len(breakdown)
+            oxp_success_count = connection.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
-            oxp_response = connection_json.get("oxp_response")
+            oxp_response = connection.get("oxp_response")
             if not oxp_response:
                 oxp_response = {}
             oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
-            connection_json["oxp_response"] = oxp_response
+            connection["oxp_response"] = oxp_response
 
             if oxp_response_code // 100 == 2:
                 if msg_json.get("operation") != "delete":
                     oxp_success_count += 1
-                    connection_json["oxp_success_count"] = oxp_success_count
+                    connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
-                        connection_json, _ = connection_state_machine(
-                            connection_json, ConnectionStateMachine.State.UP
+                        connection, _ = connection_state_machine(
+                            connection, ConnectionStateMachine.State.UP
                         )
             else:
-                if connection_json.get("status") and (
-                    connection_json.get("status")
+                if connection.get("status") and (
+                    connection.get("status")
                     == str(ConnectionStateMachine.State.RECOVERING)
                 ):
-                    connection_json, _ = connection_state_machine(
-                        connection_json, ConnectionStateMachine.State.ERROR
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.ERROR
                     )
-                elif connection_json.get("status") and (
-                    connection_json.get("status")
-                    != str(ConnectionStateMachine.State.DOWN)
+                elif connection.get("status") and (
+                    connection.get("status") != str(ConnectionStateMachine.State.DOWN)
                 ):
-                    connection_json, _ = connection_state_machine(
-                        connection_json, ConnectionStateMachine.State.DOWN
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.DOWN
                     )
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
@@ -94,7 +90,7 @@ class LcMessageHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
-                connection_json,
+                connection,
             )
             logger.info("Connection updated: " + service_id)
             return
