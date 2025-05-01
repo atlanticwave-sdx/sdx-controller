@@ -68,7 +68,12 @@ def delete_connection(service_id):
 
         logger.info(f"connection: {connection} {type(connection)}")
         if connection.get("status") is None:
+            logger.error("Missing field: status is not in connection.")
             connection["status"] = str(ConnectionStateMachine.State.DELETED)
+        elif connection["status"] == str(ConnectionStateMachine.State.UP):
+            connection, _ = connection_state_machine(
+                connection, ConnectionStateMachine.State.DELETED
+            )
         else:
             connection, _ = connection_state_machine(
                 connection, ConnectionStateMachine.State.DOWN
