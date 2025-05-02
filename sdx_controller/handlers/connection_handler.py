@@ -272,7 +272,7 @@ class ConnectionHandler:
 
         if historical_connections_list:
             historical_connections_list.append(
-                json.dumps({timestamp: connection_request})
+                {timestamp: connection_request}
             )
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
@@ -283,7 +283,7 @@ class ConnectionHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
-                [json.dumps({timestamp: connection_request})],
+                [{timestamp: connection_request}],
             )
         logger.debug(f"Archived connection: {service_id}")
 

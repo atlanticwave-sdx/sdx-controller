@@ -297,7 +297,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         return response, code
 
     # because above placement failed, so re-place the original connection request.
-    conn_request = json.loads(rollback_conn_body[service_id])
+    conn_request = rollback_conn_body
     conn_request["id"] = service_id
 
     try:
