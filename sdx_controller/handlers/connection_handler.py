@@ -271,9 +271,7 @@ class ConnectionHandler:
         timestamp = int(time.time())
 
         if historical_connections_list:
-            historical_connections_list.append(
-                {timestamp: connection_request}
-            )
+            historical_connections_list.append({timestamp: connection_request})
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
