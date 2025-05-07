@@ -17,7 +17,7 @@ def get_topology():  # noqa: E501
 
     :rtype: str
     """
-    topo_val = db_instance.read_from_db(
+    topo_val = db_instance.get_value_from_db(
         MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
     )
 
@@ -26,7 +26,7 @@ def get_topology():  # noqa: E501
     if not topo_val:
         return None
 
-    return topo_val[Constants.LATEST_TOPOLOGY]
+    return topo_val
 
 
 def get_topologyby_grenml():  # noqa: E501
@@ -61,10 +61,10 @@ def topology_version(topology_id):  # noqa: E501
 
 
 def get_topology_domains():
-    domain_list = db_instance.read_from_db(
+    domain_list = db_instance.get_value_from_db(
         MongoCollections.DOMAINS, Constants.DOMAIN_LIST
     )
     if not domain_list:
         return []
 
-    return domain_list[Constants.DOMAIN_LIST]
+    return domain_list

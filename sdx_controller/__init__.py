@@ -67,13 +67,13 @@ def create_app(run_listener: bool = True):
     app.db_instance = DbUtils()
     app.db_instance.initialize_db()
 
-    topo_val = app.db_instance.read_from_db(
+    topo_val = app.db_instance.get_value_from_db(
         MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
     )
 
     # Get a handle to PCE.
     app.te_manager = (
-        TEManager(topology_data=json.loads(topo_val[Constants.LATEST_TOPOLOGY]))
+        TEManager(topology_data=json.loads(topo_val))
         if topo_val
         else TEManager(topology_data=None)
     )

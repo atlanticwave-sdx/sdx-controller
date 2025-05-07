@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from urllib.parse import urlparse
 
 import pymongo
@@ -53,6 +54,9 @@ class DbUtils(object):
         self.mongo_client = pymongo.MongoClient(mongo_connstring)
 
     def initialize_db(self):
+        """
+        Creates collections if not exist in DB
+        """
         self.logger.debug(f"Trying to load {self.db_name} from DB")
 
         if self.db_name not in self.mongo_client.list_database_names():
@@ -71,29 +75,126 @@ class DbUtils(object):
 
         self.logger.debug(f"DB {self.db_name} initialized")
 
-    def add_key_value_pair_to_db(self, collection, key, value):
+    def add_key_value_pair_to_db(self, collection, key, value, max_retries=3):
+        """
+        Adds or replaces a key-value pair in the database.
+        """
         key = str(key)
-        obj = self.read_from_db(collection, key)
-        if obj is None:
-            return self.sdxdb[collection].insert_one({key: value})
+        retry_count = 0
 
-        query = {"_id": obj["_id"]}
-        result = self.sdxdb[collection].replace_one(query, {key: value})
-        return result
+        while retry_count < max_retries:
+            try:
+                obj = self.read_from_db(collection, key)
+
+                if obj is None:
+                    # Document doesn't exist, create a new one
+                    document = {key: value}
+                    result = self.sdxdb[collection].insert_one(document)
+
+                    if result.acknowledged and result.inserted_id:
+                        return result
+                    logging.error("Insert operation not acknowledged")
+
+                else:
+                    # Document exists, replace with new key-value pair
+                    new_document = {key: value}
+                    new_document["_id"] = obj["_id"]
+
+                    query = {"_id": obj["_id"]}
+                    result = self.sdxdb[collection].replace_one(query, new_document)
+
+                    if result.acknowledged and result.modified_count == 1:
+                        return result
+                    logging.error(
+                        f"Replace operation not successful: modified_count={result.modified_count}"
+                    )
+
+            except Exception as e:
+                retry_count += 1
+                if retry_count >= max_retries:
+                    logging.error(
+                        f"Failed to add key-value pair after {max_retries} attempts. Collection: {collection}, Key: {key}. Error: {str(e)}"
+                    )
+                    return None
+
+                time.sleep(0.5 * (2**retry_count))
+                logging.warning(
+                    f"Retry {retry_count}/{max_retries} for adding key-value pair. Collection: {collection}, Key: {key}"
+                )
+
+        return None
+
+    def update_field_in_json(self, collection, key, field_name, field_value):
+        """
+        Updates a single field in a JSON object.
+        """
+        key = str(key)
+
+        try:
+            # Update a nested field directly
+            # Format: {key}.{field_name} targets a specific field within a JSON object
+            update_query = {"$set": {f"{key}.{field_name}": field_value}}
+
+            # Perform atomic update operation
+            result = self.sdxdb[collection].update_one(
+                {key: {"$exists": True}},  # Find document where the key exists
+                update_query,
+            )
+
+            if result.matched_count == 0:
+                logging.error(
+                    f"Document with key '{key}' not found in collection '{collection}'"
+                )
+                return None
+
+            return result
+
+        except Exception as e:
+            logging.error(
+                f"Failed to update field. Collection: {collection}, Key: {key}, Field: {field_name}. Error: {str(e)}"
+            )
+            return None
 
     def read_from_db(self, collection, key):
+        """
+        Reads a document from the database using the specified key.
+        """
         key = str(key)
-        return self.sdxdb[collection].find_one(
-            {key: {"$exists": 1}, "deleted": {"$ne": True}}
-        )
+        try:
+            # Find document where the key exists and not marked as deleted
+            result = self.sdxdb[collection].find_one(
+                {key: {"$exists": 1}, "deleted": {"$ne": True}}
+            )
+            return result
+        except Exception as e:
+            logging.error(
+                f"Error reading from database. Collection: {collection}, Key: {key}. Error: {str(e)}"
+            )
+            return None
+
+    def get_value_from_db(self, collection, key):
+        """
+        Gets just the value for a specific key from the database.
+        """
+        document = self.read_from_db(collection, key)
+
+        if document and key in document:
+            return document[key]
+        return None
 
     def get_all_entries_in_collection(self, collection):
+        """
+        Gets all entries in a Mongo collection
+        """
         db_collection = self.sdxdb[collection]
         # MongoDB has an ObjectId for each item, so need to exclude the ObjectIds
         all_entries = db_collection.find({"deleted": {"$ne": True}}, {"_id": 0})
         return all_entries
 
     def mark_deleted(self, collection, key):
+        """
+        Marks an entry deleted
+        """
         db_collection = self.sdxdb[collection]
         key = str(key)
         item_to_delete = self.read_from_db(collection, key)
@@ -105,6 +206,9 @@ class DbUtils(object):
         return True
 
     def delete_one_entry(self, collection, key):
+        """
+        Actually deletes one entry
+        """
         key = str(key)
         db_collection = self.sdxdb[collection]
         db_collection.delete_one({key: {"$exists": True}})

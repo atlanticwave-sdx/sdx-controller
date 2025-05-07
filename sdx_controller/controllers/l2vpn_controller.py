@@ -59,7 +59,7 @@ def delete_connection(service_id):
         # service_id is not found.  This should in fact be an error.
         #
         # https://github.com/atlanticwave-sdx/pce/issues/180
-        connection = db_instance.read_from_db(
+        connection = db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, f"{service_id}"
         )
 
@@ -68,8 +68,16 @@ def delete_connection(service_id):
 
         logger.info(f"connection: {connection} {type(connection)}")
         if connection.get("status") is None:
+            logger.error("Missing field: status is not in connection.")
             connection["status"] = str(ConnectionStateMachine.State.DELETED)
+        elif connection["status"] == str(ConnectionStateMachine.State.UP):
+            connection, _ = connection_state_machine(
+                connection, ConnectionStateMachine.State.DELETED
+            )
         else:
+            connection, _ = connection_state_machine(
+                connection, ConnectionStateMachine.State.DOWN
+            )
             connection, _ = connection_state_machine(
                 connection, ConnectionStateMachine.State.DELETED
             )
@@ -154,35 +162,31 @@ def place_connection(body):
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
 
-    body, _ = connection_state_machine(
-        body, ConnectionStateMachine.State.UNDER_PROVISIONING
-    )
+    conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+    body, _ = connection_state_machine(body, conn_status)
 
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    value = db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
-    body = json.loads(value[service_id]) if value else body
-
     if code // 100 != 2:
-        body["status"] = str(ConnectionStateMachine.State.REJECTED)
-
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
+        conn_status = ConnectionStateMachine.State.REJECTED
+        db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "status",
+            str(conn_status),
+        )
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
 
     response = {
         "service_id": service_id,
-        "status": parse_conn_status(body["status"]),
+        "status": parse_conn_status(str(conn_status)),
         "reason": reason,
     }
 
@@ -212,8 +216,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     :rtype: Connection
     """
-    value = db_instance.read_from_db(MongoCollections.CONNECTIONS, f"{service_id}")
-    if not value:
+    body = db_instance.get_value_from_db(MongoCollections.CONNECTIONS, f"{service_id}")
+    if not body:
         return "Connection not found", 404
 
     if not connexion.request.is_json:
@@ -223,19 +227,18 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
-    body = json.loads(value[service_id])
     body.update(new_body)
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
+
     body["oxp_success_count"] = 0
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
+
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     try:
         logger.info("Removing connection")
         # Get roll back connection before removing connection
-        rollback_conn_body = value
+        rollback_conn_body = body
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
             current_app.te_manager, service_id
         )
@@ -243,7 +246,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         if remove_conn_code // 100 != 2:
             body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
             db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS, service_id, json.dumps(body)
+                MongoCollections.CONNECTIONS, service_id, body
             )
             response = {
                 "service_id": service_id,
@@ -264,9 +267,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body, _ = connection_state_machine(
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
     )
-    db_instance.add_key_value_pair_to_db(
-        MongoCollections.CONNECTIONS, service_id, json.dumps(body)
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
@@ -296,7 +297,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         return response, code
 
     # because above placement failed, so re-place the original connection request.
-    conn_request = json.loads(rollback_conn_body[service_id])
+    conn_request = rollback_conn_body
     conn_request["id"] = service_id
 
     try:
@@ -305,7 +306,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         )
         if rollback_conn_code // 100 == 2:
             db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS, service_id, json.dumps(conn_request)
+                MongoCollections.CONNECTIONS, service_id, conn_request
             )
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
