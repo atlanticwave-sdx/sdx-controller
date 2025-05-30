@@ -119,6 +119,8 @@ class LcMessageHandler:
                 added_nodes,
                 removed_links,
                 added_links,
+                uni_ports_up_to_down,
+                uni_ports_down_to_up,
             ) = self.te_manager.update_topology(msg_json)
             logger.info("Updating topology in TE manager")
             if removed_links and len(removed_links) > 0:
@@ -131,6 +133,11 @@ class LcMessageHandler:
                 logger.info("Processing link failure.")
                 self.connection_handler.handle_link_failure(
                     self.te_manager, failed_links
+                )
+            if uni_ports_up_to_down:
+                logger.info("Processing uni ports up to down.")
+                self.connection_handler.handle_uni_ports_up_to_down(
+                    uni_ports_up_to_down
                 )
 
         # Add new topology

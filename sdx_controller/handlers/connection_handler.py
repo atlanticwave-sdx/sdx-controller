@@ -404,6 +404,38 @@ class ConnectionHandler:
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
 
+    def handle_uni_ports_up_to_down(self, uni_ports_up_to_down):
+        """
+        Handles the transition of UNI ports from 'up' to 'down' status.
+        This function checks all the connections in the database and updates the status
+        of connections whose endpoints are in the provided list `uni_ports_up_to_down`.
+        The status of these connections will be changed to 'down'.
+        Args:
+            uni_ports_up_to_down (list): A list of UNI port identifiers whose status
+                                         needs to be updated to 'down'.
+        Returns:
+            None
+        """
+
+        connections = self.db_instance.get_all_entries_in_collection(
+            MongoCollections.CONNECTIONS
+        )
+
+        if not connections:
+            logger.debug("No connections found in the database.")
+            return
+
+        for service_id, connection in connections.items():
+            endpoints = connection.get("endpoints", [])
+            for endpoint in endpoints:
+                port_id = endpoint.get("port_id")
+                if any(port.id == port_id for port in uni_ports_up_to_down):
+                    logger.info(f"Updating connection {service_id} status to 'down'.")
+                    connection["status"] = "down"
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, connection
+                    )
+
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.get_value_from_db(
             MongoCollections.HISTORICAL_CONNECTIONS, service_id
