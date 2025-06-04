@@ -40,9 +40,15 @@ class ConnectionHandler:
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
+        port_connections_dict_json = self.db_instance.get_value_from_db(
+            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+        )
 
         link_connections_dict = (
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
+        )
+        port_connections_dict = (
+            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
         )
 
         interdomain_a, interdomain_b = None, None
@@ -55,6 +61,24 @@ class ConnectionHandler:
                     port_list.append(link[key]["port_id"])
 
             if port_list:
+                for port in port_list:
+                    if port not in port_connections_dict:
+                        port_connections_dict[port] = []
+
+                    if (
+                        operation == "post"
+                        and connection_service_id
+                        and connection_service_id not in port_connections_dict[port]
+                    ):
+                        port_connections_dict[port].append(connection_service_id)
+
+                    if (
+                        operation == "delete"
+                        and connection_service_id
+                        and connection_service_id in port_connections_dict[port]
+                    ):
+                        port_connections_dict[port].remove(connection_service_id)
+
                 simple_link = SimpleLink(port_list).to_string()
 
                 if simple_link not in link_connections_dict:
@@ -416,6 +440,31 @@ class ConnectionHandler:
         Returns:
             None
         """
+
+        port_connections_dict = self.db_instance.get_value_from_db(
+            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+        )
+
+        if not port_connections_dict:
+            logger.debug("No connection contains target UNI port.")
+            return
+        
+        port_connections_dict = json.loads(port_connections_dict)
+
+        for port in uni_ports_up_to_down:
+            logger.info(f"Handling uni port {port.id}")
+
+            if port.id in port_connections_dict:
+                logger.debug("Found failed port record!")
+                service_ids = port_connections_dict[port.id]
+                for service_id in service_ids:
+                    connection = self.db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
+                    if not connection:
+                        continue
+                    connection["status"] = "down"
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, connection
+                    )
 
         connections = self.db_instance.get_all_entries_in_collection(
             MongoCollections.CONNECTIONS
