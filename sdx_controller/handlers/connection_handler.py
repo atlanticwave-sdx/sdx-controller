@@ -448,7 +448,7 @@ class ConnectionHandler:
         if not port_connections_dict:
             logger.debug("No connection contains target UNI port.")
             return
-        
+
         port_connections_dict = json.loads(port_connections_dict)
 
         for port in uni_ports_up_to_down:
@@ -458,7 +458,9 @@ class ConnectionHandler:
                 logger.debug("Found failed port record!")
                 service_ids = port_connections_dict[port.id]
                 for service_id in service_ids:
-                    connection = self.db_instance.read_from_db(MongoCollections.CONNECTIONS, service_id)
+                    connection = self.db_instance.read_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
                     if not connection:
                         continue
                     connection["status"] = "down"
