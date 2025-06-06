@@ -76,7 +76,7 @@ def delete_connection(service_id):
             )
         else:
             connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.DOWN
+                connection, ConnectionStateMachine.State.ERROR
             )
             connection, _ = connection_state_machine(
                 connection, ConnectionStateMachine.State.DELETED

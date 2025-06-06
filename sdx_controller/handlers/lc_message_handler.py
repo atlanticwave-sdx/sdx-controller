@@ -66,6 +66,13 @@ class LcMessageHandler:
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
+                        if connection.get("status") and (
+                            connection.get("status")
+                            == str(ConnectionStateMachine.State.RECOVERING)
+                        ):
+                            connection, _ = connection_state_machine(
+                                connection, ConnectionStateMachine.State.UNDER_PROVISIONING
+                            )
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.UP
                         )

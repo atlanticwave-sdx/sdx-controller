@@ -44,9 +44,6 @@ class ConnectionHandler:
         link_connections_dict = (
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
         )
-        port_connections_dict = (
-            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
-        )
 
         interdomain_a, interdomain_b = None, None
         connection_service_id = connection_request.get("id")
@@ -72,18 +69,18 @@ class ConnectionHandler:
                     if (
                         operation == "post"
                         and connection_service_id
-                        and connection_service_id not in port_connections_dict[port]
+                        and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
                     ):
                         port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
 
                     if (
                         operation == "delete"
                         and connection_service_id
-                        and connection_service_id in port_connections_dict[port]
+                        and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
                     ):
                         port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
 
-                    db_instance.add_key_value_pair_to_db(
+                    self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.PORTS, port, port_in_db
                     )
 
@@ -448,29 +445,22 @@ class ConnectionHandler:
         Returns:
             None
         """
-
-        port_connections_dict = self.db_instance.get_value_from_db(
-            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
-        )
-
-        if not port_connections_dict:
-            logger.debug("No connection contains target UNI port.")
-            return
-
-        port_connections_dict = json.loads(port_connections_dict)
-
         for port in uni_ports_up_to_down:
+            port_in_db = self.db_instance.get_value_from_db(
+                MongoCollections.PORTS, port.id
+            )
             logger.info(f"Handling uni port {port.id}")
 
-            if port.id in port_connections_dict:
+            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
                 logger.debug("Found failed port record!")
-                service_ids = port_connections_dict[port.id]
+                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
                 for service_id in service_ids:
                     connection = self.db_instance.read_from_db(
                         MongoCollections.CONNECTIONS, service_id
                     )
                     if not connection:
                         continue
+                    logger.info(f"Updating connection {service_id} status to 'down'.")
                     connection["status"] = "down"
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
@@ -479,21 +469,6 @@ class ConnectionHandler:
         connections = self.db_instance.get_all_entries_in_collection(
             MongoCollections.CONNECTIONS
         )
-
-        if not connections:
-            logger.debug("No connections found in the database.")
-            return
-
-        for service_id, connection in connections.items():
-            endpoints = connection.get("endpoints", [])
-            for endpoint in endpoints:
-                port_id = endpoint.get("port_id")
-                if any(port.id == port_id for port in uni_ports_up_to_down):
-                    logger.info(f"Updating connection {service_id} status to 'down'.")
-                    connection["status"] = "down"
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, connection
-                    )
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.get_value_from_db(
