@@ -40,9 +40,6 @@ class ConnectionHandler:
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
-        port_connections_dict_json = self.db_instance.get_value_from_db(
-            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
-        )
 
         link_connections_dict = (
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
@@ -62,22 +59,33 @@ class ConnectionHandler:
 
             if port_list:
                 for port in port_list:
-                    if port not in port_connections_dict:
-                        port_connections_dict[port] = []
+                    port_in_db = self.db_instance.read_from_db(
+                        MongoCollections.PORTS, port
+                    )
+
+                    if not port_in_db:
+                        port_in_db = {}
+
+                    if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
+                        port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
 
                     if (
                         operation == "post"
                         and connection_service_id
                         and connection_service_id not in port_connections_dict[port]
                     ):
-                        port_connections_dict[port].append(connection_service_id)
+                        port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
 
                     if (
                         operation == "delete"
                         and connection_service_id
                         and connection_service_id in port_connections_dict[port]
                     ):
-                        port_connections_dict[port].remove(connection_service_id)
+                        port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
+
+                    db_instance.add_key_value_pair_to_db(
+                        MongoCollections.PORTS, port, port_in_db
+                    )
 
                 simple_link = SimpleLink(port_list).to_string()
 
