@@ -455,10 +455,11 @@ class ConnectionHandler:
                 logger.debug("Found failed port record!")
                 service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
                 for service_id in service_ids:
-                    connection = self.db_instance.read_from_db(
+                    connection = self.db_instance.get_value_from_db(
                         MongoCollections.CONNECTIONS, service_id
                     )
                     if not connection:
+                        logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
                     logger.info(f"Updating connection {service_id} status to 'down'.")
                     connection["status"] = "down"
