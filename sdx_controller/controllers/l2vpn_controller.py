@@ -74,10 +74,16 @@ def delete_connection(service_id):
             connection, _ = connection_state_machine(
                 connection, ConnectionStateMachine.State.DELETED
             )
-        else:
+        elif connection["status"] == str(
+            ConnectionStateMachine.State.UNDER_PROVISIONING
+        ):
             connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.ERROR
+                connection, ConnectionStateMachine.State.DOWN
             )
+            connection, _ = connection_state_machine(
+                connection, ConnectionStateMachine.State.DELETED
+            )
+        else:
             connection, _ = connection_state_machine(
                 connection, ConnectionStateMachine.State.DELETED
             )

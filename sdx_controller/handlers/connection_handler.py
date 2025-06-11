@@ -69,16 +69,22 @@ class ConnectionHandler:
                     if (
                         operation == "post"
                         and connection_service_id
-                        and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+                        and connection_service_id
+                        not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
                     ):
-                        port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
+                        port_in_db[Constants.PORT_CONNECTIONS_DICT].append(
+                            connection_service_id
+                        )
 
                     if (
                         operation == "delete"
                         and connection_service_id
-                        and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+                        and connection_service_id
+                        in port_in_db[Constants.PORT_CONNECTIONS_DICT]
                     ):
-                        port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
+                        port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
+                            connection_service_id
+                        )
 
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.PORTS, port, port_in_db

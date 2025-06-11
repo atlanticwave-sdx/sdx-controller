@@ -71,7 +71,8 @@ class LcMessageHandler:
                             == str(ConnectionStateMachine.State.RECOVERING)
                         ):
                             connection, _ = connection_state_machine(
-                                connection, ConnectionStateMachine.State.UNDER_PROVISIONING
+                                connection,
+                                ConnectionStateMachine.State.UNDER_PROVISIONING,
                             )
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.UP
