@@ -73,7 +73,7 @@ def create_app(run_listener: bool = True):
 
     # Get a handle to PCE.
     app.te_manager = (
-        TEManager(topology_data=json.loads(topo_val))
+        TEManager(topology_data=topo_val)
         if topo_val
         else TEManager(topology_data=None)
     )
