@@ -48,10 +48,9 @@ paths:
         "200":
           description: ok
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                x-content-type: text/plain
+                $ref: '#/components/schemas/topology'
         "400":
           description: Invalid ID supplied
         "404":

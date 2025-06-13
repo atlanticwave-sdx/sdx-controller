@@ -105,7 +105,7 @@ class LcMessageHandler:
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, db_msg_id, msg
+            MongoCollections.TOPOLOGIES, db_msg_id, msg_json
         )
         logger.info("Save to database complete.")
         logger.info("message ID:" + str(db_msg_id))
@@ -146,12 +146,10 @@ class LcMessageHandler:
         # ToDo: check if there is any change in topology update, if not, do not re-save to db.
         logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, msg_id, json.dumps(msg_json)
+            MongoCollections.TOPOLOGIES, msg_id, msg_json
         )
 
-        latest_topo = json.dumps(
-            self.te_manager.topology_manager.get_topology().to_dict()
-        )
+        latest_topo = self.te_manager.topology_manager.get_topology().to_dict()
         # use 'latest_topo' as PK to save latest topo to db
         self.db_instance.add_key_value_pair_to_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo

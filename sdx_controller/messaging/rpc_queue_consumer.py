@@ -106,7 +106,7 @@ class RpcConsumer(object):
             logger.debug("Domain list already exists in db: ")
             logger.debug(domain_list)
 
-        if latest_topo:
+        if latest_topo_from_db:
             latest_topo = latest_topo_from_db
             logger.debug("Topology already exists in db: ")
             logger.debug(latest_topo)
