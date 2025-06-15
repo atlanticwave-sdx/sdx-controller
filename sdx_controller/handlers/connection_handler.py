@@ -85,9 +85,10 @@ class ConnectionHandler:
                         port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
                             connection_service_id
                         )
-
+                    # MongoDB does not allow dot in key
+                    port_without_dot = port.replace(".", "_")
                     self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.PORTS, port, port_in_db
+                        MongoCollections.PORTS, port_without_dot, port_in_db
                     )
 
                 simple_link = SimpleLink(port_list).to_string()
@@ -452,10 +453,11 @@ class ConnectionHandler:
             None
         """
         for port in uni_ports_up_to_down:
+            # MongoDB does not allow dot as key
+            port_id_without_dot = port.id.replace(".", "_")
             port_in_db = self.db_instance.get_value_from_db(
-                MongoCollections.PORTS, port.id
+                MongoCollections.PORTS, port_id_without_dot
             )
-            logger.info(f"Handling uni port {port.id}")
 
             if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
                 logger.debug("Found failed port record!")
@@ -468,14 +470,11 @@ class ConnectionHandler:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
                     logger.info(f"Updating connection {service_id} status to 'down'.")
-                    connection["status"] = "down"
+                    connection["status"] = "DOWN"
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
-
-        connections = self.db_instance.get_all_entries_in_collection(
-            MongoCollections.CONNECTIONS
-        )
+                    logger.debug(f"Connection status updated for {service_id}")
 
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.get_value_from_db(
@@ -591,7 +590,7 @@ def get_connection_status(db, service_id: str):
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
         oxp_response = request_dict.get("oxp_response")
-        status = parse_conn_status(request_dict.get("status"))
+        status = parse_conn_status(status)
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
