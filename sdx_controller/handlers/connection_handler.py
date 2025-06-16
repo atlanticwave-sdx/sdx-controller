@@ -460,7 +460,7 @@ class ConnectionHandler:
             )
 
             if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
-                logger.debug("Found failed port record!")
+                logger.debug("Found port record!")
                 service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
                 for service_id in service_ids:
                     connection = self.db_instance.get_value_from_db(
@@ -471,6 +471,42 @@ class ConnectionHandler:
                         continue
                     logger.info(f"Updating connection {service_id} status to 'down'.")
                     connection["status"] = "DOWN"
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, connection
+                    )
+                    logger.debug(f"Connection status updated for {service_id}")
+
+    def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
+        """
+        Handles the transition of UNI ports from 'down' to 'up' status.
+        This function checks all the connections in the database and updates the status
+        of connections whose endpoints are in the provided list `uni_ports_down_to_up`.
+        The status of these connections will be changed to 'up'.
+        Args:
+            uni_ports_down_to_up (list): A list of UNI port identifiers whose status
+                                         needs to be updated to 'up'.
+        Returns:
+            None
+        """
+        for port in uni_ports_down_to_up:
+            # MongoDB does not allow dot as key
+            port_id_without_dot = port.id.replace(".", "_")
+            port_in_db = self.db_instance.get_value_from_db(
+                MongoCollections.PORTS, port_id_without_dot
+            )
+
+            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
+                logger.debug("Found port record!")
+                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
+                for service_id in service_ids:
+                    connection = self.db_instance.get_value_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
+                    if not connection:
+                        logger.debug(f"Cannot find connection {service_id} in DB.")
+                        continue
+                    logger.info(f"Updating connection {service_id} status to 'up'.")
+                    connection["status"] = "UP"
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )

@@ -147,6 +147,11 @@ class LcMessageHandler:
                 self.connection_handler.handle_uni_ports_up_to_down(
                     uni_ports_up_to_down
                 )
+            if uni_ports_down_to_up:
+                logger.info("Processing uni ports down to up.")
+                self.connection_handler.handle_uni_ports_down_to_up(
+                    uni_ports_down_to_up
+                )
 
         # Add new topology
         else:
