@@ -85,10 +85,8 @@ class ConnectionHandler:
                         port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
                             connection_service_id
                         )
-                    # MongoDB does not allow dot in key
-                    port_without_dot = port.replace(".", "_")
                     self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.PORTS, port_without_dot, port_in_db
+                        MongoCollections.PORTS, port, port_in_db
                     )
 
                 simple_link = SimpleLink(port_list).to_string()
@@ -453,10 +451,8 @@ class ConnectionHandler:
             None
         """
         for port in uni_ports_up_to_down:
-            # MongoDB does not allow dot as key
-            port_id_without_dot = port.id.replace(".", "_")
             port_in_db = self.db_instance.get_value_from_db(
-                MongoCollections.PORTS, port_id_without_dot
+                MongoCollections.PORTS, port.id
             )
 
             if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
@@ -489,10 +485,8 @@ class ConnectionHandler:
             None
         """
         for port in uni_ports_down_to_up:
-            # MongoDB does not allow dot as key
-            port_id_without_dot = port.id.replace(".", "_")
             port_in_db = self.db_instance.get_value_from_db(
-                MongoCollections.PORTS, port_id_without_dot
+                MongoCollections.PORTS, port.id
             )
 
             if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
