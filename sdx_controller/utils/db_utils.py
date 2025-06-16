@@ -163,7 +163,7 @@ class DbUtils(object):
         try:
             # Find document where the key exists and not marked as deleted
             result = self.sdxdb[collection].find_one(
-                {key: {"$exists": 1}, "deleted": {"$ne": True}}
+                {"$expr": {"$getField": key}, "deleted": {"$ne": True}}
             )
             return result
         except Exception as e:
