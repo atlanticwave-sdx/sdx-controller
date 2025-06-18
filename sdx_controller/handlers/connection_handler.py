@@ -31,8 +31,49 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
+    def _process_port(self, connection_service_id, port_id, operation):
+        port_in_db = self.db_instance.read_from_db(MongoCollections.PORTS, port_id)
+
+        if not port_in_db:
+            port_in_db = {}
+
+        if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
+            port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
+
+        if (
+            connection_service_id
+            and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+        ):
+            if operation == "post":
+                port_in_db[Constants.PORT_CONNECTIONS_DICT].append(
+                    connection_service_id
+                )
+            if operation == "delete":
+                port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
+                    connection_service_id
+                )
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.PORTS, port_id, port_in_db
+        )
+
+    def _process_link_connection_dict(
+        self, link_connections_dict, simple_link, connection_service_id, operation
+    ):
+        if simple_link not in link_connections_dict:
+            link_connections_dict[simple_link] = []
+
+        if (
+            connection_service_id
+            and connection_service_id not in link_connections_dict[simple_link]
+        ):
+            if operation == "post":
+                link_connections_dict[simple_link].append(connection_service_id)
+            if operation == "delete":
+                link_connections_dict[simple_link].remove(connection_service_id)
+
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
-        logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
+        logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
             return "Could not break down the solution", 400
@@ -56,57 +97,13 @@ class ConnectionHandler:
 
             if port_list:
                 for port in port_list:
-                    port_in_db = self.db_instance.read_from_db(
-                        MongoCollections.PORTS, port
-                    )
-
-                    if not port_in_db:
-                        port_in_db = {}
-
-                    if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
-                        port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
-
-                    if (
-                        operation == "post"
-                        and connection_service_id
-                        and connection_service_id
-                        not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
-                    ):
-                        port_in_db[Constants.PORT_CONNECTIONS_DICT].append(
-                            connection_service_id
-                        )
-
-                    if (
-                        operation == "delete"
-                        and connection_service_id
-                        and connection_service_id
-                        in port_in_db[Constants.PORT_CONNECTIONS_DICT]
-                    ):
-                        port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
-                            connection_service_id
-                        )
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.PORTS, port, port_in_db
-                    )
+                    self._process_port(connection_service_id, port, operation)
 
                 simple_link = SimpleLink(port_list).to_string()
 
-                if simple_link not in link_connections_dict:
-                    link_connections_dict[simple_link] = []
-
-                if (
-                    operation == "post"
-                    and connection_service_id
-                    and connection_service_id not in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].append(connection_service_id)
-
-                if (
-                    operation == "delete"
-                    and connection_service_id
-                    and connection_service_id in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].remove(connection_service_id)
+            self._process_link_connection_dict(
+                link_connections_dict, simple_link, connection_service_id, operation
+            )
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
@@ -115,24 +112,9 @@ class ConnectionHandler:
 
             if interdomain_a and interdomain_b:
                 simple_link = SimpleLink([interdomain_a, interdomain_b]).to_string()
-
-                if simple_link not in link_connections_dict:
-                    link_connections_dict[simple_link] = []
-
-                if (
-                    operation == "post"
-                    and connection_service_id
-                    and connection_service_id not in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].append(connection_service_id)
-
-                if (
-                    operation == "delete"
-                    and connection_service_id
-                    and connection_service_id in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].remove(connection_service_id)
-
+                self._process_link_connection_dict(
+                    link_connections_dict, simple_link, connection_service_id, operation
+                )
                 interdomain_a = link.get("uni_z", {}).get("port_id")
 
             self.db_instance.add_key_value_pair_to_db(
