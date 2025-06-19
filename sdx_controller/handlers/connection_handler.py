@@ -41,17 +41,18 @@ class ConnectionHandler:
             port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
 
         if (
-            connection_service_id
+            operation == "post"
+            and connection_service_id
             and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
         ):
-            if operation == "post":
-                port_in_db[Constants.PORT_CONNECTIONS_DICT].append(
-                    connection_service_id
-                )
-            if operation == "delete":
-                port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(
-                    connection_service_id
-                )
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
+
+        if (
+            operation == "delete"
+            and connection_service_id
+            and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+        ):
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
 
         self.db_instance.add_key_value_pair_to_db(
             MongoCollections.PORTS, port_id, port_in_db
@@ -64,13 +65,18 @@ class ConnectionHandler:
             link_connections_dict[simple_link] = []
 
         if (
-            connection_service_id
+            operation == "post"
+            and connection_service_id
             and connection_service_id not in link_connections_dict[simple_link]
         ):
-            if operation == "post":
-                link_connections_dict[simple_link].append(connection_service_id)
-            if operation == "delete":
-                link_connections_dict[simple_link].remove(connection_service_id)
+            link_connections_dict[simple_link].append(connection_service_id)
+
+        if (
+            operation == "delete"
+            and connection_service_id
+            and connection_service_id in link_connections_dict[simple_link]
+        ):
+            link_connections_dict[simple_link].remove(connection_service_id)
 
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
         logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
