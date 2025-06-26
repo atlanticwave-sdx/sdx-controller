@@ -86,6 +86,16 @@ class TestL2vpnController(BaseTestCase):
         assert connection_response.status_code // 100 == 2
 
         service_id = connection_response.get_json().get("service_id")
+        # Before deleting, the L2VPN has to be UP
+        connection = self.db_instance.get_value_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
+        connection["status"] = "UP"
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            connection,
+        )
         print(f"Deleting request_id: {service_id}")
 
         delete_response = self.client.open(

@@ -509,10 +509,10 @@ def topology_db_update(db_instance, te_manager):
     for domain_name, topology in oxp_topology_map.items():
         msg_json = topology.to_dict()
         db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
+            MongoCollections.TOPOLOGIES, domain_name, msg_json
         )
     # use 'latest_topo' as PK to save latest full topo to db
-    latest_topo = json.dumps(te_manager.topology_manager.get_topology().to_dict())
+    latest_topo = te_manager.topology_manager.get_topology().to_dict()
     db_instance.add_key_value_pair_to_db(
         MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
     )
