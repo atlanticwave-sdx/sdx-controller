@@ -146,7 +146,7 @@ class LcMessageHandler:
         # ToDo: check if there is any change in topology update, if not, do not re-save to db.
         logger.info(f"Adding topology {domain_name} to db.")
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.TOPOLOGIES, domain_name, json.dumps(msg_json)
+            MongoCollections.TOPOLOGIES, msg_id, json.dumps(msg_json)
         )
 
         latest_topo = json.dumps(

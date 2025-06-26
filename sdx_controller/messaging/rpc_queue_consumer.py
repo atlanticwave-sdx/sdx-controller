@@ -7,6 +7,7 @@ from queue import Queue
 
 import pika
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
+from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
@@ -114,7 +115,7 @@ class RpcConsumer(object):
         if domain_list:
             for domain in domain_list:
                 topology = db_instance.get_value_from_db(
-                    MongoCollections.TOPOLOGIES, domain
+                    MongoCollections.TOPOLOGIES, SDX_TOPOLOGY_ID_prefix + domain
                 )
 
                 if not topology:
