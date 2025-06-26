@@ -66,6 +66,14 @@ class LcMessageHandler:
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
+                        if connection.get("status") and (
+                            connection.get("status")
+                            == str(ConnectionStateMachine.State.RECOVERING)
+                        ):
+                            connection, _ = connection_state_machine(
+                                connection,
+                                ConnectionStateMachine.State.UNDER_PROVISIONING,
+                            )
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.UP
                         )
@@ -77,8 +85,12 @@ class LcMessageHandler:
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.ERROR
                     )
-                elif connection.get("status") and (
-                    connection.get("status") != str(ConnectionStateMachine.State.DOWN)
+                elif (
+                    connection.get("status")
+                    and connection.get("status")
+                    != str(ConnectionStateMachine.State.DOWN)
+                    and connection.get("status")
+                    != str(ConnectionStateMachine.State.ERROR)
                 ):
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.DOWN
@@ -119,6 +131,8 @@ class LcMessageHandler:
                 added_nodes,
                 removed_links,
                 added_links,
+                uni_ports_up_to_down,
+                uni_ports_down_to_up,
             ) = self.te_manager.update_topology(msg_json)
             logger.info("Updating topology in TE manager")
             if removed_links and len(removed_links) > 0:
@@ -131,6 +145,16 @@ class LcMessageHandler:
                 logger.info("Processing link failure.")
                 self.connection_handler.handle_link_failure(
                     self.te_manager, failed_links
+                )
+            if uni_ports_up_to_down:
+                logger.info("Processing uni ports up to down.")
+                self.connection_handler.handle_uni_ports_up_to_down(
+                    uni_ports_up_to_down
+                )
+            if uni_ports_down_to_up:
+                logger.info("Processing uni ports down to up.")
+                self.connection_handler.handle_uni_ports_down_to_up(
+                    uni_ports_down_to_up
                 )
 
         # Add new topology

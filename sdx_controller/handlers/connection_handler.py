@@ -31,8 +31,55 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
+    def _process_port(self, connection_service_id, port_id, operation):
+        port_in_db = self.db_instance.read_from_db(MongoCollections.PORTS, port_id)
+
+        if not port_in_db:
+            port_in_db = {}
+
+        if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
+            port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
+
+        if (
+            operation == "post"
+            and connection_service_id
+            and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+        ):
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
+
+        if (
+            operation == "delete"
+            and connection_service_id
+            and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+        ):
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.PORTS, port_id, port_in_db
+        )
+
+    def _process_link_connection_dict(
+        self, link_connections_dict, simple_link, connection_service_id, operation
+    ):
+        if simple_link not in link_connections_dict:
+            link_connections_dict[simple_link] = []
+
+        if (
+            operation == "post"
+            and connection_service_id
+            and connection_service_id not in link_connections_dict[simple_link]
+        ):
+            link_connections_dict[simple_link].append(connection_service_id)
+
+        if (
+            operation == "delete"
+            and connection_service_id
+            and connection_service_id in link_connections_dict[simple_link]
+        ):
+            link_connections_dict[simple_link].remove(connection_service_id)
+
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
-        logger.debug(f"-- BREAKDOWN: {json.dumps(breakdown)}")
+        logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
 
         if breakdown is None:
             return "Could not break down the solution", 400
@@ -55,24 +102,14 @@ class ConnectionHandler:
                     port_list.append(link[key]["port_id"])
 
             if port_list:
+                for port in port_list:
+                    self._process_port(connection_service_id, port, operation)
+
                 simple_link = SimpleLink(port_list).to_string()
 
-                if simple_link not in link_connections_dict:
-                    link_connections_dict[simple_link] = []
-
-                if (
-                    operation == "post"
-                    and connection_service_id
-                    and connection_service_id not in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].append(connection_service_id)
-
-                if (
-                    operation == "delete"
-                    and connection_service_id
-                    and connection_service_id in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].remove(connection_service_id)
+            self._process_link_connection_dict(
+                link_connections_dict, simple_link, connection_service_id, operation
+            )
 
             if interdomain_a:
                 interdomain_b = link.get("uni_a", {}).get("port_id")
@@ -81,24 +118,9 @@ class ConnectionHandler:
 
             if interdomain_a and interdomain_b:
                 simple_link = SimpleLink([interdomain_a, interdomain_b]).to_string()
-
-                if simple_link not in link_connections_dict:
-                    link_connections_dict[simple_link] = []
-
-                if (
-                    operation == "post"
-                    and connection_service_id
-                    and connection_service_id not in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].append(connection_service_id)
-
-                if (
-                    operation == "delete"
-                    and connection_service_id
-                    and connection_service_id in link_connections_dict[simple_link]
-                ):
-                    link_connections_dict[simple_link].remove(connection_service_id)
-
+                self._process_link_connection_dict(
+                    link_connections_dict, simple_link, connection_service_id, operation
+                )
                 interdomain_a = link.get("uni_z", {}).get("port_id")
 
             self.db_instance.add_key_value_pair_to_db(
@@ -404,6 +426,74 @@ class ConnectionHandler:
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
 
+    def handle_uni_ports_up_to_down(self, uni_ports_up_to_down):
+        """
+        Handles the transition of UNI ports from 'up' to 'down' status.
+        This function checks all the connections in the database and updates the status
+        of connections whose endpoints are in the provided list `uni_ports_up_to_down`.
+        The status of these connections will be changed to 'down'.
+        Args:
+            uni_ports_up_to_down (list): A list of UNI port identifiers whose status
+                                         needs to be updated to 'down'.
+        Returns:
+            None
+        """
+        for port in uni_ports_up_to_down:
+            port_in_db = self.db_instance.get_value_from_db(
+                MongoCollections.PORTS, port.id
+            )
+
+            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
+                logger.debug("Found port record!")
+                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
+                for service_id in service_ids:
+                    connection = self.db_instance.get_value_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
+                    if not connection:
+                        logger.debug(f"Cannot find connection {service_id} in DB.")
+                        continue
+                    logger.info(f"Updating connection {service_id} status to 'down'.")
+                    connection["status"] = "DOWN"
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, connection
+                    )
+                    logger.debug(f"Connection status updated for {service_id}")
+
+    def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
+        """
+        Handles the transition of UNI ports from 'down' to 'up' status.
+        This function checks all the connections in the database and updates the status
+        of connections whose endpoints are in the provided list `uni_ports_down_to_up`.
+        The status of these connections will be changed to 'up'.
+        Args:
+            uni_ports_down_to_up (list): A list of UNI port identifiers whose status
+                                         needs to be updated to 'up'.
+        Returns:
+            None
+        """
+        for port in uni_ports_down_to_up:
+            port_in_db = self.db_instance.get_value_from_db(
+                MongoCollections.PORTS, port.id
+            )
+
+            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
+                logger.debug("Found port record!")
+                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
+                for service_id in service_ids:
+                    connection = self.db_instance.get_value_from_db(
+                        MongoCollections.CONNECTIONS, service_id
+                    )
+                    if not connection:
+                        logger.debug(f"Cannot find connection {service_id} in DB.")
+                        continue
+                    logger.info(f"Updating connection {service_id} status to 'up'.")
+                    connection["status"] = "UP"
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.CONNECTIONS, service_id, connection
+                    )
+                    logger.debug(f"Connection status updated for {service_id}")
+
     def get_archived_connections(self, service_id: str):
         historical_connections = self.db_instance.get_value_from_db(
             MongoCollections.HISTORICAL_CONNECTIONS, service_id
@@ -518,7 +608,7 @@ def get_connection_status(db, service_id: str):
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
         oxp_response = request_dict.get("oxp_response")
-        status = parse_conn_status(request_dict.get("status"))
+        status = parse_conn_status(status)
         if request_dict.get("endpoints") is not None:  # spec version 2.0.0
             request_endpoints = request_dict.get("endpoints")
             request_uni_a = request_endpoints[0]
