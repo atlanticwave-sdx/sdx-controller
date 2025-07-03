@@ -97,14 +97,24 @@ class ConnectionHandler:
 
         for domain, link in breakdown.items():
             port_list = []
+            link_with_new_format = {}
             for key in link.keys():
                 if "uni_" in key and "port_id" in link[key]:
                     port_list.append(link[key]["port_id"])
 
             if port_list:
+                link_with_new_format["name"] = link.get("name", "")
+                link_with_new_format["endpoints"] = []
                 for port in port_list:
                     self._process_port(connection_service_id, port, operation)
-
+                    vlan_value = link.get("tag", {}).get("value")
+                    if vlan_value is not None:
+                        link_with_new_format["endpoints"].append(
+                            {
+                                "port_id": port,
+                                "vlan": str(vlan_value),
+                            }
+                        )
                 simple_link = SimpleLink(port_list).to_string()
 
             self._process_link_connection_dict(
@@ -148,6 +158,7 @@ class ConnectionHandler:
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
+            logger.info(f"link_with_new_format: {link_with_new_format}")
             producer.call(json.dumps(mq_link))
             producer.stop_keep_alive()
 
