@@ -253,7 +253,7 @@ class ConnectionHandler:
             )
             self._process_path_to_db(
                 te_manager,
-                solution,
+                links,
                 operation="post",
                 connection_request=connection_request,
             )
