@@ -91,6 +91,7 @@ class ConnectionHandler:
         links = self.db_instance.read_from_db(
             MongoCollections.SOLUTIONS, connection_service_id
         )
+        links = json.loads(links)
         for ports in links:
             link = temanager.topology_manager._topology.get_link_by_port_id(
                 ports["source"], ports["destination"]
@@ -105,11 +106,12 @@ class ConnectionHandler:
             self._process_link_connection_dict(
                 link_connections_dict, simple_link, connection_service_id, operation
             )
-            self.db_instance.add_key_value_pair_to_db(
-                MongoCollections.LINKS,
-                Constants.LINK_CONNECTIONS_DICT,
-                json.dumps(link_connections_dict),
-            )
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.LINKS,
+            Constants.LINK_CONNECTIONS_DICT,
+            json.dumps(link_connections_dict),
+        )
 
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
         logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
