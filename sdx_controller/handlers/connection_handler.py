@@ -25,6 +25,8 @@ from sdx_controller.utils.parse_helper import ParseHelper
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
+MongoCollections.SOLUTIONS = "solutions"
+
 
 class ConnectionHandler:
     def __init__(self, db_instance):
