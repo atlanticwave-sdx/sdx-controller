@@ -78,57 +78,45 @@ class ConnectionHandler:
         ):
             link_connections_dict[simple_link].remove(connection_service_id)
 
-    def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
-        logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
-
-        if breakdown is None:
-            return "Could not break down the solution", 400
-
+    def _process_path_to_db(self, temanager, solution, operation, connection_request):
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
-
         link_connections_dict = (
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
         )
-
-        interdomain_a, interdomain_b = None, None
         connection_service_id = connection_request.get("id")
+        solution = self.db_instance.read_from_db(
+            MongoCollections.SOLUTIONS, connection_service_id
+        )
+        _, links = temanager.get_links_on_path(solution)
+        for ports in links:
+            link = temanager.topology_manager._topology.get_link_by_port_id(
+                ports["source"], ports["destination"]
+            )
+            temanager._logger.info(f"Links on path: {link.id}")
+            self._process_port(connection_service_id, ports["source"], operation)
+            self._process_port(connection_service_id, ports["destination"], operation)
 
-        for domain, link in breakdown.items():
-            port_list = []
-            for key in link.keys():
-                if "uni_" in key and "port_id" in link[key]:
-                    port_list.append(link[key]["port_id"])
-
-            if port_list:
-                for port in port_list:
-                    self._process_port(connection_service_id, port, operation)
-
-                simple_link = SimpleLink(port_list).to_string()
-
+            simple_link = SimpleLink(ports["source"], ports["destination"]).to_string()
             self._process_link_connection_dict(
                 link_connections_dict, simple_link, connection_service_id, operation
             )
-
-            if interdomain_a:
-                interdomain_b = link.get("uni_a", {}).get("port_id")
-            else:
-                interdomain_a = link.get("uni_z", {}).get("port_id")
-
-            if interdomain_a and interdomain_b:
-                simple_link = SimpleLink([interdomain_a, interdomain_b]).to_string()
-                self._process_link_connection_dict(
-                    link_connections_dict, simple_link, connection_service_id, operation
-                )
-                interdomain_a = link.get("uni_z", {}).get("port_id")
-
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.LINKS,
                 Constants.LINK_CONNECTIONS_DICT,
                 json.dumps(link_connections_dict),
             )
 
+    def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
+        logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
+
+        if breakdown is None:
+            return "Could not break down the solution", 400
+
+        connection_service_id = connection_request.get("id")
+
+        for domain, link in breakdown.items():
             logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
 
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
@@ -253,11 +241,20 @@ class ConnectionHandler:
             return "Could not solve the request", 410
 
         try:
+            self.db_instance.add_key_value_pair_to_db(
+                MongoCollections.SOLUTIONS, connection_request["id"], solution
+            )
             breakdown = te_manager.generate_connection_breakdown(
                 solution, connection_request
             )
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
+            )
+            self._process_path_to_db(
+                te_manager,
+                solution,
+                operation="post",
+                connection_request=connection_request,
             )
             status, code = self._send_breakdown_to_lc(
                 breakdown, "post", connection_request
@@ -324,6 +321,9 @@ class ConnectionHandler:
         try:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
+            )
+            self._process_path_to_db(
+                None, None, operation="delete", connection_request=connection_request
             )
             self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
             self.archive_connection(service_id)
@@ -692,7 +692,6 @@ def get_connection_status(db, service_id: str):
         "endpoints": response_endpoints,
         "current_path": endpoints,
         "archived_date": 0,
-        "status": status,
     }
     if qos_metrics:
         response[service_id]["qos_metrics"] = qos_metrics
