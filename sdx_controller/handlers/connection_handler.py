@@ -80,7 +80,7 @@ class ConnectionHandler:
         ):
             link_connections_dict[simple_link].remove(connection_service_id)
 
-    def _process_path_to_db(self, temanager, solution, operation, connection_request):
+    def _process_path_to_db(self, temanager, links, operation, connection_request):
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
@@ -88,10 +88,7 @@ class ConnectionHandler:
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
         )
         connection_service_id = connection_request.get("id")
-        solution = self.db_instance.read_from_db(
-            MongoCollections.SOLUTIONS, connection_service_id
-        )
-        _, links = temanager.get_links_on_path(solution)
+
         for ports in links:
             link = temanager.topology_manager._topology.get_link_by_port_id(
                 ports["source"], ports["destination"]
@@ -242,9 +239,11 @@ class ConnectionHandler:
         if solution is None or solution.connection_map is None:
             return "Could not solve the request", 410
 
+        _, links = te_manager.get_links_on_path(solution)
+
         try:
             self.db_instance.add_key_value_pair_to_db(
-                MongoCollections.SOLUTIONS, connection_request["id"], solution
+                MongoCollections.SOLUTIONS, connection_request["id"], links
             )
             breakdown = te_manager.generate_connection_breakdown(
                 solution, connection_request
