@@ -88,10 +88,11 @@ class ConnectionHandler:
             json.loads(link_connections_dict_json) if link_connections_dict_json else {}
         )
         connection_service_id = connection_request.get("id")
-        links = self.db_instance.read_from_db(
+        links = self.db_instance.get_value_from_db(
             MongoCollections.SOLUTIONS, connection_service_id
         )
-        links = json.loads(links)
+        logger.info(f"Links on path: {links}: {type(links)}")
+
         for ports in links:
             link = temanager.topology_manager._topology.get_link_by_port_id(
                 ports["source"], ports["destination"]
