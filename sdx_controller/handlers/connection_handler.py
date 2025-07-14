@@ -80,7 +80,7 @@ class ConnectionHandler:
         ):
             link_connections_dict[simple_link].remove(connection_service_id)
 
-    def _process_path_to_db(self, temanager, links, operation, connection_request):
+    def _process_path_to_db(self, temanager, operation, connection_request):
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
         )
