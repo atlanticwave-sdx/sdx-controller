@@ -260,7 +260,6 @@ class ConnectionHandler:
             )
             self._process_path_to_db(
                 te_manager,
-                links,
                 operation="post",
                 connection_request=connection_request,
             )
@@ -331,7 +330,7 @@ class ConnectionHandler:
                 breakdown, "delete", connection_request
             )
             self._process_path_to_db(
-                None, None, operation="delete", connection_request=connection_request
+                te_manager, operation="delete", connection_request=connection_request
             )
             self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
             self.archive_connection(service_id)
