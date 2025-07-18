@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import uuid
@@ -14,7 +13,8 @@ from sdx_controller.handlers.connection_handler import (
     get_connection_status,
     parse_conn_status,
 )
-from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
+
+# from sdx_controller.models.l2vpn_service_id_body import L2vpnServiceIdBody  # noqa: E501
 from sdx_controller.utils.db_utils import DbUtils
 
 LOG_FORMAT = (
