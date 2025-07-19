@@ -163,7 +163,6 @@ class ConnectionHandler:
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
-            logger.info(f"link_with_new_format: {link_with_new_format}")
             producer.call(json.dumps(mq_link))
             producer.stop_keep_alive()
 
