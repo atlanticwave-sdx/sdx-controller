@@ -100,22 +100,27 @@ class ConnectionHandler:
             link_with_new_format = {}
             for key in link.keys():
                 if "uni_" in key and "port_id" in link[key]:
-                    port_list.append(link[key]["port_id"])
+                    port_list.append(
+                        {
+                            "port_id": link[key]["port_id"],
+                            "vlan_value": link[key].get("tag", {}).get("value"),
+                        }
+                    )
 
             if port_list:
                 link_with_new_format["name"] = link.get("name", "")
                 link_with_new_format["endpoints"] = []
                 for port in port_list:
                     self._process_port(connection_service_id, port, operation)
-                    vlan_value = link.get("tag", {}).get("value")
-                    if vlan_value is not None:
+                    if port.get("vlan_value"):
                         link_with_new_format["endpoints"].append(
                             {
-                                "port_id": port,
-                                "vlan": str(vlan_value),
+                                "port_id": port.get("port_id"),
+                                "vlan": port.get("vlan_value"),
                             }
                         )
-                simple_link = SimpleLink(port_list).to_string()
+                port_id_list = [port.get("port_id") for port in port_list]
+                simple_link = SimpleLink(port_id_list).to_string()
 
             self._process_link_connection_dict(
                 link_connections_dict, simple_link, connection_service_id, operation
