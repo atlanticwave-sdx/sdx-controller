@@ -144,7 +144,7 @@ class ConnectionHandler:
                 json.dumps(link_connections_dict),
             )
 
-            logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
+            logger.debug(f"Attempting to publish domain: {domain}, link: {link_with_new_format}")
 
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
@@ -152,13 +152,13 @@ class ConnectionHandler:
             exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
-                f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
+                f"Doing '{operation}' operation for '{link_with_new_format}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
             mq_link = {
                 "operation": operation,
                 "service_id": connection_service_id,
-                "link": link,
+                "link": link_with_new_format,
             }
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
