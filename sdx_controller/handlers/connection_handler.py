@@ -97,15 +97,30 @@ class ConnectionHandler:
 
         for domain, link in breakdown.items():
             port_list = []
+            link_with_new_format = {}
             for key in link.keys():
                 if "uni_" in key and "port_id" in link[key]:
-                    port_list.append(link[key]["port_id"])
+                    port_list.append(
+                        {
+                            "port_id": link[key]["port_id"],
+                            "vlan_value": link[key].get("tag", {}).get("value"),
+                        }
+                    )
 
             if port_list:
+                link_with_new_format["name"] = link.get("name", "")
+                link_with_new_format["endpoints"] = []
                 for port in port_list:
                     self._process_port(connection_service_id, port, operation)
-
-                simple_link = SimpleLink(port_list).to_string()
+                    if port.get("vlan_value"):
+                        link_with_new_format["endpoints"].append(
+                            {
+                                "port_id": port.get("port_id"),
+                                "vlan": port.get("vlan_value"),
+                            }
+                        )
+                port_id_list = [port.get("port_id") for port in port_list]
+                simple_link = SimpleLink(port_id_list).to_string()
 
             self._process_link_connection_dict(
                 link_connections_dict, simple_link, connection_service_id, operation
@@ -129,7 +144,9 @@ class ConnectionHandler:
                 json.dumps(link_connections_dict),
             )
 
-            logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
+            logger.debug(
+                f"Attempting to publish domain: {domain}, link: {link_with_new_format}"
+            )
 
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
@@ -137,13 +154,13 @@ class ConnectionHandler:
             exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
-                f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
+                f"Doing '{operation}' operation for '{link_with_new_format}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
             mq_link = {
                 "operation": operation,
                 "service_id": connection_service_id,
-                "link": link,
+                "link": link_with_new_format,
             }
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
