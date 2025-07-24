@@ -144,7 +144,9 @@ class ConnectionHandler:
                 json.dumps(link_connections_dict),
             )
 
-            logger.debug(f"Attempting to publish domain: {domain}, link: {link_with_new_format}")
+            logger.debug(
+                f"Attempting to publish domain: {domain}, link: {link_with_new_format}"
+            )
 
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
