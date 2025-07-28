@@ -140,12 +140,12 @@ class LcMessageHandler:
                 self.connection_handler.handle_link_removal(
                     self.te_manager, removed_links
                 )
-            failed_links = self.te_manager.get_failed_links()
-            if failed_links:
-                logger.info("Processing link failure.")
-                self.connection_handler.handle_link_failure(
-                    self.te_manager, failed_links
-                )
+            # failed_links = self.te_manager.get_failed_links()
+            # if failed_links:
+            #    logger.info("Processing link failure.")
+            #    self.connection_handler.handle_link_failure(
+            #        self.te_manager, failed_links
+            #    )
             if uni_ports_up_to_down:
                 logger.info("Processing uni ports up to down.")
                 self.connection_handler.handle_uni_ports_up_to_down(

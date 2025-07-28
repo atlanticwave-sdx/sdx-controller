@@ -489,8 +489,8 @@ class TestL2vpnController(BaseTestCase):
 
         # What were the original port_ids now?
         request_dict = json.loads(connection_request)
-        requested_port0 = request_dict.get("endpoints")[0].get("port_id")
-        requested_port1 = request_dict.get("endpoints")[1].get("port_id")
+        # requested_port0 = request_dict.get("endpoints")[0].get("port_id")
+        # requested_port1 = request_dict.get("endpoints")[1].get("port_id")
 
         # print(f"requested_port0: {requested_port0}")
         # print(f"requested_port1: {requested_port1}")
