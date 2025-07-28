@@ -29,7 +29,7 @@ dependencies = [
     "pika >= 1.2.0",
     "dataset",
     "pymongo > 3.0",
-    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@3.1.0.dev9",
+    "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@294-full-path-link-failure-handling",
 ]
 
 [project.optional-dependencies]
