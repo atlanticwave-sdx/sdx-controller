@@ -329,17 +329,20 @@ class ConnectionHandler:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
-        
+
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
 
         oxp_response = connection_request.get("oxp_response")
-        
+
         # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
         evc_id = oxp_response.get("service_id", None) if oxp_response else None
 
         if not oxp_response or not evc_id:
-            return "Connection does not have OXP response, cannot remove connection", 404
+            return (
+                "Connection does not have OXP response, cannot remove connection",
+                404,
+            )
 
         breakdown = self.db_instance.get_value_from_db(
             MongoCollections.BREAKDOWNS, service_id
