@@ -239,6 +239,9 @@ class ConnectionHandler:
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
                 )
+                self._process_port(
+                    te_manager, connection_request["id"], ctx.ingress_port, "post"
+                )
                 status, code = self._send_breakdown_to_lc(
                     breakdown, "post", connection_request
                 )
@@ -659,19 +662,17 @@ def get_connection_status(db, service_id: str):
         notifications = request_dict.get("notifications")
         oxp_response = request_dict.get("oxp_response")
         status = parse_conn_status(status)
-        if request_dict.get("endpoints") is not None:  # spec version 2.0.0
-            request_endpoints = request_dict.get("endpoints")
+        request_endpoints = request_dict.get("endpoints")  # spec version 2.0.0
+        if request_endpoints and len(request_endpoints) > 1:
             request_uni_a = request_endpoints[0]
+            request_uni_z = request_endpoints[1]
+            request_uni_z_id = request_uni_z.get("id")
             request_uni_a_id = request_uni_a.get("port_id")
             if request_uni_a_id is None:
                 request_uni_a_id = request_uni_a.get("id")
-            if len(request_endpoints) > 1:
-                request_uni_z = request_endpoints[1]
-                request_uni_z_id = request_uni_z.get("port_id")
-                if request_uni_z_id is None:
-                    request_uni_z_id = request_uni_z.get("id")
-            else:
-                request_uni_z_id = None
+            request_uni_z_id = request_uni_z.get("port_id")
+            if request_uni_z_id is None:
+                request_uni_z_id = request_uni_z.get("id")
         else:  # spec version 1.0.0
             request_uni_a = request_dict.get("ingress_port")
             request_uni_a_id = request_uni_a.get("id")
