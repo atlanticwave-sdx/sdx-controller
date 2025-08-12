@@ -33,7 +33,7 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
-    def _process_port(self, connection_service_id, port_id, operation):
+    def _process_port(self, temanager, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
         )
@@ -44,12 +44,16 @@ class ConnectionHandler:
         if port_id not in port_connections_dict:
             port_connections_dict[port_id] = []
 
+        temanager._logger.info(
+            f"DB ports in {operation}: {port_id} {connection_service_id} {port_connections_dict}"
+        )
         if (
             operation == "post"
             and connection_service_id
             and connection_service_id not in port_connections_dict[port_id]
         ):
             port_connections_dict[port_id].append(connection_service_id)
+            temanager._logger.info(f"Save to DB ports: {port_connections_dict}")
 
         if (
             operation == "delete"
@@ -65,17 +69,26 @@ class ConnectionHandler:
         )
 
     def _process_link_connection_dict(
-        self, link_connections_dict, simple_link, connection_service_id, operation
+        self,
+        temanager,
+        link_connections_dict,
+        simple_link,
+        connection_service_id,
+        operation,
     ):
         if simple_link not in link_connections_dict:
             link_connections_dict[simple_link] = []
 
+        temanager._logger.info(
+            f"DB links in {operation}: {simple_link} {connection_service_id} {link_connections_dict}"
+        )
         if (
             operation == "post"
             and connection_service_id
             and connection_service_id not in link_connections_dict[simple_link]
         ):
             link_connections_dict[simple_link].append(connection_service_id)
+            temanager._logger.info(f"Save to DB links: {link_connections_dict}")
 
         if (
             operation == "delete"
@@ -109,12 +122,16 @@ class ConnectionHandler:
                 s_port, d_port
             )
             temanager._logger.info(f"Links on path: {link.id} {s_port} {d_port}")
-            self._process_port(connection_service_id, s_port, operation)
-            self._process_port(connection_service_id, d_port, operation)
+            self._process_port(temanager, connection_service_id, s_port, operation)
+            self._process_port(temanager, connection_service_id, d_port, operation)
 
             simple_link = SimpleLink([s_port, d_port]).to_string()
             self._process_link_connection_dict(
-                link_connections_dict, simple_link, connection_service_id, operation
+                temanager,
+                link_connections_dict,
+                simple_link,
+                connection_service_id,
+                operation,
             )
 
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
