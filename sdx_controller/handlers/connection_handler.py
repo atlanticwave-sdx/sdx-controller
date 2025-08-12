@@ -465,14 +465,17 @@ class ConnectionHandler:
         Returns:
             None
         """
-        for port in uni_ports_up_to_down:
-            port_in_db = self.db_instance.get_value_from_db(
-                MongoCollections.PORTS, port.id
-            )
+        port_connections_dict_json = self.db_instance.get_value_from_db(
+            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+        )
+        port_connections_dict = (
+            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
+        )
 
-            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
-                logger.debug("Found port record!")
-                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
+        for port in uni_ports_up_to_down:
+            if port in port_connections_dict:
+                logger.debug("Found the down port record!")
+                service_ids = port_connections_dict[port]
                 for service_id in service_ids:
                     connection = self.db_instance.get_value_from_db(
                         MongoCollections.CONNECTIONS, service_id
@@ -501,14 +504,16 @@ class ConnectionHandler:
         Returns:
             None
         """
+        port_connections_dict_json = self.db_instance.get_value_from_db(
+            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+        )
+        port_connections_dict = (
+            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
+        )
         for port in uni_ports_down_to_up:
-            port_in_db = self.db_instance.get_value_from_db(
-                MongoCollections.PORTS, port.id
-            )
-
-            if port_in_db and Constants.PORT_CONNECTIONS_DICT in port_in_db:
-                logger.debug("Found port record!")
-                service_ids = port_in_db[Constants.PORT_CONNECTIONS_DICT]
+            if port in port_connections_dict:
+                logger.debug("Found the down port record!")
+                service_ids = port_connections_dict[port]
                 for service_id in service_ids:
                     connection = self.db_instance.get_value_from_db(
                         MongoCollections.CONNECTIONS, service_id
@@ -516,6 +521,7 @@ class ConnectionHandler:
                     if not connection:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
+
                     logger.info(f"Updating connection {service_id} status to 'up'.")
                     connection["status"] = "UP"
                     self.db_instance.add_key_value_pair_to_db(
