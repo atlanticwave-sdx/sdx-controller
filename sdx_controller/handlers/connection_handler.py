@@ -115,6 +115,22 @@ class ConnectionHandler:
             MongoCollections.SOLUTIONS, connection_service_id
         )
 
+        # only save the uni ports
+        if connection_request.get("endpoints") is not None:  # spec version 2.0.0
+            request_endpoints = connection_request.get("endpoints")
+            request_uni_a = request_endpoints[0]
+            request_uni_a_id = request_uni_a.get("id")
+            request_uni_z = request_endpoints[1]
+            request_uni_z_id = request_uni_z.get("id")
+            self._process_port(
+                temanager, connection_service_id, request_uni_a_id, operation
+            )
+            self._process_port(
+                temanager, connection_service_id, request_uni_z_id, operation
+            )
+        else:
+            temanager._logger.warning(f"No endpoints: {connection_request}")
+
         for ports in links:
             s_port = ports["source"]
             d_port = ports["destination"]
@@ -122,9 +138,6 @@ class ConnectionHandler:
                 s_port, d_port
             )
             temanager._logger.info(f"Links on path: {link.id} {s_port} {d_port}")
-            self._process_port(temanager, connection_service_id, s_port, operation)
-            self._process_port(temanager, connection_service_id, d_port, operation)
-
             simple_link = SimpleLink([s_port, d_port]).to_string()
             self._process_link_connection_dict(
                 temanager,
@@ -466,7 +479,7 @@ class ConnectionHandler:
             None
         """
         port_connections_dict_json = self.db_instance.get_value_from_db(
-            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+            MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
         )
         port_connections_dict = (
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
@@ -507,7 +520,7 @@ class ConnectionHandler:
             None
         """
         port_connections_dict_json = self.db_instance.get_value_from_db(
-            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+            MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
         )
         port_connections_dict = (
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
