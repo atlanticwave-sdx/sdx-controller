@@ -474,8 +474,8 @@ class ConnectionHandler:
 
         for port in uni_ports_up_to_down:
             if port.id in port_connections_dict:
-                logger.debug("Found the down port record!")
-                service_ids = port_connections_dict[port]
+                logger.debug(f"Found the down port record for port {port.id}!")
+                service_ids = port_connections_dict[port.id]
                 for service_id in service_ids:
                     connection = self.db_instance.get_value_from_db(
                         MongoCollections.CONNECTIONS, service_id
@@ -490,7 +490,9 @@ class ConnectionHandler:
                     )
                     logger.debug(f"Connection status updated for {service_id}")
             else:
-                logger.warning(f"port not found in db")
+                logger.warning(
+                    f"port not found in db {port.id} in {port_connections_dict}"
+                )
 
     def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
         """
