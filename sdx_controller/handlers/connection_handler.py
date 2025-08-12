@@ -35,7 +35,7 @@ class ConnectionHandler:
 
     def _process_port(self, temanager, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
-            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+            MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
         )
         port_connections_dict = (
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
@@ -473,7 +473,7 @@ class ConnectionHandler:
         )
 
         for port in uni_ports_up_to_down:
-            if port in port_connections_dict:
+            if port.id in port_connections_dict:
                 logger.debug("Found the down port record!")
                 service_ids = port_connections_dict[port]
                 for service_id in service_ids:
@@ -511,7 +511,7 @@ class ConnectionHandler:
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
         )
         for port in uni_ports_down_to_up:
-            if port in port_connections_dict:
+            if port.id in port_connections_dict:
                 logger.debug("Found the down port record!")
                 service_ids = port_connections_dict[port]
                 for service_id in service_ids:
