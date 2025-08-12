@@ -116,8 +116,8 @@ class ConnectionHandler:
         )
 
         # only save the uni ports
-        if connection_request.get("endpoints") is not None:  # spec version 2.0.0
-            request_endpoints = connection_request.get("endpoints")
+        request_endpoints = connection_request.get("endpoints")  # spec version 2.0.0
+        if request_endpoints and len(request_endpoints) > 1:
             request_uni_a = request_endpoints[0]
             request_uni_a_id = request_uni_a.get("id")
             request_uni_z = request_endpoints[1]
