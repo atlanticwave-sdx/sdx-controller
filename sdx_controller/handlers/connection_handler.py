@@ -665,10 +665,13 @@ def get_connection_status(db, service_id: str):
             request_uni_a_id = request_uni_a.get("port_id")
             if request_uni_a_id is None:
                 request_uni_a_id = request_uni_a.get("id")
-            request_uni_z = request_endpoints[1]
-            request_uni_z_id = request_uni_z.get("port_id")
-            if request_uni_z_id is None:
-                request_uni_z_id = request_uni_z.get("id")
+            if len(request_endpoints) > 1:
+                request_uni_z = request_endpoints[1]
+                request_uni_z_id = request_uni_z.get("port_id")
+                if request_uni_z_id is None:
+                    request_uni_z_id = request_uni_z.get("id")
+            else:
+                request_uni_z_id = None
         else:  # spec version 1.0.0
             request_uni_a = request_dict.get("ingress_port")
             request_uni_a_id = request_uni_a.get("id")
