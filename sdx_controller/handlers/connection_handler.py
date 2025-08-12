@@ -34,30 +34,34 @@ class ConnectionHandler:
         self.parse_helper = ParseHelper()
 
     def _process_port(self, connection_service_id, port_id, operation):
-        port_in_db = self.db_instance.read_from_db(MongoCollections.PORTS, port_id)
+        port_connections_dict_json = self.db_instance.get_value_from_db(
+            MongoCollections.LINKS, Constants.PORT_CONNECTIONS_DICT
+        )
+        port_connections_dict = (
+            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
+        )
 
-        if not port_in_db:
-            port_in_db = {}
-
-        if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
-            port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
+        if port_id not in port_connections_dict:
+            port_connections_dict[port_id] = []
 
         if (
             operation == "post"
             and connection_service_id
-            and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+            and connection_service_id not in port_connections_dict[port_id]
         ):
-            port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
+            port_connections_dict[port_id].append(connection_service_id)
 
         if (
             operation == "delete"
             and connection_service_id
-            and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
+            and connection_service_id in port_connections_dict[port_id]
         ):
-            port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
+            port_connections_dict[port_id].remove(connection_service_id)
 
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.PORTS, port_id, port_in_db
+            MongoCollections.PORTS,
+            Constants.PORT_CONNECTIONS_DICT,
+            json.dumps(port_connections_dict),
         )
 
     def _process_link_connection_dict(
@@ -80,6 +84,12 @@ class ConnectionHandler:
         ):
             link_connections_dict[simple_link].remove(connection_service_id)
 
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.LINKS,
+            Constants.LINK_CONNECTIONS_DICT,
+            json.dumps(link_connections_dict),
+        )
+
     def _process_path_to_db(self, temanager, operation, connection_request):
         link_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.LINKS, Constants.LINK_CONNECTIONS_DICT
@@ -91,28 +101,21 @@ class ConnectionHandler:
         links = self.db_instance.get_value_from_db(
             MongoCollections.SOLUTIONS, connection_service_id
         )
-        logger.info(f"Links on path: {links}: {type(links)}")
 
         for ports in links:
+            s_port = ports["source"]
+            d_port = ports["destination"]
             link = temanager.topology_manager._topology.get_link_by_port_id(
-                ports["source"], ports["destination"]
+                s_port, d_port
             )
-            temanager._logger.info(f"Links on path: {link.id}")
-            self._process_port(connection_service_id, ports["source"], operation)
-            self._process_port(connection_service_id, ports["destination"], operation)
+            temanager._logger.info(f"Links on path: {link.id} {s_port} {d_port}")
+            self._process_port(connection_service_id, s_port, operation)
+            self._process_port(connection_service_id, d_port, operation)
 
-            simple_link = SimpleLink(
-                [ports["source"], ports["destination"]]
-            ).to_string()
+            simple_link = SimpleLink([s_port, d_port]).to_string()
             self._process_link_connection_dict(
                 link_connections_dict, simple_link, connection_service_id, operation
             )
-
-        self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.LINKS,
-            Constants.LINK_CONNECTIONS_DICT,
-            json.dumps(link_connections_dict),
-        )
 
     def _send_breakdown_to_lc(self, breakdown, operation, connection_request):
         logger.debug(f"BREAKDOWN: {json.dumps(breakdown)}")
@@ -466,6 +469,8 @@ class ConnectionHandler:
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
                     logger.debug(f"Connection status updated for {service_id}")
+            else:
+                logger.warning(f"port not found in db")
 
     def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
         """
