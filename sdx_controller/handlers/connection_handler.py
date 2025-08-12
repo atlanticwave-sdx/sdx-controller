@@ -348,20 +348,24 @@ class ConnectionHandler:
         logger.debug(f"Archived connection: {service_id}")
 
     def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
-        te_manager.delete_connection(service_id)
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
 
-        breakdown = self.db_instance.get_value_from_db(
-            MongoCollections.BREAKDOWNS, service_id
-        )
-        if not breakdown:
-            return "Did not find breakdown, cannot remove connection", 404
+        if connection_request.get("status") is not ConnectionStateMachine.State.UP:
+            logger.info(f"Connection {service_id} is not UP, cannot remove connection.")
+            return "Connection is not UP, Archive", 200
 
         try:
+            te_manager.delete_connection(service_id)
+            breakdown = self.db_instance.get_value_from_db(
+                MongoCollections.BREAKDOWNS, service_id
+            )
+            if not breakdown:
+                return "Did not find breakdown, cannot remove connection", 404
+
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
             )
