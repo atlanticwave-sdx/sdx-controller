@@ -528,7 +528,7 @@ class ConnectionHandler:
         for port in uni_ports_down_to_up:
             if port.id in port_connections_dict:
                 logger.debug("Found the down port record!")
-                service_ids = port_connections_dict[port]
+                service_ids = port_connections_dict[port.id]
                 for service_id in service_ids:
                     connection = self.db_instance.get_value_from_db(
                         MongoCollections.CONNECTIONS, service_id
