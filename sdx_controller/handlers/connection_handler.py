@@ -119,9 +119,13 @@ class ConnectionHandler:
         request_endpoints = connection_request.get("endpoints")  # spec version 2.0.0
         if request_endpoints and len(request_endpoints) > 1:
             request_uni_a = request_endpoints[0]
-            request_uni_a_id = request_uni_a.get("port_id")
             request_uni_z = request_endpoints[1]
+            request_uni_a_id = request_uni_a.get("port_id")
+            if request_uni_a_id is None:
+                request_uni_a_id = request_uni_a.get("id")
             request_uni_z_id = request_uni_z.get("port_id")
+            if request_uni_z_id is None:
+                request_uni_z_id = request_uni_z.get("id")
             self._process_port(
                 temanager, connection_service_id, request_uni_a_id, operation
             )
