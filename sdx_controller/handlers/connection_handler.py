@@ -357,10 +357,10 @@ class ConnectionHandler:
         )
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
-
-        if connection_request.get("status") != str(ConnectionStateMachine.State.UP):
+        connection_status = connection_request.get("status")
+        if connection_status != str(ConnectionStateMachine.State.UP):
             logger.info(
-                f"Connection {service_id} connection_request.get('status') is not {str(ConnectionStateMachine.State.UP)}, cannot remove connection."
+                f"Connection {service_id} {connection_status} is not {str(ConnectionStateMachine.State.UP)}, cannot remove connection."
             )
             return "Connection is not UP, Archive", 404
 
