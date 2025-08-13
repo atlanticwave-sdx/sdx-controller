@@ -360,7 +360,7 @@ class ConnectionHandler:
 
         if connection_request.get("status") is not ConnectionStateMachine.State.UP:
             logger.info(f"Connection {service_id} is not UP, cannot remove connection.")
-            return "Connection is not UP, Archive", 200
+            return "Connection is not UP, Archive", 404
 
         try:
             te_manager.delete_connection(service_id)
@@ -446,7 +446,11 @@ class ConnectionHandler:
                         logger.info(
                             f"Removing connection: {service_id} {connection.get('status')}"
                         )
-                        self.remove_connection(te_manager, connection["id"])
+                        _, code = self.remove_connection(te_manager, connection["id"])
+                        if code // 100 != 2:
+                            logger.info(
+                                f"Do not remove connection, may be already removed: {connection['id']}, code: {code}"
+                            )
                     except Exception as err:
                         logger.info(
                             f"Encountered error when deleting connection: {err}"
