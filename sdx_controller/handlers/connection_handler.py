@@ -167,7 +167,11 @@ class ConnectionHandler:
                 oxp_response = connection_request.get("oxp_response")
 
                 # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-                evc_id = oxp_response.get(domain_name, [None, {}])[1].get("service_id") if oxp_response else None
+                evc_id = (
+                    oxp_response.get(domain_name, [None, {}])[1].get("service_id")
+                    if oxp_response
+                    else None
+                )
 
                 if not oxp_response or not evc_id:
                     return (
@@ -184,7 +188,9 @@ class ConnectionHandler:
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
-        return "Connection deleted" if operation == "delete" else "Connection published", 201
+        return (
+            "Connection deleted" if operation == "delete" else "Connection published"
+        ), 201
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
