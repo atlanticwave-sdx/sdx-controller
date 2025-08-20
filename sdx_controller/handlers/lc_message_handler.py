@@ -93,6 +93,9 @@ class LcMessageHandler:
                     != str(ConnectionStateMachine.State.ERROR)
                 ):
                     connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.MODIFYING
+                    )
+                    connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.DOWN
                     )
 
