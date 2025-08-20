@@ -162,6 +162,20 @@ class ConnectionHandler:
                 "service_id": connection_service_id,
                 "link": link_with_new_format,
             }
+
+            if operation == "delete":
+                oxp_response = connection_request.get("oxp_response")
+
+                # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
+                evc_id = oxp_response.get(domain_name, [None, {}])[1].get("service_id") if oxp_response else None
+
+                if not oxp_response or not evc_id:
+                    return (
+                        "Connection does not have OXP response, cannot remove connection",
+                        404,
+                    )
+                mq_link["evc_id"] = evc_id
+
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
@@ -170,7 +184,7 @@ class ConnectionHandler:
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
-        return "Connection published", 201
+        return "Connection deleted" if operation == "delete" else "Connection published", 201
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
@@ -320,7 +334,7 @@ class ConnectionHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
-                [{timestamp: connection_request}],
+                [{str(timestamp): connection_request}],
             )
         logger.debug(f"Archived connection: {service_id}")
 
@@ -333,17 +347,6 @@ class ConnectionHandler:
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
 
-        oxp_response = connection_request.get("oxp_response")
-
-        # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-        evc_id = oxp_response.get("service_id", None) if oxp_response else None
-
-        if not oxp_response or not evc_id:
-            return (
-                "Connection does not have OXP response, cannot remove connection",
-                404,
-            )
-
         breakdown = self.db_instance.get_value_from_db(
             MongoCollections.BREAKDOWNS, service_id
         )
@@ -351,7 +354,6 @@ class ConnectionHandler:
             return "Did not find breakdown, cannot remove connection", 404
 
         try:
-            breakdown["evc_id"] = evc_id
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
             )
