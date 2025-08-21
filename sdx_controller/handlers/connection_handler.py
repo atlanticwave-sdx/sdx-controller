@@ -327,7 +327,7 @@ class ConnectionHandler:
             MongoCollections.HISTORICAL_CONNECTIONS, service_id
         )
         # Current timestamp in seconds
-        timestamp = int(time.time())
+        timestamp = str(int(time.time()))
 
         if historical_connections_list:
             historical_connections_list.append({timestamp: connection_request})
@@ -340,7 +340,7 @@ class ConnectionHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
-                [{str(timestamp): connection_request}],
+                [{timestamp: connection_request}],
             )
         logger.debug(f"Archived connection: {service_id}")
 
