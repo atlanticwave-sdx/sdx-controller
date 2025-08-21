@@ -147,12 +147,12 @@ class LcMessageHandler:
             #        self.te_manager, failed_links
             #    )
             if uni_ports_up_to_down:
-                logger.info("Processing uni ports up to down.")
+                logger.info(f"Processing uni ports up to down:{uni_ports_up_to_down}")
                 self.connection_handler.handle_uni_ports_up_to_down(
                     uni_ports_up_to_down
                 )
             if uni_ports_down_to_up:
-                logger.info("Processing uni ports down to up.")
+                logger.info(f"Processing uni ports down to up:{uni_ports_down_to_up}")
                 self.connection_handler.handle_uni_ports_down_to_up(
                     uni_ports_down_to_up
                 )
