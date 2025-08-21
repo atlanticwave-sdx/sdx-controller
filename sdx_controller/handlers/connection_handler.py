@@ -334,7 +334,7 @@ class ConnectionHandler:
             MongoCollections.HISTORICAL_CONNECTIONS, service_id
         )
         # Current timestamp in seconds
-        timestamp = int(time.time())
+        timestamp = str(int(time.time()))
 
         if historical_connections_list:
             historical_connections_list.append({timestamp: connection_request})
