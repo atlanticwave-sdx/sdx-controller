@@ -358,8 +358,13 @@ class ConnectionHandler:
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
         connection_status = connection_request.get("status")
-        if (connection_status != str(ConnectionStateMachine.State.UP)) and (
-            connection_status != str(ConnectionStateMachine.State.MODIFYING)
+        if (
+            (connection_status != str(ConnectionStateMachine.State.UP))
+            and (connection_status != str(ConnectionStateMachine.State.MODIFYING))
+            and (
+                connection_status
+                != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
+            )
         ):
             logger.info(
                 f"Connection {service_id} {connection_status} is not {str(ConnectionStateMachine.State.UP)}, cannot remove connection."
