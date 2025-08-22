@@ -358,7 +358,9 @@ class ConnectionHandler:
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
         connection_status = connection_request.get("status")
-        if connection_status != str(ConnectionStateMachine.State.UP):
+        if (connection_status != str(ConnectionStateMachine.State.UP)) and (
+            connection_status != str(ConnectionStateMachine.State.MODIFYING)
+        ):
             logger.info(
                 f"Connection {service_id} {connection_status} is not {str(ConnectionStateMachine.State.UP)}, cannot remove connection."
             )
@@ -453,7 +455,7 @@ class ConnectionHandler:
                             logger.info(
                                 f"Do not remove connection, may be already removed: {connection['id']}, code: {code}"
                             )
-                        continue
+                            continue
                     except Exception as err:
                         logger.info(
                             f"Encountered error when deleting connection: {err}"
