@@ -32,7 +32,7 @@ class ConnectionHandler:
         self.parse_helper = ParseHelper()
 
     def _process_port(self, connection_service_id, port_id, operation):
-        port_in_db = self.db_instance.read_from_db(MongoCollections.PORTS, port_id)
+        port_in_db = self.db_instance.get_value_from_db(MongoCollections.PORTS, port_id)
 
         if not port_in_db:
             port_in_db = {}
