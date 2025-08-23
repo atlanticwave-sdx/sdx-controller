@@ -621,7 +621,7 @@ def get_connection_status(db, service_id: str):
     request = db.read_from_db(MongoCollections.CONNECTIONS, service_id)
     if not request:
         logger.error(f"Can't find a connection request for {service_id}")
-        # TODO: we're in a strange state here. Should we panic?
+        return response
     else:
         logger.info(f"Found request for {service_id}: {request}")
         # We seem to have saved the original request in the form of a
