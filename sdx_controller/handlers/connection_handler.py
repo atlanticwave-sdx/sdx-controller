@@ -601,10 +601,67 @@ def get_connection_status(db, service_id: str):
     assert db is not None
     assert service_id is not None
 
+    # Find the name and description from the original connection
+    # request for this service_id.
+    name = "unknown"
+    description = "unknown"
+    status = "unknown"
+    qos_metrics = {}
+    scheduling = {}
+    notifications = {}
+
+    endpoints = list()
+    request_endpoints = []
+    response_endpoints = []
+    request_uni_a_id = None
+    request_uni_z_id = None
+
+    response = {}
+
+    request = db.read_from_db(MongoCollections.CONNECTIONS, service_id)
+    if not request:
+        logger.error(f"Can't find a connection request for {service_id}")
+        # TODO: we're in a strange state here. Should we panic?
+    else:
+        logger.info(f"Found request for {service_id}: {request}")
+        # We seem to have saved the original request in the form of a
+        # string into the DB, not a record.
+        request_dict = request.get(service_id)
+        name = request_dict.get("name")
+        description = request_dict.get("description")
+        status = request_dict.get("status")
+        qos_metrics = request_dict.get("qos_metrics")
+        scheduling = request_dict.get("scheduling")
+        notifications = request_dict.get("notifications")
+        oxp_response = request_dict.get("oxp_response")
+        status = parse_conn_status(status)
+        request_endpoints = request_dict.get("endpoints")  # spec version 2.0.0
+        if request_endpoints and len(request_endpoints) > 1:
+            request_uni_a = request_endpoints[0]
+            request_uni_z = request_endpoints[1]
+            request_uni_a_id = request_uni_a.get("port_id")
+            if request_uni_a_id is None:
+                request_uni_a_id = request_uni_a.get("id")
+            request_uni_z_id = request_uni_z.get("port_id")
+            if request_uni_z_id is None:
+                request_uni_z_id = request_uni_z.get("id")
+        else:  # spec version 1.0.0
+            request_uni_a = request_dict.get("ingress_port")
+            request_uni_a_id = request_uni_a.get("id")
+            request_uni_z = request_dict.get("egress_port")
+            request_uni_z_id = request_uni_z.get("id")
+
+    response[service_id] = {
+        "service_id": service_id,
+        "name": name,
+        "description": description,
+        "status": status,
+    }
+
     breakdown = db.read_from_db(MongoCollections.BREAKDOWNS, service_id)
     if not breakdown:
         logger.info(f"Could not find breakdown for {service_id}")
-        return {}
+        return response
 
     logger.info(f"breakdown for {service_id}: {breakdown}")
 
@@ -651,56 +708,6 @@ def get_connection_status(db, service_id: str):
 
     domains = breakdown.get(service_id)
     logger.info(f"domains for {service_id}: {domains.keys()}")
-
-    # Find the name and description from the original connection
-    # request for this service_id.
-    name = "unknown"
-    description = "unknown"
-    status = "unknown"
-    qos_metrics = {}
-    scheduling = {}
-    notifications = {}
-
-    endpoints = list()
-    request_endpoints = []
-    response_endpoints = []
-    request_uni_a_id = None
-    request_uni_z_id = None
-
-    request = db.read_from_db(MongoCollections.CONNECTIONS, service_id)
-    if not request:
-        logger.error(f"Can't find a connection request for {service_id}")
-        # TODO: we're in a strange state here. Should we panic?
-    else:
-        logger.info(f"Found request for {service_id}: {request}")
-        # We seem to have saved the original request in the form of a
-        # string into the DB, not a record.
-        request_dict = request.get(service_id)
-        name = request_dict.get("name")
-        description = request_dict.get("description")
-        status = request_dict.get("status")
-        qos_metrics = request_dict.get("qos_metrics")
-        scheduling = request_dict.get("scheduling")
-        notifications = request_dict.get("notifications")
-        oxp_response = request_dict.get("oxp_response")
-        status = parse_conn_status(status)
-        request_endpoints = request_dict.get("endpoints")  # spec version 2.0.0
-        if request_endpoints and len(request_endpoints) > 1:
-            request_uni_a = request_endpoints[0]
-            request_uni_z = request_endpoints[1]
-            request_uni_a_id = request_uni_a.get("port_id")
-            if request_uni_a_id is None:
-                request_uni_a_id = request_uni_a.get("id")
-            request_uni_z_id = request_uni_z.get("port_id")
-            if request_uni_z_id is None:
-                request_uni_z_id = request_uni_z.get("id")
-        else:  # spec version 1.0.0
-            request_uni_a = request_dict.get("ingress_port")
-            request_uni_a_id = request_uni_a.get("id")
-            request_uni_z = request_dict.get("egress_port")
-            request_uni_z_id = request_uni_z.get("id")
-
-    response = {}
 
     for domain, breakdown in domains.items():
         uni_a_port = breakdown.get("uni_a").get("port_id")
