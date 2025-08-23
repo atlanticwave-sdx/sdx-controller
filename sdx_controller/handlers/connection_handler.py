@@ -630,6 +630,8 @@ def get_connection_status(db, service_id: str):
         name = request_dict.get("name")
         description = request_dict.get("description")
         status = request_dict.get("status")
+        if status == str(ConnectionStateMachine.State.REJECTED):
+            return response
         qos_metrics = request_dict.get("qos_metrics")
         scheduling = request_dict.get("scheduling")
         notifications = request_dict.get("notifications")
@@ -647,9 +649,11 @@ def get_connection_status(db, service_id: str):
                 request_uni_z_id = request_uni_z.get("id")
         else:  # spec version 1.0.0
             request_uni_a = request_dict.get("ingress_port")
-            request_uni_a_id = request_uni_a.get("id")
+            if request_uni_a_id:
+                request_uni_a_id = request_uni_a.get("id")
             request_uni_z = request_dict.get("egress_port")
-            request_uni_z_id = request_uni_z.get("id")
+            if request_uni_z_id:
+                request_uni_z_id = request_uni_z.get("id")
 
     response[service_id] = {
         "service_id": service_id,
