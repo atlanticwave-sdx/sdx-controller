@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed MongoDB documents key for historical connection that must be string (#479)
+- Fixed nested documents on ports collection (#480)
 
 ### Changed
 
