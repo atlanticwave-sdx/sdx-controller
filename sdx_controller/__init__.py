@@ -1,11 +1,9 @@
-import json
 import logging
 import os
 import threading
 from queue import Queue
 
 import connexion
-from sdx_datamodel.constants import Constants, MongoCollections
 from sdx_pce.topology.temanager import TEManager
 
 from sdx_controller import encoder
