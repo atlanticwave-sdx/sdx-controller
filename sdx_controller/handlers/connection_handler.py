@@ -33,39 +33,31 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
-    def _process_port(self, temanager, connection_service_id, port_id, operation):
-        port_connections_dict_json = self.db_instance.get_value_from_db(
-            MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
-        )
-        port_connections_dict = (
-            json.loads(port_connections_dict_json) if port_connections_dict_json else {}
-        )
+    def _process_port(self, connection_service_id, port_id, operation):
+        port_in_db = self.db_instance.get_value_from_db(MongoCollections.PORTS, port_id)
 
-        if port_id not in port_connections_dict:
-            port_connections_dict[port_id] = []
+        if not port_in_db:
+            port_in_db = {}
 
-        temanager._logger.info(
-            f"DB ports in {operation}: {port_id} {connection_service_id} {port_connections_dict}"
-        )
+        if Constants.PORT_CONNECTIONS_DICT not in port_in_db:
+            port_in_db[Constants.PORT_CONNECTIONS_DICT] = []
+
         if (
             operation == "post"
             and connection_service_id
-            and connection_service_id not in port_connections_dict[port_id]
+            and connection_service_id not in port_in_db[Constants.PORT_CONNECTIONS_DICT]
         ):
-            port_connections_dict[port_id].append(connection_service_id)
-            temanager._logger.info(f"Save to DB ports: {port_connections_dict}")
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].append(connection_service_id)
 
         if (
             operation == "delete"
             and connection_service_id
-            and connection_service_id in port_connections_dict[port_id]
+            and connection_service_id in port_in_db[Constants.PORT_CONNECTIONS_DICT]
         ):
-            port_connections_dict[port_id].remove(connection_service_id)
+            port_in_db[Constants.PORT_CONNECTIONS_DICT].remove(connection_service_id)
 
         self.db_instance.add_key_value_pair_to_db(
-            MongoCollections.PORTS,
-            Constants.PORT_CONNECTIONS_DICT,
-            json.dumps(port_connections_dict),
+            MongoCollections.PORTS, port_id, port_in_db
         )
 
     def _process_link_connection_dict(
