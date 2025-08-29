@@ -118,12 +118,8 @@ class ConnectionHandler:
             request_uni_z_id = request_uni_z.get("port_id")
             if request_uni_z_id is None:
                 request_uni_z_id = request_uni_z.get("id")
-            self._process_port(
-                temanager, connection_service_id, request_uni_a_id, operation
-            )
-            self._process_port(
-                temanager, connection_service_id, request_uni_z_id, operation
-            )
+            self._process_port(connection_service_id, request_uni_a_id, operation)
+            self._process_port(connection_service_id, request_uni_z_id, operation)
         else:
             temanager._logger.warning(f"No endpoints: {connection_request}")
 
@@ -235,9 +231,7 @@ class ConnectionHandler:
                 self.db_instance.add_key_value_pair_to_db(
                     MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
                 )
-                self._process_port(
-                    te_manager, connection_request["id"], ctx.ingress_port, "post"
-                )
+                self._process_port(connection_request["id"], ctx.ingress_port, "post")
                 status, code = self._send_breakdown_to_lc(
                     breakdown, "post", connection_request
                 )
