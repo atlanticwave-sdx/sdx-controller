@@ -40,6 +40,8 @@ class ConnectionHandler:
         port_connections_dict = (
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
         )
+        logger.info(f"PORT_ID: {port_id}")
+        logger.info(f"port_connections_dict: {port_connections_dict}")
 
         if port_id not in port_connections_dict:
             port_connections_dict[port_id] = []
