@@ -40,8 +40,6 @@ class ConnectionHandler:
         port_connections_dict = (
             json.loads(port_connections_dict_json) if port_connections_dict_json else {}
         )
-        logger.info(f"PORT_ID: {port_id}")
-        logger.info(f"port_connections_dict: {port_connections_dict}")
 
         if port_id not in port_connections_dict:
             port_connections_dict[port_id] = []
@@ -169,7 +167,7 @@ class ConnectionHandler:
                 link_with_new_format["name"] = link.get("name", "")
                 link_with_new_format["endpoints"] = []
                 for port in port_list:
-                    self._process_port(connection_service_id, port, operation)
+                    self._process_port(connection_service_id, port.get("port_id"), operation)
                     if port.get("vlan_value"):
                         link_with_new_format["endpoints"].append(
                             {
