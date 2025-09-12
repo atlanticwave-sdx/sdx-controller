@@ -167,7 +167,9 @@ class ConnectionHandler:
                 link_with_new_format["name"] = link.get("name", "")
                 link_with_new_format["endpoints"] = []
                 for port in port_list:
-                    self._process_port(connection_service_id, port.get("port_id"), operation)
+                    self._process_port(
+                        connection_service_id, port.get("port_id"), operation
+                    )
                     if port.get("vlan_value"):
                         link_with_new_format["endpoints"].append(
                             {
