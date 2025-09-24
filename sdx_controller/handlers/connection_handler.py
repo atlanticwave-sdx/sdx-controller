@@ -569,7 +569,7 @@ class ConnectionHandler:
                     logger.debug(f"Connection status updated for {service_id}")
             else:
                 logger.warning(
-                    f"port not found in db {port.id} in {port_connections_dict}"
+                    f"Port not found in db {port.id} in {port_connections_dict}"
                 )
 
     def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
