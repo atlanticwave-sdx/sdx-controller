@@ -152,22 +152,69 @@ class ConnectionHandler:
         connection_service_id = connection_request.get("id")
 
         for domain, link in breakdown.items():
-            logger.debug(f"Attempting to publish domain: {domain}, link: {link}")
+            port_list = []
+            link_with_new_format = {}
+            for key in link.keys():
+                if "uni_" in key and "port_id" in link[key]:
+                    port_list.append(
+                        {
+                            "port_id": link[key]["port_id"],
+                            "vlan_value": link[key].get("tag", {}).get("value"),
+                        }
+                    )
 
+            if port_list:
+                link_with_new_format["name"] = link.get("name", "")
+                link_with_new_format["endpoints"] = []
+                for port in port_list:
+                    self._process_port(
+                        connection_service_id, port.get("port_id"), operation
+                    )
+                    if port.get("vlan_value"):
+                        link_with_new_format["endpoints"].append(
+                            {
+                                "port_id": port.get("port_id"),
+                                "vlan": port.get("vlan_value"),
+                            }
+                        )
+                port_id_list = [port.get("port_id") for port in port_list]
+                simple_link = SimpleLink(port_id_list).to_string()
+
+            logger.debug(
+                f"Attempting to publish domain: {domain}, link: {link_with_new_format}"
+            )
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
             domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
             exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
-                f"Doing '{operation}' operation for '{link}' with exchange_name: {exchange_name}, "
+                f"Doing '{operation}' operation for '{link_with_new_format}' with exchange_name: {exchange_name}, "
                 f"routing_key: {domain_name}"
             )
             mq_link = {
                 "operation": operation,
                 "service_id": connection_service_id,
-                "link": link,
+                "link": link_with_new_format,
             }
+
+            if operation == "delete":
+                oxp_response = connection_request.get("oxp_response")
+
+                # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
+                evc_id = (
+                    oxp_response.get(domain_name, [None, {}])[1].get("service_id")
+                    if oxp_response
+                    else None
+                )
+
+                if not oxp_response or not evc_id:
+                    return (
+                        "Connection does not have OXP response, cannot remove connection",
+                        404,
+                    )
+                mq_link["evc_id"] = evc_id
+
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
             )
@@ -176,7 +223,9 @@ class ConnectionHandler:
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
-        return "Connection published", 201
+        return (
+            "Connection deleted" if operation == "delete" else "Connection published"
+        ), 201
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
@@ -345,6 +394,7 @@ class ConnectionHandler:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
+
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
         connection_status = connection_request.get("status")
@@ -519,7 +569,7 @@ class ConnectionHandler:
                     logger.debug(f"Connection status updated for {service_id}")
             else:
                 logger.warning(
-                    f"port not found in db {port.id} in {port_connections_dict}"
+                    f"Port not found in db {port.id} in {port_connections_dict}"
                 )
 
     def handle_uni_ports_down_to_up(self, uni_ports_down_to_up):
