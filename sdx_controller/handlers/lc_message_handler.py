@@ -85,12 +85,6 @@ class LcMessageHandler:
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.ERROR
                     )
-                elif connection.get("status") == str(
-                    ConnectionStateMachine.State.UNDER_PROVISIONING
-                ):
-                    connection, _ = connection_state_machine(
-                        connection, ConnectionStateMachine.State.DOWN
-                    )
                 elif (
                     connection.get("status")
                     and connection.get("status")
@@ -98,9 +92,6 @@ class LcMessageHandler:
                     and connection.get("status")
                     != str(ConnectionStateMachine.State.ERROR)
                 ):
-                    connection, _ = connection_state_machine(
-                        connection, ConnectionStateMachine.State.MODIFYING
-                    )
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.DOWN
                     )
