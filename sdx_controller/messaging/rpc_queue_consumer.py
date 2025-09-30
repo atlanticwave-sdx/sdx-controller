@@ -124,6 +124,23 @@ class RpcConsumer(object):
                 # Get the actual thing minus the Mongo ObjectID.
                 self.te_manager.add_topology(topology)
                 logger.debug(f"Read {domain}: {topology}")
+                # update topology state
+                connections = db_instance.get_all_entries_in_collection(
+                    MongoCollections.CONNECTIONS
+                )
+                if not connections:
+                    logger.info("No connection was found")
+                else:
+                    for connection in connections:
+                        service_id = next(iter(connection))
+                        logger.info(f"service_id: {service_id}")
+                        request_dict = connection.get(service_id)
+                        status = request_dict.get("status")
+                        breakdown = db_instance.read_from_db(
+                            MongoCollections.BREAKDOWNS, service_id
+                        )
+                        if not breakdown:
+                            logger.warning(f"Could not find breakdown for {service_id}")
 
         while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.
