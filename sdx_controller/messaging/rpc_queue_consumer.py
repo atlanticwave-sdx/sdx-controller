@@ -89,22 +89,22 @@ class RpcConsumer(object):
         parse_helper = ParseHelper()
 
         latest_topo = {}
-        domain_list = []
+        domain_dict = {}
 
         # This part reads from DB when SDX controller initially starts.
-        # It looks for domain_list, if already in DB,
+        # It looks for domain_dict, if already in DB,
         # Then use the existing ones from DB.
-        domain_list_from_db = db_instance.get_value_from_db(
-            MongoCollections.DOMAINS, Constants.DOMAIN_LIST
+        domain_dict_from_db = db_instance.get_value_from_db(
+            MongoCollections.DOMAINS, Constants.DOMAIN_DICT
         )
         latest_topo_from_db = db_instance.get_value_from_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
         )
 
-        if domain_list_from_db:
-            domain_list = domain_list_from_db
+        if domain_dict_from_db:
+            domain_dict = domain_dict_from_db
             logger.debug("Domain list already exists in db: ")
-            logger.debug(domain_list)
+            logger.debug(domain_dict)
 
         if latest_topo_from_db:
             latest_topo = latest_topo_from_db
@@ -112,8 +112,8 @@ class RpcConsumer(object):
             logger.debug(latest_topo)
 
         # If topologies already saved in db, use them to initialize te_manager
-        if domain_list:
-            for domain in domain_list:
+        if domain_dict:
+            for domain in domain_dict.keys():
                 topology = db_instance.get_value_from_db(
                     MongoCollections.TOPOLOGIES, SDX_TOPOLOGY_ID_prefix + domain
                 )
@@ -144,7 +144,7 @@ class RpcConsumer(object):
             lc_message_handler.process_lc_json_msg(
                 msg,
                 latest_topo,
-                domain_list,
+                domain_dict,
             )
 
     def stop_threads(self):
