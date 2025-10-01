@@ -3,11 +3,13 @@ import json
 import logging
 import os
 import threading
+import traceback
 from queue import Queue
 
 import pika
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
+from sdx_pce.models import ConnectionSolution
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
@@ -136,11 +138,39 @@ class RpcConsumer(object):
                         logger.info(f"service_id: {service_id}")
                         request_dict = connection.get(service_id)
                         status = request_dict.get("status")
+                        solution_links = self.db_instance.read_from_db(
+                            MongoCollections.SOLUTIONS, service_id
+                        )
+                        if not solution_links:
+                            logger.warning(
+                                f"Could not find solution links for {service_id}"
+                            )
+                        solution = result = ConnectionSolution(
+                            connection_map={}, cost=0, request_id=service_id
+                        )
+                        result.connection_map[connection] = solution_links
                         breakdown = db_instance.read_from_db(
                             MongoCollections.BREAKDOWNS, service_id
                         )
                         if not breakdown:
                             logger.warning(f"Could not find breakdown for {service_id}")
+                            continue
+                        try:
+                            breakdown = self.te_manager.generate_connection_breakdown(
+                                solution, connection
+                            )
+                            self._logger.info(
+                                f"generate_connection_breakdown(): tagged_breakdown: {breakdown}"
+                            )
+
+                            # Make tests pass, temporarily.
+                            # need to throw an exception if tagged_breakdown is None
+                        except Exception as e:
+                            err = traceback.format_exc().replace("\n", ", ")
+                            logger.error(
+                                f"Error when recovering breakdown vlan assignment: {e} - {err}"
+                            )
+                            return f"Error: {e}", 410
 
         while not self._exit_event.is_set():
             # Queue.get() will block until there's an item in the queue.
