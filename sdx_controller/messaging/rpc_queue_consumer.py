@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import threading
+import traceback
 from queue import Queue
 
 import pika
@@ -141,11 +142,15 @@ class RpcConsumer(object):
             if "version" not in str(msg):
                 logger.info("Got message (NO VERSION) from MQ: " + str(msg))
 
-            lc_message_handler.process_lc_json_msg(
-                msg,
-                latest_topo,
-                domain_list,
-            )
+            try:
+                lc_message_handler.process_lc_json_msg(
+                    msg,
+                    latest_topo,
+                    domain_list,
+                )
+            except Exception as exc:
+                err = traceback.format_exc().replace("\n", ", ")
+                logger.error(f"Failed to process LC message: {exc} -- {err}")
 
     def stop_threads(self):
         """
