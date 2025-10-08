@@ -23,6 +23,24 @@ SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 logger = logging.getLogger(__name__)
 
 
+class HeartbeatMonitor:
+    def __init__(self):
+        self.heartbeat_counts = {}
+        self.lock = threading.Lock()
+        self.monitoring = False
+
+    def start_monitoring(self):
+        self.monitoring = True
+        logger.info("[HeartbeatMonitor] Started monitoring heartbeats.")
+
+    def record_heartbeat(self, domain):
+        with self.lock:
+            if domain not in self.heartbeat_counts:
+                self.heartbeat_counts[domain] = 0
+            self.heartbeat_counts[domain] += 1
+            logger.debug(f"[HeartbeatMonitor] Heartbeat count for {domain}: {self.heartbeat_counts[domain]}")
+
+
 class RpcConsumer(object):
     def __init__(self, thread_queue, exchange_name, te_manager):
         self.logger = logging.getLogger(__name__)
@@ -79,14 +97,15 @@ class RpcConsumer(object):
         self.channel.start_consuming()
 
     def start_sdx_consumer(self, thread_queue, db_instance):
-        HEARTBEAT_ID = 0
-
         rpc = RpcConsumer(thread_queue, "", self.te_manager)
         t1 = threading.Thread(target=rpc.start_consumer, args=(), daemon=True)
         t1.start()
 
         lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
         parse_helper = ParseHelper()
+
+        heartbeat_monitor = HeartbeatMonitor()
+        heartbeat_monitor.start_monitoring()
 
         latest_topo = {}
         domain_dict = {}
@@ -131,8 +150,9 @@ class RpcConsumer(object):
             logger.debug("MQ received message:" + str(msg))
 
             if "Heart Beat" in str(msg):
-                HEARTBEAT_ID += 1
-                logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
+                domain = parse_helper.extract_domain_from_msg(msg) if hasattr(parse_helper, "extract_domain_from_msg") else "unknown"
+                heartbeat_monitor.record_heartbeat(domain)
+                logger.debug(f"Heart beat received from {domain}")
                 continue
 
             if not parse_helper.is_json(msg):
