@@ -38,7 +38,9 @@ class HeartbeatMonitor:
             if domain not in self.heartbeat_counts:
                 self.heartbeat_counts[domain] = 0
             self.heartbeat_counts[domain] += 1
-            logger.debug(f"[HeartbeatMonitor] Heartbeat count for {domain}: {self.heartbeat_counts[domain]}")
+            logger.debug(
+                f"[HeartbeatMonitor] Heartbeat count for {domain}: {self.heartbeat_counts[domain]}"
+            )
 
 
 class RpcConsumer(object):
@@ -150,7 +152,11 @@ class RpcConsumer(object):
             logger.debug("MQ received message:" + str(msg))
 
             if "Heart Beat" in str(msg):
-                domain = parse_helper.extract_domain_from_msg(msg) if hasattr(parse_helper, "extract_domain_from_msg") else "unknown"
+                domain = (
+                    parse_helper.extract_domain_from_msg(msg)
+                    if hasattr(parse_helper, "extract_domain_from_msg")
+                    else "unknown"
+                )
                 heartbeat_monitor.record_heartbeat(domain)
                 logger.debug(f"Heart beat received from {domain}")
                 continue
