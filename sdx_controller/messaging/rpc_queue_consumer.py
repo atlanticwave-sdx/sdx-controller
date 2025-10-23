@@ -16,6 +16,11 @@ MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
 MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
+HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", 10))  # seconds
+HEARTBEAT_TOLERANCE = int(
+    os.getenv("HEARTBEAT_TOLERANCE", 10)
+)  # consecutive missed heartbeats allowed
+
 
 # subscribe to the corresponding queue
 SUB_QUEUE = MessageQueueNames.OXP_UPDATE
@@ -25,22 +30,49 @@ logger = logging.getLogger(__name__)
 
 class HeartbeatMonitor:
     def __init__(self):
-        self.heartbeat_counts = {}
+        self.last_heartbeat = {}  # domain -> last heartbeat timestamp
+        self.domain_status = {}  # domain -> "up" or "down"
         self.lock = threading.Lock()
         self.monitoring = False
 
+    def record_heartbeat(self, domain):
+        """Record heartbeat from a domain and mark it as up."""
+        with self.lock:
+            self.last_heartbeat[domain] = time.time()
+            self.domain_status[domain] = "up"
+            logger.debug(f"[HeartbeatMonitor] Heartbeat recorded for {domain}")
+
+    def check_status(self):
+        """Mark domains as down if heartbeats are missing."""
+        now = time.time()
+        with self.lock:
+            for domain, last_time in self.last_heartbeat.items():
+                if now - last_time > HEARTBEAT_TOLERANCE * HEARTBEAT_INTERVAL:
+                    if self.domain_status.get(domain) != "down":
+                        logger.warning(
+                            f"[HeartbeatMonitor] Domain {domain} marked DOWN (missed {HEARTBEAT_TOLERANCE} heartbeats)"
+                        )
+                    self.domain_status[domain] = "down"
+
+    def get_status(self, domain):
+        """Return the current status of a domain."""
+        with self.lock:
+            return self.domain_status.get(domain, "unknown")
+
     def start_monitoring(self):
+        """Start a background thread to monitor heartbeat status."""
+        if self.monitoring:
+            return
         self.monitoring = True
         logger.info("[HeartbeatMonitor] Started monitoring heartbeats.")
 
-    def record_heartbeat(self, domain):
-        with self.lock:
-            if domain not in self.heartbeat_counts:
-                self.heartbeat_counts[domain] = 0
-            self.heartbeat_counts[domain] += 1
-            logger.debug(
-                f"[HeartbeatMonitor] Heartbeat count for {domain}: {self.heartbeat_counts[domain]}"
-            )
+        def monitor_loop():
+            while self.monitoring:
+                self.check_status()
+                time.sleep(HEARTBEAT_INTERVAL)
+
+        t = threading.Thread(target=monitor_loop, daemon=True)
+        t.start()
 
 
 class RpcConsumer(object):
@@ -147,7 +179,6 @@ class RpcConsumer(object):
                 logger.debug(f"Read {domain}: {topology}")
 
         while not self._exit_event.is_set():
-            # Queue.get() will block until there's an item in the queue.
             msg = thread_queue.get()
             logger.debug("MQ received message:" + str(msg))
 
@@ -163,9 +194,6 @@ class RpcConsumer(object):
 
             if not parse_helper.is_json(msg):
                 continue
-
-            if "version" not in str(msg):
-                logger.info("Got message (NO VERSION) from MQ: " + str(msg))
 
             lc_message_handler.process_lc_json_msg(
                 msg,
