@@ -3,14 +3,15 @@ import json
 import logging
 import os
 import threading
+import time
 from queue import Queue
 
 import pika
 from sdx_datamodel.constants import (
     Constants,
+    DomainStatus,
     MessageQueueNames,
     MongoCollections,
-    DomainStatus,
 )
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 
