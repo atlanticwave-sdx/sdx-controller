@@ -2,7 +2,7 @@ import json
 import logging
 
 from sdx_datamodel.connection_sm import ConnectionStateMachine
-from sdx_datamodel.constants import Constants, MongoCollections
+from sdx_datamodel.constants import Constants, MongoCollections, DomainStatus
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
@@ -159,7 +159,7 @@ class LcMessageHandler:
 
         # Add new topology
         else:
-            domain_dict[domain_name] = Constants.UP
+            domain_dict[domain_name] = DomainStatus.UP
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.DOMAINS, Constants.DOMAIN_DICT, domain_dict
             )

@@ -6,7 +6,12 @@ import threading
 from queue import Queue
 
 import pika
-from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
+from sdx_datamodel.constants import (
+    Constants,
+    MessageQueueNames,
+    MongoCollections,
+    DomainStatus,
+)
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
@@ -29,30 +34,61 @@ logger = logging.getLogger(__name__)
 
 
 class HeartbeatMonitor:
-    def __init__(self):
+    def __init__(self, db_instance):
         self.last_heartbeat = {}  # domain -> last heartbeat timestamp
-        self.domain_status = {}  # domain -> "up" or "down"
+        self.domain_status = {}  # domain -> current status (UP / UNKNOWN)
         self.lock = threading.Lock()
         self.monitoring = False
+        self.db_instance = db_instance  # store DB instance
 
     def record_heartbeat(self, domain):
-        """Record heartbeat from a domain and mark it as up."""
+        """Record heartbeat from a domain and mark it as UP if previously UNKNOWN."""
         with self.lock:
             self.last_heartbeat[domain] = time.time()
-            self.domain_status[domain] = "up"
+
+            previous_status = self.domain_status.get(domain)
+            self.domain_status[domain] = DomainStatus.UP
+
+            # Update DB if status changed from UNKNOWN -> UP
+            if previous_status == DomainStatus.UNKNOWN:
+                logger.info(
+                    f"[HeartbeatMonitor] Domain {domain} is BACK UP after missed heartbeats."
+                )
+                domain_dict_from_db = self.db_instance.get_value_from_db(
+                    MongoCollections.DOMAINS, Constants.DOMAIN_DICT
+                )
+                if domain in domain_dict_from_db:
+                    domain_dict_from_db[domain] = DomainStatus.UP
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.DOMAINS,
+                        Constants.DOMAIN_DICT,
+                        domain_dict_from_db,
+                    )
+
             logger.debug(f"[HeartbeatMonitor] Heartbeat recorded for {domain}")
 
     def check_status(self):
-        """Mark domains as down if heartbeats are missing."""
+        """Mark domains as UNKNOWN if heartbeats are missing."""
         now = time.time()
         with self.lock:
             for domain, last_time in self.last_heartbeat.items():
                 if now - last_time > HEARTBEAT_TOLERANCE * HEARTBEAT_INTERVAL:
-                    if self.domain_status.get(domain) != "down":
+                    if self.domain_status.get(domain) != DomainStatus.UNKNOWN:
                         logger.warning(
-                            f"[HeartbeatMonitor] Domain {domain} marked DOWN (missed {HEARTBEAT_TOLERANCE} heartbeats)"
+                            f"[HeartbeatMonitor] Domain {domain} marked UNKNOWN (missed {HEARTBEAT_TOLERANCE} heartbeats)"
                         )
-                    self.domain_status[domain] = "down"
+                        self.domain_status[domain] = DomainStatus.UNKNOWN
+
+                        domain_dict_from_db = self.db_instance.get_value_from_db(
+                            MongoCollections.DOMAINS, Constants.DOMAIN_DICT
+                        )
+                        if domain in domain_dict_from_db:
+                            domain_dict_from_db[domain] = DomainStatus.UNKNOWN
+                            self.db_instance.add_key_value_pair_to_db(
+                                MongoCollections.DOMAINS,
+                                Constants.DOMAIN_DICT,
+                                domain_dict_from_db,
+                            )
 
     def get_status(self, domain):
         """Return the current status of a domain."""
@@ -138,7 +174,7 @@ class RpcConsumer(object):
         lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
         parse_helper = ParseHelper()
 
-        heartbeat_monitor = HeartbeatMonitor()
+        heartbeat_monitor = HeartbeatMonitor(db_instance)
         heartbeat_monitor.start_monitoring()
 
         latest_topo = {}
