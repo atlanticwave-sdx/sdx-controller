@@ -24,7 +24,7 @@ MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
 HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", 10))  # seconds
 HEARTBEAT_TOLERANCE = int(
-    os.getenv("HEARTBEAT_TOLERANCE", 10)
+    os.getenv("HEARTBEAT_TOLERANCE", 3)
 )  # consecutive missed heartbeats allowed
 
 
@@ -219,17 +219,15 @@ class RpcConsumer(object):
             msg = thread_queue.get()
             logger.debug("MQ received message:" + str(msg))
 
-            if "Heart Beat" in str(msg):
-                domain = (
-                    parse_helper.extract_domain_from_msg(msg)
-                    if hasattr(parse_helper, "extract_domain_from_msg")
-                    else "unknown"
-                )
-                heartbeat_monitor.record_heartbeat(domain)
-                logger.debug(f"Heart beat received from {domain}")
+            if not parse_helper.is_json(msg):
+                logger.debug("Non JSON message, ignored")
                 continue
 
-            if not parse_helper.is_json(msg):
+            msg_json = json.loads(msg)
+            if "type" in msg_json and msg_json.get("type") == "Heart Beat":
+                domain = msg_json.get("domain")
+                heartbeat_monitor.record_heartbeat(domain)
+                logger.debug(f"Heart beat received from {domain}")
                 continue
 
             lc_message_handler.process_lc_json_msg(
