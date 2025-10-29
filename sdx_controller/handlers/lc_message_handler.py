@@ -2,7 +2,7 @@ import json
 import logging
 
 from sdx_datamodel.connection_sm import ConnectionStateMachine
-from sdx_datamodel.constants import Constants, MongoCollections, DomainStatus
+from sdx_datamodel.constants import Constants, DomainStatus, MongoCollections
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
