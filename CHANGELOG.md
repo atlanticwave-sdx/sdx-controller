@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed MongoDB documents key for historical connection that must be string (#479)
 - Fixed nested documents on ports collection (#480)
 - Updated to use new Kytos API when placing connection
+- Added exception handler to LC message processing
 
 ### Changed
 

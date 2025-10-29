@@ -4,6 +4,7 @@ import logging
 import os
 import threading
 import time
+import traceback
 from queue import Queue
 
 import pika
@@ -230,11 +231,15 @@ class RpcConsumer(object):
                 logger.debug(f"Heart beat received from {domain}")
                 continue
 
-            lc_message_handler.process_lc_json_msg(
-                msg,
-                latest_topo,
-                domain_dict,
-            )
+            try:
+                lc_message_handler.process_lc_json_msg(
+                    msg,
+                    latest_topo,
+                    domain_list,
+                )
+            except Exception as exc:
+                err = traceback.format_exc().replace("\n", ", ")
+                logger.error(f"Failed to process LC message: {exc} -- {err}")
 
     def stop_threads(self):
         """
