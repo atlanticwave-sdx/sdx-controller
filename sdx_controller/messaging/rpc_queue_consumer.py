@@ -235,7 +235,7 @@ class RpcConsumer(object):
                 lc_message_handler.process_lc_json_msg(
                     msg,
                     latest_topo,
-                    domain_list,
+                    domain_dict,
                 )
             except Exception as exc:
                 err = traceback.format_exc().replace("\n", ", ")
