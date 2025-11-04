@@ -61,10 +61,10 @@ def topology_version(topology_id):  # noqa: E501
 
 
 def get_topology_domains():
-    domain_list = db_instance.get_value_from_db(
-        MongoCollections.DOMAINS, Constants.DOMAIN_LIST
+    domain_dict = db_instance.get_value_from_db(
+        MongoCollections.DOMAINS, Constants.DOMAIN_DICT
     )
-    if not domain_list:
+    if not domain_dict:
         return []
 
-    return domain_list
+    return domain_dict
