@@ -3,11 +3,17 @@ import json
 import logging
 import os
 import threading
+import time
 import traceback
 from queue import Queue
 
 import pika
-from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
+from sdx_datamodel.constants import (
+    Constants,
+    DomainStatus,
+    MessageQueueNames,
+    MongoCollections,
+)
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
@@ -17,11 +23,94 @@ MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
 MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
+HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", 10))  # seconds
+HEARTBEAT_TOLERANCE = int(
+    os.getenv("HEARTBEAT_TOLERANCE", 3)
+)  # consecutive missed heartbeats allowed
+
 
 # subscribe to the corresponding queue
 SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
+
+
+class HeartbeatMonitor:
+    def __init__(self, db_instance):
+        self.last_heartbeat = {}  # domain -> last heartbeat timestamp
+        self.domain_status = {}  # domain -> current status (UP / UNKNOWN)
+        self.lock = threading.Lock()
+        self.monitoring = False
+        self.db_instance = db_instance  # store DB instance
+
+    def record_heartbeat(self, domain):
+        """Record heartbeat from a domain and mark it as UP if previously UNKNOWN."""
+        with self.lock:
+            self.last_heartbeat[domain] = time.time()
+
+            previous_status = self.domain_status.get(domain)
+            self.domain_status[domain] = DomainStatus.UP
+
+            # Update DB if status changed from UNKNOWN -> UP
+            if previous_status == DomainStatus.UNKNOWN:
+                logger.info(
+                    f"[HeartbeatMonitor] Domain {domain} is BACK UP after missed heartbeats."
+                )
+                domain_dict_from_db = self.db_instance.get_value_from_db(
+                    MongoCollections.DOMAINS, Constants.DOMAIN_DICT
+                )
+                if domain in domain_dict_from_db:
+                    domain_dict_from_db[domain] = DomainStatus.UP
+                    self.db_instance.add_key_value_pair_to_db(
+                        MongoCollections.DOMAINS,
+                        Constants.DOMAIN_DICT,
+                        domain_dict_from_db,
+                    )
+
+            logger.debug(f"[HeartbeatMonitor] Heartbeat recorded for {domain}")
+
+    def check_status(self):
+        """Mark domains as UNKNOWN if heartbeats are missing."""
+        now = time.time()
+        with self.lock:
+            for domain, last_time in self.last_heartbeat.items():
+                if now - last_time > HEARTBEAT_TOLERANCE * HEARTBEAT_INTERVAL:
+                    if self.domain_status.get(domain) != DomainStatus.UNKNOWN:
+                        logger.warning(
+                            f"[HeartbeatMonitor] Domain {domain} marked UNKNOWN (missed {HEARTBEAT_TOLERANCE} heartbeats)"
+                        )
+                        self.domain_status[domain] = DomainStatus.UNKNOWN
+
+                        domain_dict_from_db = self.db_instance.get_value_from_db(
+                            MongoCollections.DOMAINS, Constants.DOMAIN_DICT
+                        )
+                        if domain in domain_dict_from_db:
+                            domain_dict_from_db[domain] = DomainStatus.UNKNOWN
+                            self.db_instance.add_key_value_pair_to_db(
+                                MongoCollections.DOMAINS,
+                                Constants.DOMAIN_DICT,
+                                domain_dict_from_db,
+                            )
+
+    def get_status(self, domain):
+        """Return the current status of a domain."""
+        with self.lock:
+            return self.domain_status.get(domain, "unknown")
+
+    def start_monitoring(self):
+        """Start a background thread to monitor heartbeat status."""
+        if self.monitoring:
+            return
+        self.monitoring = True
+        logger.info("[HeartbeatMonitor] Started monitoring heartbeats.")
+
+        def monitor_loop():
+            while self.monitoring:
+                self.check_status()
+                time.sleep(HEARTBEAT_INTERVAL)
+
+        t = threading.Thread(target=monitor_loop, daemon=True)
+        t.start()
 
 
 class RpcConsumer(object):
@@ -80,8 +169,6 @@ class RpcConsumer(object):
         self.channel.start_consuming()
 
     def start_sdx_consumer(self, thread_queue, db_instance):
-        HEARTBEAT_ID = 0
-
         rpc = RpcConsumer(thread_queue, "", self.te_manager)
         t1 = threading.Thread(target=rpc.start_consumer, args=(), daemon=True)
         t1.start()
@@ -89,23 +176,26 @@ class RpcConsumer(object):
         lc_message_handler = LcMessageHandler(db_instance, self.te_manager)
         parse_helper = ParseHelper()
 
+        heartbeat_monitor = HeartbeatMonitor(db_instance)
+        heartbeat_monitor.start_monitoring()
+
         latest_topo = {}
-        domain_list = []
+        domain_dict = {}
 
         # This part reads from DB when SDX controller initially starts.
-        # It looks for domain_list, if already in DB,
+        # It looks for domain_dict, if already in DB,
         # Then use the existing ones from DB.
-        domain_list_from_db = db_instance.get_value_from_db(
-            MongoCollections.DOMAINS, Constants.DOMAIN_LIST
+        domain_dict_from_db = db_instance.get_value_from_db(
+            MongoCollections.DOMAINS, Constants.DOMAIN_DICT
         )
         latest_topo_from_db = db_instance.get_value_from_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY
         )
 
-        if domain_list_from_db:
-            domain_list = domain_list_from_db
+        if domain_dict_from_db:
+            domain_dict = domain_dict_from_db
             logger.debug("Domain list already exists in db: ")
-            logger.debug(domain_list)
+            logger.debug(domain_dict)
 
         if latest_topo_from_db:
             latest_topo = latest_topo_from_db
@@ -113,8 +203,8 @@ class RpcConsumer(object):
             logger.debug(latest_topo)
 
         # If topologies already saved in db, use them to initialize te_manager
-        if domain_list:
-            for domain in domain_list:
+        if domain_dict:
+            for domain in domain_dict.keys():
                 topology = db_instance.get_value_from_db(
                     MongoCollections.TOPOLOGIES, SDX_TOPOLOGY_ID_prefix + domain
                 )
@@ -127,26 +217,25 @@ class RpcConsumer(object):
                 logger.debug(f"Read {domain}: {topology}")
 
         while not self._exit_event.is_set():
-            # Queue.get() will block until there's an item in the queue.
             msg = thread_queue.get()
             logger.debug("MQ received message:" + str(msg))
 
-            if "Heart Beat" in str(msg):
-                HEARTBEAT_ID += 1
-                logger.debug("Heart beat received. ID: " + str(HEARTBEAT_ID))
-                continue
-
             if not parse_helper.is_json(msg):
+                logger.debug("Non JSON message, ignored")
                 continue
 
-            if "version" not in str(msg):
-                logger.info("Got message (NO VERSION) from MQ: " + str(msg))
+            msg_json = json.loads(msg)
+            if "type" in msg_json and msg_json.get("type") == "Heart Beat":
+                domain = msg_json.get("domain")
+                heartbeat_monitor.record_heartbeat(domain)
+                logger.debug(f"Heart beat received from {domain}")
+                continue
 
             try:
                 lc_message_handler.process_lc_json_msg(
                     msg,
                     latest_topo,
-                    domain_list,
+                    domain_dict,
                 )
             except Exception as exc:
                 err = traceback.format_exc().replace("\n", ", ")
