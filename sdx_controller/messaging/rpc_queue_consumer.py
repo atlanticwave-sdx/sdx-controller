@@ -216,51 +216,51 @@ class RpcConsumer(object):
                 # Get the actual thing minus the Mongo ObjectID.
                 self.te_manager.add_topology(topology)
                 logger.debug(f"Read {domain}: {topology}")
-                # update topology state
-                connections = db_instance.get_all_entries_in_collection(
-                    MongoCollections.CONNECTIONS
-                )
-                if not connections:
-                    logger.info("No connection was found")
-                else:
-                    for connection in connections:
-                        service_id = next(iter(connection))
-                        logger.info(f"service_id: {service_id}")
-                        request_dict = connection.get(service_id)
-                        status = request_dict.get("status")
-                        solution_links = self.db_instance.read_from_db(
-                            MongoCollections.SOLUTIONS, service_id
+            # update topology/pce state in TE Manager
+            connections = db_instance.get_all_entries_in_collection(
+                MongoCollections.CONNECTIONS
+            )
+            if not connections:
+                logger.info("No connection was found")
+            else:
+                for connection in connections:
+                    service_id = next(iter(connection))
+                    logger.info(f"service_id: {service_id}")
+                    request_dict = connection.get(service_id)
+                    status = request_dict.get("status")
+                    solution_links = self.db_instance.read_from_db(
+                        MongoCollections.SOLUTIONS, service_id
+                    )
+                    if not solution_links:
+                        logger.warning(
+                            f"Could not find solution links for {service_id}"
                         )
-                        if not solution_links:
-                            logger.warning(
-                                f"Could not find solution links for {service_id}"
-                            )
-                        solution = result = ConnectionSolution(
-                            connection_map={}, cost=0, request_id=service_id
+                    solution = ConnectionSolution(
+                        connection_map={}, cost=0, request_id=service_id
+                    )
+                    solution.connection_map[connection] = solution_links
+                    breakdown = db_instance.read_from_db(
+                        MongoCollections.BREAKDOWNS, service_id
+                    )
+                    if not breakdown:
+                        logger.warning(f"Could not find breakdown for {service_id}")
+                        continue
+                    try:
+                        breakdown = self.te_manager.generate_connection_breakdown(
+                            solution, connection
                         )
-                        result.connection_map[connection] = solution_links
-                        breakdown = db_instance.read_from_db(
-                            MongoCollections.BREAKDOWNS, service_id
+                        self._logger.info(
+                            f"generate_connection_breakdown(): tagged_breakdown: {breakdown}"
                         )
-                        if not breakdown:
-                            logger.warning(f"Could not find breakdown for {service_id}")
-                            continue
-                        try:
-                            breakdown = self.te_manager.generate_connection_breakdown(
-                                solution, connection
-                            )
-                            self._logger.info(
-                                f"generate_connection_breakdown(): tagged_breakdown: {breakdown}"
-                            )
 
-                            # Make tests pass, temporarily.
-                            # need to throw an exception if tagged_breakdown is None
-                        except Exception as e:
-                            err = traceback.format_exc().replace("\n", ", ")
-                            logger.error(
-                                f"Error when recovering breakdown vlan assignment: {e} - {err}"
-                            )
-                            return f"Error: {e}", 410
+                        # Make tests pass, temporarily.
+                        # need to throw an exception if tagged_breakdown is None
+                    except Exception as e:
+                        err = traceback.format_exc().replace("\n", ", ")
+                        logger.error(
+                            f"Error when recovering breakdown vlan assignment: {e} - {err}"
+                        )
+                        return f"Error: {e}", 410
 
         while not self._exit_event.is_set():
             msg = thread_queue.get()
