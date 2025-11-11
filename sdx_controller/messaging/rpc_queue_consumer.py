@@ -235,7 +235,7 @@ class RpcConsumer(object):
                     logger.info(
                         f"Restart: service_id: {service_id}, status: {status.get(service_id)}"
                     )
-                    solution_links = self.db_instance.read_from_db(
+                    solution_links = db_instance.read_from_db(
                         MongoCollections.SOLUTIONS, service_id
                     )
                     if not solution_links:
