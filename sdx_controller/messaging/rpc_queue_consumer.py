@@ -17,6 +17,12 @@ from sdx_datamodel.constants import (
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 from sdx_pce.models import ConnectionSolution
 
+from sdx_controller.handlers.connection_handler import (
+    ConnectionHandler,
+    connection_state_machine,
+    get_connection_status,
+    parse_conn_status,
+)
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
 from sdx_controller.utils.parse_helper import ParseHelper
 
@@ -225,9 +231,10 @@ class RpcConsumer(object):
             else:
                 for connection in connections:
                     service_id = next(iter(connection))
-                    logger.info(f"service_id: {service_id}")
-                    request_dict = connection.get(service_id)
-                    status = request_dict.get("status")
+                    status = get_connection_status(db_instance, service_id)
+                    logger.info(
+                        f"Restart: service_id: {service_id}, status: {status.get(service_id)}"
+                    )
                     solution_links = self.db_instance.read_from_db(
                         MongoCollections.SOLUTIONS, service_id
                     )
