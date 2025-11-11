@@ -235,6 +235,7 @@ class RpcConsumer(object):
                     logger.info(
                         f"Restart: service_id: {service_id}, status: {status.get(service_id)}"
                     )
+                    request_dict = connection.get(service_id)
                     solution_links = db_instance.read_from_db(
                         MongoCollections.SOLUTIONS, service_id
                     )
@@ -245,7 +246,7 @@ class RpcConsumer(object):
                     solution = ConnectionSolution(
                         connection_map={}, cost=0, request_id=service_id
                     )
-                    solution.connection_map[connection] = solution_links
+                    solution.connection_map[request_dict] = solution_links
                     breakdown = db_instance.read_from_db(
                         MongoCollections.BREAKDOWNS, service_id
                     )
@@ -254,7 +255,7 @@ class RpcConsumer(object):
                         continue
                     try:
                         breakdown = self.te_manager.generate_connection_breakdown(
-                            solution, connection
+                            solution, request_dict
                         )
                         self._logger.info(
                             f"generate_connection_breakdown(): tagged_breakdown: {breakdown}"
