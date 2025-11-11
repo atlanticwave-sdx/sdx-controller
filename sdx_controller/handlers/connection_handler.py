@@ -432,7 +432,7 @@ class ConnectionHandler:
             topology_db_update(self.db_instance, te_manager)
             return status, code
         except Exception as e:
-            logger.debug(f"Error when removing breakdown: {e}")
+            logger.error(f"Error when removing breakdown: {e}")
             return f"Error when removing breakdown: {e}", 400
 
     def handle_link_removal(self, te_manager, removed_links):
