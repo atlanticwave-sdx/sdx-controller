@@ -2,6 +2,7 @@
 import logging
 import os
 import threading
+import time
 import uuid
 
 import pika
@@ -52,7 +53,7 @@ class TopicQueueProducer(object):
     def keep_live(self):
         """Publish heart beat messages periodically on the MQ."""
         while not self.exit_event.wait(30):
-            msg = "[MQ]: Heart Beat"
+            msg = {"type": "Heart Beat"}
             self.logger.debug("Sending heart beat msg.")
             self.call(msg)
 
@@ -77,6 +78,9 @@ class TopicQueueProducer(object):
             f"exchange_name: {self.exchange_name}, "
             f"routing_key: {self.routing_key}"
         )
+
+        current_time = int(time.time())
+        body["sent_time"] = current_time
 
         self.channel.basic_publish(
             exchange=self.exchange_name, routing_key=self.routing_key, body=str(body)
