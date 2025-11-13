@@ -15,7 +15,7 @@ from sdx_datamodel.constants import (
     MongoCollections,
 )
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
-from sdx_pce.models import ConnectionSolution
+from sdx_pce.models import ConnectionPath, ConnectionRequest, ConnectionSolution
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
@@ -24,6 +24,7 @@ from sdx_controller.handlers.connection_handler import (
     parse_conn_status,
 )
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
+from sdx_controller.models import connection
 from sdx_controller.utils.parse_helper import ParseHelper
 
 MQ_HOST = os.getenv("MQ_HOST")
@@ -40,6 +41,8 @@ HEARTBEAT_TOLERANCE = int(
 SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
+
+MongoCollections.SOLUTIONS = "solutions"
 
 
 class HeartbeatMonitor:
@@ -223,6 +226,7 @@ class RpcConsumer(object):
                 self.te_manager.add_topology(topology)
                 logger.debug(f"Read {domain}: {topology}")
             # update topology/pce state in TE Manager
+            graph = self.te_manager.generate_graph_te()
             connections = db_instance.get_all_entries_in_collection(
                 MongoCollections.CONNECTIONS
             )
@@ -235,34 +239,24 @@ class RpcConsumer(object):
                     logger.info(
                         f"Restart: service_id: {service_id}, status: {status.get(service_id)}"
                     )
-                    request_dict = connection.get(service_id)
-                    solution_links = db_instance.read_from_db(
-                        MongoCollections.SOLUTIONS, service_id
-                    )
-                    if not solution_links:
-                        logger.warning(
-                            f"Could not find solution links for {service_id}"
-                        )
-                    solution = ConnectionSolution(
-                        connection_map={}, cost=0, request_id=service_id
-                    )
-                    solution.connection_map[request_dict] = solution_links
-                    breakdown = db_instance.read_from_db(
+                    # 1. update the vlan tables in pce
+                    domain_breakdown = db_instance.get_value_from_db(
                         MongoCollections.BREAKDOWNS, service_id
                     )
-                    if not breakdown:
+                    if not domain_breakdown:
                         logger.warning(f"Could not find breakdown for {service_id}")
                         continue
                     try:
-                        breakdown = self.te_manager.generate_connection_breakdown(
-                            solution, request_dict
-                        )
-                        self._logger.info(
-                            f"generate_connection_breakdown(): tagged_breakdown: {breakdown}"
-                        )
-
-                        # Make tests pass, temporarily.
-                        # need to throw an exception if tagged_breakdown is None
+                        vlan_tags_table = self.te_manager.vlan_tags_table
+                        for domain, segment in domain_breakdown.items():
+                            logger.debug(f"domain:{domain};segment:{segment}")
+                            domain_table = vlan_tags_table.get(domain)
+                            uni_a = segment.get("uni_a")
+                            vlan_table = domain_table.get(uni_a.get("port_id"))
+                            vlan_table[uni_a.get("tag").get("value")] = service_id
+                            uni_z = segment.get("uni_z")
+                            vlan_table = domain_table.get(uni_z.get("port_id"))
+                            vlan_table[uni_z.get("tag").get("value")] = service_id
                     except Exception as e:
                         err = traceback.format_exc().replace("\n", ", ")
                         logger.error(
