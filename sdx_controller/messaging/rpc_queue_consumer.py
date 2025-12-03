@@ -15,8 +15,16 @@ from sdx_datamodel.constants import (
     MongoCollections,
 )
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
+from sdx_pce.models import ConnectionPath, ConnectionRequest, ConnectionSolution
 
+from sdx_controller.handlers.connection_handler import (
+    ConnectionHandler,
+    connection_state_machine,
+    get_connection_status,
+    parse_conn_status,
+)
 from sdx_controller.handlers.lc_message_handler import LcMessageHandler
+from sdx_controller.models import connection
 from sdx_controller.utils.parse_helper import ParseHelper
 
 MQ_HOST = os.getenv("MQ_HOST")
@@ -33,6 +41,8 @@ HEARTBEAT_TOLERANCE = int(
 SUB_QUEUE = MessageQueueNames.OXP_UPDATE
 
 logger = logging.getLogger(__name__)
+
+MongoCollections.SOLUTIONS = "solutions"
 
 
 class HeartbeatMonitor:
@@ -215,6 +225,44 @@ class RpcConsumer(object):
                 # Get the actual thing minus the Mongo ObjectID.
                 self.te_manager.add_topology(topology)
                 logger.debug(f"Read {domain}: {topology}")
+            # update topology/pce state in TE Manager
+            graph = self.te_manager.generate_graph_te()
+            connections = db_instance.get_all_entries_in_collection(
+                MongoCollections.CONNECTIONS
+            )
+            if not connections:
+                logger.info("No connection was found")
+            else:
+                for connection in connections:
+                    service_id = next(iter(connection))
+                    status = get_connection_status(db_instance, service_id)
+                    logger.info(
+                        f"Restart: service_id: {service_id}, status: {status.get(service_id)}"
+                    )
+                    # 1. update the vlan tables in pce
+                    domain_breakdown = db_instance.get_value_from_db(
+                        MongoCollections.BREAKDOWNS, service_id
+                    )
+                    if not domain_breakdown:
+                        logger.warning(f"Could not find breakdown for {service_id}")
+                        continue
+                    try:
+                        vlan_tags_table = self.te_manager.vlan_tags_table
+                        for domain, segment in domain_breakdown.items():
+                            logger.debug(f"domain:{domain};segment:{segment}")
+                            domain_table = vlan_tags_table.get(domain)
+                            uni_a = segment.get("uni_a")
+                            vlan_table = domain_table.get(uni_a.get("port_id"))
+                            vlan_table[uni_a.get("tag").get("value")] = service_id
+                            uni_z = segment.get("uni_z")
+                            vlan_table = domain_table.get(uni_z.get("port_id"))
+                            vlan_table[uni_z.get("tag").get("value")] = service_id
+                    except Exception as e:
+                        err = traceback.format_exc().replace("\n", ", ")
+                        logger.error(
+                            f"Error when recovering breakdown vlan assignment: {e} - {err}"
+                        )
+                        return f"Error: {e}", 410
 
         while not self._exit_event.is_set():
             msg = thread_queue.get()
