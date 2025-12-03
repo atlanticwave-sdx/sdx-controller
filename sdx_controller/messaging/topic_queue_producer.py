@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+import json
 import logging
 import os
 import threading
+import time
 import uuid
 
 import pika
@@ -52,9 +54,9 @@ class TopicQueueProducer(object):
     def keep_live(self):
         """Publish heart beat messages periodically on the MQ."""
         while not self.exit_event.wait(30):
-            msg = "[MQ]: Heart Beat"
+            msg = {"type": "Heart Beat"}
             self.logger.debug("Sending heart beat msg.")
-            self.call(msg)
+            self.call(json.dumps(msg))
 
     def stop_keep_alive(self):
         """Ask the keep-alive thread to stop."""
@@ -77,6 +79,20 @@ class TopicQueueProducer(object):
             f"exchange_name: {self.exchange_name}, "
             f"routing_key: {self.routing_key}"
         )
+
+        current_time = int(time.time())
+
+        if isinstance(body, dict):
+            body["sent_time"] = current_time
+        elif isinstance(body, str):
+            try:
+                parsed = json.loads(body)
+                if isinstance(parsed, dict):
+                    parsed["sent_time"] = current_time
+                    body = json.dumps(parsed)
+            except json.JSONDecodeError:
+                # Not a valid JSON string, leave as is
+                pass
 
         self.channel.basic_publish(
             exchange=self.exchange_name, routing_key=self.routing_key, body=str(body)
