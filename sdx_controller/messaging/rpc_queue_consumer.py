@@ -16,6 +16,7 @@ from sdx_datamodel.constants import (
 )
 from sdx_datamodel.models.topology import SDX_TOPOLOGY_ID_prefix
 from sdx_pce.models import ConnectionPath, ConnectionRequest, ConnectionSolution
+from sdx_pce.topology.manager import TopologyManager
 
 from sdx_controller.handlers.connection_handler import (
     ConnectionHandler,
@@ -207,10 +208,15 @@ class RpcConsumer(object):
             logger.debug("Domain list already exists in db: ")
             logger.debug(domain_dict)
 
+        residul_bw = {}
         if latest_topo_from_db:
             latest_topo = latest_topo_from_db
             logger.debug("Topology already exists in db: ")
-            logger.debug(latest_topo)
+            # logger.debug(latest_topo)
+            update_topology_manager = TopologyManager()
+            update_topology_manager.add_topology(latest_topo)
+            residul_bw = update_topology_manager.get_residul_bandwidth()
+            logger.debug(residul_bw)
 
         # If topologies already saved in db, use them to initialize te_manager
         if domain_dict:
@@ -226,6 +232,7 @@ class RpcConsumer(object):
                 self.te_manager.add_topology(topology)
                 logger.debug(f"Read {domain}: {topology}")
             # update topology/pce state in TE Manager
+
             graph = self.te_manager.generate_graph_te()
             connections = db_instance.get_all_entries_in_collection(
                 MongoCollections.CONNECTIONS
@@ -263,6 +270,8 @@ class RpcConsumer(object):
                             f"Error when recovering breakdown vlan assignment: {e} - {err}"
                         )
                         return f"Error: {e}", 410
+            if residul_bw:
+                self.te_manager.update_available_bw_in_topology(residul_bw)
 
         while not self._exit_event.is_set():
             msg = thread_queue.get()
