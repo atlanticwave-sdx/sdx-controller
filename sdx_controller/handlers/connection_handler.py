@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 import time
 import traceback
 from typing import Tuple
@@ -432,6 +433,10 @@ class ConnectionHandler:
             topology_db_update(self.db_instance, te_manager)
             return status, code
         except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            logging.error(
+                "Custom error message.", exc_info=(exc_type, exc_value, exc_traceback)
+            )
             logger.error(f"Error when removing breakdown: {e}")
             return f"Error when removing breakdown: {e}", 400
 

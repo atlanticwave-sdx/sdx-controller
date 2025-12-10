@@ -234,6 +234,7 @@ class RpcConsumer(object):
             # update topology/pce state in TE Manager
 
             graph = self.te_manager.generate_graph_te()
+            logger.debug(f"restart graph = {graph.nodes};{graph.edges}")
             connections = db_instance.get_all_entries_in_collection(
                 MongoCollections.CONNECTIONS
             )
@@ -270,6 +271,84 @@ class RpcConsumer(object):
                             f"Error when recovering breakdown vlan assignment: {e} - {err}"
                         )
                         return f"Error: {e}", 410
+            logger.debug(f"Restart: solutions for {connections}")
+            connectionSolution_list = self.te_manager.connectionSolution_list
+            connections = db_instance.get_all_entries_in_collection(
+                MongoCollections.CONNECTIONS
+            )
+            if not connections:
+                logger.info("No connection was found")
+            else:
+                for connection in connections:
+                    try:
+                        service_id = next(iter(connection))
+                        response = get_connection_status(db_instance, service_id)
+                        if not response:
+                            continue
+                        qos_metrics = response[service_id].get("qos_metrics")
+                        if not qos_metrics:
+                            continue
+                        min_bw = qos_metrics.get("min_bw", {"value": 0.0}).get(
+                            "value", 0
+                        )
+                        logger.debug(f"service_id:{service_id}, {response}")
+                        solution_links = db_instance.get_value_from_db(
+                            MongoCollections.SOLUTIONS, service_id
+                        )
+                        logger.debug(
+                            f"service_id:{service_id};solution:{solution_links}"
+                        )
+                        if not solution_links:
+                            logger.warning(
+                                f"Could not find solution in DB for {service_id}"
+                            )
+                            continue
+                        links = []
+                        for link in solution_links:
+                            source_node = self.te_manager.topology_manager.get_topology().get_node_by_port(
+                                link.get("source")
+                            )
+                            destination_node = self.te_manager.topology_manager.get_topology().get_node_by_port(
+                                link.get("destination")
+                            )
+                            source = [
+                                x
+                                for x, y in graph.nodes(data=True)
+                                if y["id"] == source_node.id
+                            ]
+
+                            destination = [
+                                x
+                                for x, y in graph.nodes(data=True)
+                                if y["id"] == destination_node.id
+                            ]
+                            links.append(
+                                {"source": source[0], "destination": destination[0]}
+                            )
+                        # rebuild solution object
+                        request = ConnectionRequest(
+                            source=0,
+                            destination=0,
+                            required_bandwidth=min_bw,
+                            required_latency=float("inf"),
+                        )
+                        link_map = [
+                            ConnectionPath(link.get("source"), link.get("destination"))
+                            for link in links
+                        ]
+                        solution = ConnectionSolution(
+                            connection_map={request: link_map},
+                            cost=0,
+                            request_id=service_id,
+                        )
+                        connectionSolution_list.append(solution)
+                    except Exception as e:
+                        err = traceback.format_exc().replace("\n", ", ")
+                        logger.error(
+                            f"Error when recovering solution list: {e} - {err}"
+                        )
+                        return f"Error: {e}", 410
+            logger.debug(f"Restart: residul_bw")
             if residul_bw:
                 self.te_manager.update_available_bw_in_topology(residul_bw)
 
