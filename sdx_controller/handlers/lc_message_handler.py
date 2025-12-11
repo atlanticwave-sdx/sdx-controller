@@ -29,7 +29,37 @@ class LcMessageHandler:
         logger.info("MQ received message:" + str(msg))
         msg_json = json.loads(msg)
 
-        if msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
+        if msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_status_change":
+            logger.info("Received OXP connection status change.")
+            service_id = msg_json.get("service_id")
+
+            if not service_id:
+                return
+
+            connection = self.db_instance.get_value_from_db(
+                MongoCollections.CONNECTIONS, service_id
+            )
+            if not connection:
+                return
+
+            if connection.get("status") and (
+                    connection.get("status")
+                    == str(ConnectionStateMachine.State.RECOVERING)
+                ):
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.ERROR
+                    )
+                elif (
+                    connection.get("status")
+                    and connection.get("status")
+                    != str(ConnectionStateMachine.State.DOWN)
+                    and connection.get("status")
+                    != str(ConnectionStateMachine.State.ERROR)
+                ):
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.DOWN
+                    )
+        elif msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
             logger.info("Received OXP connection response.")
             service_id = msg_json.get("service_id")
 
