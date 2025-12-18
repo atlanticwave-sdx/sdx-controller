@@ -95,7 +95,7 @@ class HeartbeatMonitor:
                         domain_dict_from_db = self.db_instance.get_value_from_db(
                             MongoCollections.DOMAINS, Constants.DOMAIN_DICT
                         )
-                        if domain in domain_dict_from_db:
+                        if domain_dict_from_db and domain in domain_dict_from_db:
                             domain_dict_from_db[domain] = DomainStatus.UNKNOWN
                             self.db_instance.add_key_value_pair_to_db(
                                 MongoCollections.DOMAINS,
