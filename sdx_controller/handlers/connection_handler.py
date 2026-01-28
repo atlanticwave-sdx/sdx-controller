@@ -392,7 +392,7 @@ class ConnectionHandler:
             )
         logger.debug(f"Archived connection: {service_id}")
 
-    def remove_connection(self, te_manager, service_id, archive_reason: str = "API") -> Tuple[str, int]:
+    def remove_connection(self, te_manager, service_id, archive_reason) -> Tuple[str, int]:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
