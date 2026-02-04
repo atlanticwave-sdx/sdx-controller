@@ -1,9 +1,9 @@
 import pytest
+from sdx_datamodel.connection_sm import ConnectionSMException, ConnectionStateMachine
 
-from sdx_datamodel.connection_sm import ConnectionStateMachine, ConnectionSMException
-from sdx_controller.handlers.connection_handler import (
+from sdx_controller.handlers.connection_handler import (  # adjust path if needed
     connection_state_machine,
-)  # adjust path if needed
+)
 
 
 class TestConnectionStateMachine:
