@@ -30,7 +30,6 @@ dependencies = [
     "dataset",
     "pymongo > 3.0",
     "sdx-pce @ git+https://github.com/atlanticwave-sdx/pce@302-port-nni-removed",
-]
 
 [project.optional-dependencies]
 test = [
