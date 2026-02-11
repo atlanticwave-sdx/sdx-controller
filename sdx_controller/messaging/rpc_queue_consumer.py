@@ -32,7 +32,7 @@ MQ_HOST = os.getenv("MQ_HOST")
 MQ_PORT = os.getenv("MQ_PORT") or 5672
 MQ_USER = os.getenv("MQ_USER") or "guest"
 MQ_PASS = os.getenv("MQ_PASS") or "guest"
-HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", 10))  # seconds
+HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", 30))  # seconds
 HEARTBEAT_TOLERANCE = int(
     os.getenv("HEARTBEAT_TOLERANCE", 3)
 )  # consecutive missed heartbeats allowed
@@ -95,7 +95,7 @@ class HeartbeatMonitor:
                         domain_dict_from_db = self.db_instance.get_value_from_db(
                             MongoCollections.DOMAINS, Constants.DOMAIN_DICT
                         )
-                        if domain in domain_dict_from_db:
+                        if domain_dict_from_db and domain in domain_dict_from_db:
                             domain_dict_from_db[domain] = DomainStatus.UNKNOWN
                             self.db_instance.add_key_value_pair_to_db(
                                 MongoCollections.DOMAINS,
