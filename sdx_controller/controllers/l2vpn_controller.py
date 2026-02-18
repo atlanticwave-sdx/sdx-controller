@@ -90,7 +90,7 @@ def delete_connection(service_id):
 
         logger.info(f"Removing connection: {service_id} {connection.get('status')}")
 
-        connection_handler.remove_connection(current_app.te_manager, service_id)
+        connection_handler.remove_connection(current_app.te_manager, service_id, "API")
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
     except Exception as e:
@@ -246,7 +246,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         # Get roll back connection before removing connection
         rollback_conn_body = body
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
-            current_app.te_manager, service_id
+            current_app.te_manager, service_id, "API"
         )
 
         if remove_conn_code // 100 != 2:
