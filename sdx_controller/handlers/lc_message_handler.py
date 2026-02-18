@@ -29,7 +29,47 @@ class LcMessageHandler:
         logger.info("MQ received message:" + str(msg))
         msg_json = json.loads(msg)
 
-        if msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
+        if (
+            msg_json.get("msg_type")
+            and msg_json["msg_type"] == "oxp_conn_status_change"
+        ):
+            logger.info("Received OXP connection status change.")
+            service_id = msg_json.get("service_id")
+            new_status = msg_json.get("new_status")
+            existing_status = msg_json.get("existing_status")
+
+            if not service_id or new_status is None:
+                return
+
+            connection = self.db_instance.get_value_from_db(
+                MongoCollections.CONNECTIONS, service_id
+            )
+            if not connection:
+                return
+
+            current_status = connection.get("status")
+
+            # If status is unchanged, do nothing
+            if current_status == new_status:
+                logger.info(f"Status unchanged for {service_id}")
+                return
+
+            logger.info(
+                f"Updating connection {service_id} status: "
+                f"{current_status} -> {new_status}"
+            )
+
+            # Directly reflect LC/OXP status into controller DB
+            connection["status"] = new_status
+
+            self.db_instance.add_key_value_pair_to_db(
+                MongoCollections.CONNECTIONS,
+                service_id,
+                connection,
+            )
+            logger.info(f"Connection {service_id} status updated.")
+            return
+        elif msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
             logger.info("Received OXP connection response.")
             service_id = msg_json.get("service_id")
 
