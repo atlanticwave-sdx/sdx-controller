@@ -35,8 +35,10 @@ class LcMessageHandler:
         ):
             logger.info("Received OXP connection status change.")
             service_id = msg_json.get("service_id")
+            new_status = msg_json.get("new_status")
+            existing_status = msg_json.get("existing_status")
 
-            if not service_id:
+            if not service_id or new_status is None:
                 return
 
             connection = self.db_instance.get_value_from_db(
@@ -45,30 +47,30 @@ class LcMessageHandler:
             if not connection:
                 return
 
-            if connection.get("status") and (
-                connection.get("status") == str(ConnectionStateMachine.State.RECOVERING)
-            ):
-                connection, _ = connection_state_machine(
-                    connection, ConnectionStateMachine.State.ERROR
-                )
-                connection["status"] = "error"
-            elif (
-                connection.get("status")
-                and connection.get("status") != str(ConnectionStateMachine.State.DOWN)
-                and connection.get("status") != str(ConnectionStateMachine.State.ERROR)
-            ):
-                connection, _ = connection_state_machine(
-                    connection, ConnectionStateMachine.State.DOWN
-                )
-                connection["status"] = "down"
+            current_status = connection.get("status")
+
+            # If status is unchanged, do nothing
+            if current_status == new_status:
+                logger.info(f"Status unchanged for {service_id}")
+                return
+
+            logger.info(
+                f"Updating connection {service_id} status: "
+                f"{current_status} -> {new_status}"
+            )
+
+            # Directly reflect LC/OXP status into controller DB
+            connection["status"] = new_status
 
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS,
                 service_id,
                 connection,
             )
-            logger.info("Connection updated: " + service_id)
-
+            logger.info(
+                f"Connection {service_id} status updated from '{current_status}' to '{new_status}'"
+            )
+            return
         elif msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
             logger.info("Received OXP connection response.")
             service_id = msg_json.get("service_id")
