@@ -68,7 +68,7 @@ class LcMessageHandler:
                 connection,
             )
             logger.info(
-                f"Connection {service_id} status updated from '{current_status}' to '{new_status}'"
+                f"Connection {service_id} status updated."
             )
             return
         elif msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
