@@ -197,6 +197,24 @@ paths:
         "400":
           description: Invalid Connection
       x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
+  /l2vpn/1.0/archived:
+    get:
+      tags:
+      - l2vpn
+      summary: List all archived l2vpn connections
+      description: archived connection details
+      operationId: get_archived_connections
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                x-content-type: application/json
+        "404":
+          description: no archived connections found
+      x-openapi-router-controller: sdx_controller.controllers.l2vpn_controller
   /l2vpn/1.0/{service_id}:
     get:
       tags:
@@ -1079,4 +1097,3 @@ components:
       name: api_key
       in: header
       x-apikeyInfoFunc: sdx_controller.controllers.authorization_controller.check_api_key
-
