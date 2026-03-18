@@ -360,14 +360,13 @@ class ConnectionHandler:
             logger.error(f"Error when generating/publishing breakdown: {e} - {err}")
             return f"Error: {e}", 410
 
-    def archive_connection(self, service_id) -> None:
+    def archive_connection(self, service_id, reason) -> None:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
         if not connection_request:
             return
 
-        connection_request = connection_request
         self.db_instance.delete_one_entry(MongoCollections.CONNECTIONS, service_id)
 
         historical_connections_list = self.db_instance.get_value_from_db(
@@ -377,7 +376,9 @@ class ConnectionHandler:
         timestamp = str(int(time.time()))
 
         if historical_connections_list:
-            historical_connections_list.append({timestamp: connection_request})
+            historical_connections_list.append(
+                {timestamp: {"connection": connection_request, "reason": reason}}
+            )
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
@@ -387,11 +388,13 @@ class ConnectionHandler:
             self.db_instance.add_key_value_pair_to_db(
                 MongoCollections.HISTORICAL_CONNECTIONS,
                 service_id,
-                [{timestamp: connection_request}],
+                [{timestamp: {"connection": connection_request, "reason": reason}}],
             )
         logger.debug(f"Archived connection: {service_id}")
 
-    def remove_connection(self, te_manager, service_id) -> Tuple[str, int]:
+    def remove_connection(
+        self, te_manager, service_id, archive_reason
+    ) -> Tuple[str, int]:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
         )
@@ -427,7 +430,7 @@ class ConnectionHandler:
                 te_manager, operation="delete", connection_request=connection_request
             )
             self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
-            self.archive_connection(service_id)
+            self.archive_connection(service_id, archive_reason)
             logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
             # update topology in DB with updated states (bandwidth and available vlan pool)
             topology_db_update(self.db_instance, te_manager)
@@ -500,7 +503,9 @@ class ConnectionHandler:
                         logger.info(
                             f"Removing connection: {service_id} {connection.get('status')}"
                         )
-                        _, code = self.remove_connection(te_manager, connection["id"])
+                        _, code = self.remove_connection(
+                            te_manager, connection["id"], archive_reason="Failure"
+                        )
                         if code // 100 != 2:
                             logger.info(
                                 f"Do not remove connection, may be already removed: {connection['id']}, code: {code}"
