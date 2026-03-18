@@ -233,6 +233,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
+    # Get roll back connection before removing connection
+    rollback_conn_body = body
     body.update(new_body)
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
@@ -243,8 +245,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     try:
         logger.info("Removing connection")
-        # Get roll back connection before removing connection
-        rollback_conn_body = body
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
             current_app.te_manager, service_id, "API"
         )
@@ -287,7 +287,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         }
         return response, code
     else:
-        body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
+        body, _ = connection_state_machine(body, ConnectionStateMachine.State.ERROR)
 
     logger.info(
         f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
@@ -305,19 +305,32 @@ def patch_connection(service_id, body=None):  # noqa: E501
     # because above placement failed, so re-place the original connection request.
     conn_request = rollback_conn_body
     conn_request["id"] = service_id
-
+    rollback_conn_body, _ = connection_state_machine(
+        rollback_conn_body, ConnectionStateMachine.State.UNDER_PROVISIONING
+    )
     try:
         rollback_conn_reason, rollback_conn_code = connection_handler.place_connection(
             current_app.te_manager, conn_request
         )
-        if rollback_conn_code // 100 == 2:
-            db_instance.add_key_value_pair_to_db(
-                MongoCollections.CONNECTIONS, service_id, conn_request
+        if rollback_conn_code // 100 != 2:
+            conn_status = ConnectionStateMachine.State.REJECTED
+            db_instance.update_field_in_json(
+                MongoCollections.CONNECTIONS,
+                service_id,
+                "status",
+                str(conn_status),
             )
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
         )
     except Exception as e:
+        conn_status = ConnectionStateMachine.State.DOWN
+        db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "status",
+            str(conn_status),
+        )
         logger.info(f"Rollback failed (connection id: {service_id}): {e}")
         return f"Rollback failed, reason: {e}", 500
 
