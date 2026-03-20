@@ -294,26 +294,23 @@ def patch_connection(service_id, body=None):  # noqa: E501
     )
     logger.info("Rolling back to old connection.")
 
-    if not rollback_conn_body:
-        response = {
-            "service_id": service_id,
-            "status": parse_conn_status(body["status"]),
-            "reason": f"Failure, unable to rollback to last successful L2VPN: {reason}",
-        }
-        return response, code
-
     # because above placement failed, so re-place the original connection request.
+
+    rollback_conn_body["status"] = str(ConnectionStateMachine.State.REQUESTED)
+    # used in lc_message_handler to count the oxp success response
+    rollback_conn_body["oxp_success_count"] = 0
+    conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+    rollback_conn_body, _ = connection_state_machine(rollback_conn_body, conn_status)
+
     conn_request = rollback_conn_body
     conn_request["id"] = service_id
-    rollback_conn_body, _ = connection_state_machine(
-        rollback_conn_body, ConnectionStateMachine.State.UNDER_PROVISIONING
-    )
+
     try:
         rollback_conn_reason, rollback_conn_code = connection_handler.place_connection(
             current_app.te_manager, conn_request
         )
         if rollback_conn_code // 100 != 2:
-            conn_status = ConnectionStateMachine.State.DOWN
+            conn_status = ConnectionStateMachine.State.REJECTED
             db_instance.update_field_in_json(
                 MongoCollections.CONNECTIONS,
                 service_id,
@@ -324,7 +321,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
         )
     except Exception as e:
-        conn_status = ConnectionStateMachine.State.DOWN
+        conn_status = ConnectionStateMachine.State.REJECTED
         db_instance.update_field_in_json(
             MongoCollections.CONNECTIONS,
             service_id,
@@ -332,14 +329,14 @@ def patch_connection(service_id, body=None):  # noqa: E501
             str(conn_status),
         )
         logger.info(f"Rollback failed (connection id: {service_id}): {e}")
-        return f"Rollback failed, reason: {e}", 500
+        rollback_conn_code = 500
 
     response = {
         "service_id": service_id,
-        "reason": f"Failure, rolled back to last successful L2VPN: {reason}",
-        "status": parse_conn_status(conn_request["status"]),
+        "reason": f"Patch Failure,rolled back to last successful L2VPN: {rollback_conn_reason}",
+        "status": parse_conn_status(str(conn_status)),
     }
-    return response, code
+    return response, rollback_conn_code
 
 
 def get_archived_connections_by_id(service_id):
