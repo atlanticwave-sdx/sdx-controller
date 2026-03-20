@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import uuid
@@ -234,7 +235,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(f"Gathered connexion JSON: {new_body}")
 
     # Get roll back connection before removing connection
-    rollback_conn_body = body
+    rollback_conn_body = copy.deepcopy(body)
     body.update(new_body)
 
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
