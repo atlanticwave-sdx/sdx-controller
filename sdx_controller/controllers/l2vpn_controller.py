@@ -287,7 +287,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
         }
         return response, code
     else:
-        body, _ = connection_state_machine(body, ConnectionStateMachine.State.ERROR)
+        body, _ = connection_state_machine(body, ConnectionStateMachine.State.DOWN)
 
     logger.info(
         f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
@@ -313,7 +313,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             current_app.te_manager, conn_request
         )
         if rollback_conn_code // 100 != 2:
-            conn_status = ConnectionStateMachine.State.REJECTED
+            conn_status = ConnectionStateMachine.State.DOWN
             db_instance.update_field_in_json(
                 MongoCollections.CONNECTIONS,
                 service_id,
