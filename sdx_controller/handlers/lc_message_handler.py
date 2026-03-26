@@ -147,10 +147,24 @@ class LcMessageHandler:
         logger.info("Save to database complete.")
         logger.info("message ID:" + str(db_msg_id))
 
+        previous_domain_status = domain_dict.get(domain_name)
         is_new_domain = domain_name not in domain_dict
+        is_recovered_domain = (
+            previous_domain_status is not None
+            and previous_domain_status != DomainStatus.UP
+        )
 
         # Update existing topology
         if domain_name in domain_dict:
+            if is_recovered_domain:
+                logger.info(
+                    f"Domain {domain_name} status changed from "
+                    f"{previous_domain_status} to {DomainStatus.UP}"
+                )
+                domain_dict[domain_name] = DomainStatus.UP
+                self.db_instance.add_key_value_pair_to_db(
+                    MongoCollections.DOMAINS, Constants.DOMAIN_DICT, domain_dict
+                )
             logger.info("Updating topo")
             logger.debug(msg_json)
             (
@@ -205,6 +219,6 @@ class LcMessageHandler:
         self.db_instance.add_key_value_pair_to_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
         )
-        if is_new_domain:
+        if is_new_domain or is_recovered_domain:
             self.connection_handler.retry_error_connections(self.te_manager)
         logger.info("Save to database complete.")
