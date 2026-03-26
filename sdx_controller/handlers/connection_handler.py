@@ -61,7 +61,9 @@ class ConnectionHandler:
         logger.info(f"Saved connection {service_id} to error collection")
 
     def delete_error_connection(self, service_id) -> None:
-        self.db_instance.delete_one_entry(MongoCollections.ERROR_CONNECTIONS, service_id)
+        self.db_instance.delete_one_entry(
+            MongoCollections.ERROR_CONNECTIONS, service_id
+        )
 
     def get_latest_archived_connection(self, service_id):
         historical_connections = self.db_instance.get_value_from_db(
