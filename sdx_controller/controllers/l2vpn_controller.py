@@ -120,7 +120,8 @@ def get_connection_by_id(service_id):
 
 
 def get_connections():  # noqa: E501
-    """List all connections
+    """
+    List all connections
 
     connection details # noqa: E501
 
@@ -136,6 +137,30 @@ def get_connections():  # noqa: E501
         connection_status = get_connection_status(db_instance, service_id)
         if connection_status:
             return_values[service_id] = connection_status.get(service_id)
+    return return_values
+
+
+def get_archived_connections():
+    """
+    List all archived connections.
+
+    :rtype: dict
+    """
+    values = db_instance.get_all_entries_in_collection(
+        MongoCollections.HISTORICAL_CONNECTIONS
+    )
+    if not values:
+        return "No archived connection was found", 404
+
+    return_values = {}
+    for archived_connection in values:
+        service_id = next(iter(archived_connection))
+        archived_events = connection_handler.get_archived_connections(service_id)
+        if archived_events:
+            return_values[service_id] = archived_events
+
+    if not return_values:
+        return "No archived connection was found", 404
     return return_values
 
 
@@ -350,9 +375,9 @@ def get_archived_connections_by_id(service_id):
     :rtype: Connection
     """
 
-    value = get_connection_status(db_instance, service_id)
+    value = connection_handler.get_archived_connections(service_id)
 
     if not value:
-        return "Connection not found", 404
+        return "Archived connection not found", 404
 
-    return value
+    return {service_id: value}
