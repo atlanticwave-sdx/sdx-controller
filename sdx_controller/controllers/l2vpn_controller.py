@@ -119,7 +119,8 @@ def get_connection_by_id(service_id):
 
 
 def get_connections():  # noqa: E501
-    """List all connections
+    """
+    List all connections
 
     connection details # noqa: E501
 
