@@ -139,6 +139,10 @@ class ConnectionHandler:
             )
 
             if code // 100 != 2:
+                connection_to_retry["status"] = str(ConnectionStateMachine.State.ERROR)
+                self.db_instance.add_key_value_pair_to_db(
+                    MongoCollections.CONNECTIONS, service_id, connection_to_retry
+                )
                 self.save_error_connection(
                     connection_to_retry,
                     reason="Retry failed",
