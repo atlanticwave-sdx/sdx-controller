@@ -33,7 +33,7 @@ class LcMessageHandler:
             msg_json.get("msg_type")
             and msg_json["msg_type"] == "oxp_conn_status_change"
         ):
-            logger.info("Received OXP connection status change.")
+            logger.info(f"Received OXP connection status change {service_id=} {existing_status=} {new_status=}")
             service_id = msg_json.get("service_id")
             new_status = msg_json.get("new_status")
             existing_status = msg_json.get("existing_status")
@@ -51,7 +51,7 @@ class LcMessageHandler:
 
             # If status is unchanged, do nothing
             if current_status == new_status:
-                logger.info(f"Status unchanged for {service_id}")
+                logger.debug(f"Status unchanged for {service_id}")
                 return
 
             logger.info(
