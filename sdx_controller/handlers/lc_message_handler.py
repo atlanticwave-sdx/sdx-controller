@@ -75,6 +75,9 @@ class LcMessageHandler:
         elif msg_json.get("msg_type") and msg_json["msg_type"] == "oxp_conn_response":
             logger.info("Received OXP connection response.")
             service_id = msg_json.get("service_id")
+            operation = msg_json.get("operation")
+            oxp_response_code = msg_json.get("oxp_response_code")
+            oxp_response_msg = msg_json.get("oxp_response")
 
             if not service_id:
                 return
@@ -84,6 +87,20 @@ class LcMessageHandler:
             )
 
             if not connection:
+                if operation == "delete" and oxp_response_code // 100 != 2:
+                    saved = self.connection_handler.save_error_connection_from_archive(
+                        service_id,
+                        reason="Delete failed during failure handling",
+                        details={
+                            "oxp_response_code": oxp_response_code,
+                            "oxp_response": oxp_response_msg,
+                        },
+                        expected_archive_reason="Failure",
+                    )
+                    if saved:
+                        logger.info(
+                            f"Saved archived connection {service_id} to error collection after delete failure"
+                        )
                 return
 
             breakdown = self.db_instance.get_value_from_db(
@@ -96,8 +113,6 @@ class LcMessageHandler:
             oxp_number = len(breakdown)
             oxp_success_count = connection.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
-            oxp_response_code = msg_json.get("oxp_response_code")
-            oxp_response_msg = msg_json.get("oxp_response")
             oxp_response = connection.get("oxp_response")
             if not oxp_response:
                 oxp_response = {}
@@ -105,7 +120,7 @@ class LcMessageHandler:
             connection["oxp_response"] = oxp_response
 
             if oxp_response_code // 100 == 2:
-                if msg_json.get("operation") != "delete":
+                if operation != "delete":
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
@@ -120,7 +135,17 @@ class LcMessageHandler:
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.UP
                         )
+                        self.connection_handler.delete_error_connection(service_id)
             else:
+                if operation == "delete":
+                    self.connection_handler.save_error_connection(
+                        connection,
+                        reason="Delete failed during failure handling",
+                        details={
+                            "oxp_response_code": oxp_response_code,
+                            "oxp_response": oxp_response_msg,
+                        },
+                    )
                 if connection.get("status") and (
                     connection.get("status")
                     == str(ConnectionStateMachine.State.RECOVERING)
@@ -165,8 +190,24 @@ class LcMessageHandler:
         logger.info("Save to database complete.")
         logger.info("message ID:" + str(db_msg_id))
 
+        previous_domain_status = domain_dict.get(domain_name)
+        is_new_domain = domain_name not in domain_dict
+        is_recovered_domain = (
+            previous_domain_status is not None
+            and previous_domain_status != DomainStatus.UP
+        )
+
         # Update existing topology
         if domain_name in domain_dict:
+            if is_recovered_domain:
+                logger.info(
+                    f"Domain {domain_name} status changed from "
+                    f"{previous_domain_status} to {DomainStatus.UP}"
+                )
+                domain_dict[domain_name] = DomainStatus.UP
+                self.db_instance.add_key_value_pair_to_db(
+                    MongoCollections.DOMAINS, Constants.DOMAIN_DICT, domain_dict
+                )
             logger.info("Updating topo")
             logger.debug(msg_json)
             (
@@ -221,4 +262,6 @@ class LcMessageHandler:
         self.db_instance.add_key_value_pair_to_db(
             MongoCollections.TOPOLOGIES, Constants.LATEST_TOPOLOGY, latest_topo
         )
+        if is_new_domain or is_recovered_domain:
+            self.connection_handler.retry_error_connections(self.te_manager)
         logger.info("Save to database complete.")

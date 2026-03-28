@@ -34,6 +34,123 @@ class ConnectionHandler:
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
 
+    def save_error_connection(self, connection, reason, details=None) -> None:
+        if not connection:
+            return
+
+        service_id = connection.get("id")
+        if not service_id:
+            return
+
+        connection_to_save = dict(connection)
+        connection_to_save["status"] = str(ConnectionStateMachine.State.ERROR)
+
+        error_record = {
+            "connection": connection_to_save,
+            "reason": reason,
+            "updated_at": str(int(time.time())),
+        }
+        if details is not None:
+            error_record["details"] = details
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.ERROR_CONNECTIONS,
+            service_id,
+            error_record,
+        )
+        logger.info(f"Saved connection {service_id} to error collection")
+
+    def delete_error_connection(self, service_id) -> None:
+        self.db_instance.delete_one_entry(
+            MongoCollections.ERROR_CONNECTIONS, service_id
+        )
+
+    def get_latest_archived_connection(self, service_id):
+        historical_connections = self.db_instance.get_value_from_db(
+            MongoCollections.HISTORICAL_CONNECTIONS, service_id
+        )
+        if not historical_connections:
+            return None, None
+
+        latest_record = historical_connections[-1]
+        if not latest_record:
+            return None, None
+
+        latest_timestamp = next(reversed(latest_record))
+        latest_entry = latest_record.get(latest_timestamp, {})
+        return latest_entry.get("connection"), latest_entry.get("reason")
+
+    def save_error_connection_from_archive(
+        self, service_id, reason, details=None, expected_archive_reason=None
+    ) -> bool:
+        connection, archive_reason = self.get_latest_archived_connection(service_id)
+        if not connection:
+            return False
+
+        if (
+            expected_archive_reason is not None
+            and archive_reason != expected_archive_reason
+        ):
+            return False
+
+        self.save_error_connection(connection, reason=reason, details=details)
+        return True
+
+    def retry_error_connections(self, te_manager) -> None:
+        error_connections = self.db_instance.get_all_entries_in_collection(
+            MongoCollections.ERROR_CONNECTIONS
+        )
+
+        for error_connection in error_connections:
+            service_id = next(iter(error_connection))
+            error_record = error_connection.get(service_id, {})
+            connection = error_record.get("connection", error_record)
+
+            if not connection:
+                continue
+
+            active_connection = self.db_instance.get_value_from_db(
+                MongoCollections.CONNECTIONS, service_id
+            )
+            if active_connection:
+                active_status = active_connection.get("status")
+                if active_status in {
+                    str(ConnectionStateMachine.State.RECOVERING),
+                    str(ConnectionStateMachine.State.UNDER_PROVISIONING),
+                    str(ConnectionStateMachine.State.UP),
+                    str(ConnectionStateMachine.State.MODIFYING),
+                }:
+                    logger.info(
+                        f"Skipping retry for {service_id}; active status is {active_status}"
+                    )
+                    continue
+                connection = active_connection
+
+            connection_to_retry = dict(connection)
+            connection_to_retry["status"] = str(ConnectionStateMachine.State.RECOVERING)
+            connection_to_retry["oxp_success_count"] = 0
+            connection_to_retry.pop("oxp_response", None)
+
+            self.db_instance.add_key_value_pair_to_db(
+                MongoCollections.CONNECTIONS, service_id, connection_to_retry
+            )
+
+            reason, code = self.place_connection(te_manager, connection_to_retry)
+            logger.info(
+                f"Retry error connection result: ID: {service_id} reason='{reason}', code={code}"
+            )
+
+            if code // 100 != 2:
+                connection_to_retry["status"] = str(ConnectionStateMachine.State.ERROR)
+                self.db_instance.add_key_value_pair_to_db(
+                    MongoCollections.CONNECTIONS, service_id, connection_to_retry
+                )
+                self.save_error_connection(
+                    connection_to_retry,
+                    reason="Retry failed",
+                    details={"place_connection_reason": reason, "code": code},
+                )
+
     def _process_port(self, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
@@ -507,11 +624,21 @@ class ConnectionHandler:
                             te_manager, connection["id"], archive_reason="Failure"
                         )
                         if code // 100 != 2:
+                            self.save_error_connection(
+                                connection,
+                                reason="Failure handling delete failed",
+                                details={"code": code},
+                            )
                             logger.info(
                                 f"Do not remove connection, may be already removed: {connection['id']}, code: {code}"
                             )
                             continue
                     except Exception as err:
+                        self.save_error_connection(
+                            connection,
+                            reason="Failure handling delete raised exception",
+                            details={"error": str(err)},
+                        )
                         logger.info(
                             f"Encountered error when deleting connection: {err}"
                         )
@@ -535,6 +662,11 @@ class ConnectionHandler:
                             MongoCollections.CONNECTIONS,
                             service_id,
                             connection,
+                        )
+                        self.save_error_connection(
+                            connection,
+                            reason="Failure handling recovery failed",
+                            details={"place_connection_reason": _reason, "code": code},
                         )
 
                     logger.info(
