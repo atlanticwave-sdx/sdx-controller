@@ -86,14 +86,6 @@ class LcMessageHandler:
             if not connection:
                 return
 
-            if connection.get("status") and (
-                connection.get("status")
-                != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
-            ):
-                logger.info("Connection is not under provisioning: " + service_id)
-                logger.info("No need to process OXP response for down connection.")
-                return
-
             breakdown = self.db_instance.get_value_from_db(
                 MongoCollections.BREAKDOWNS, service_id
             )
@@ -114,6 +106,15 @@ class LcMessageHandler:
 
             if oxp_response_code // 100 == 2:
                 if msg_json.get("operation") != "delete":
+                    if connection.get("status") and (
+                        connection.get("status")
+                        != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
+                    ):
+                        logger.info(
+                            "Ignore oxp_conn_response, Connection is not under provisioning: "
+                            + service_id
+                        )
+                        return
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
