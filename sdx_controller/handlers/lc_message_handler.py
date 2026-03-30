@@ -86,6 +86,14 @@ class LcMessageHandler:
             if not connection:
                 return
 
+            if connection.get("status") and (
+                connection.get("status")
+                != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
+            ):
+                logger.info("Connection is not under provisioning: " + service_id)
+                logger.info("No need to process OXP response for down connection.")
+                return
+
             breakdown = self.db_instance.get_value_from_db(
                 MongoCollections.BREAKDOWNS, service_id
             )
