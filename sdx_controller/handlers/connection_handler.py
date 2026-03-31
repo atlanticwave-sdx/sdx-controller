@@ -496,7 +496,9 @@ class ConnectionHandler:
                             connection["status"] = str(
                                 ConnectionStateMachine.State.ERROR
                             )
-                        else:
+                        elif connection.get("status") == str(
+                            ConnectionStateMachine.State.UP
+                        ):
                             connection, _ = connection_state_machine(
                                 connection, ConnectionStateMachine.State.ERROR
                             )
@@ -517,8 +519,14 @@ class ConnectionHandler:
                         )
                         continue
 
-                    logger.debug("Removed connection:")
-                    logger.debug(connection)
+                    logger.debug(f"Removed connection:{connection}")
+                    if connection.get("status") != str(
+                        ConnectionStateMachine.State.ERROR
+                    ):
+                        logger.info(
+                            f"Connection {service_id} is in {connection.get('status')} state after link failure, no recovery needed."
+                        )
+
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
                     )
@@ -574,6 +582,8 @@ class ConnectionHandler:
                     if not connection:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
+
+                    # special case on uni port status change, out of SM
                     logger.info(f"Updating connection {service_id} status to 'down'.")
                     connection["status"] = "DOWN"
                     self.db_instance.add_key_value_pair_to_db(
@@ -614,7 +624,7 @@ class ConnectionHandler:
                     if not connection:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
-
+                    # special case on uni port status change, out of SM
                     logger.info(f"Updating connection {service_id} status to 'up'.")
                     connection["status"] = "UP"
                     self.db_instance.add_key_value_pair_to_db(
