@@ -526,6 +526,9 @@ class ConnectionHandler:
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.UNDER_PROVISIONING
+                    )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
                         connection, _ = connection_state_machine(
