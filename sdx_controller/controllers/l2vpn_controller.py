@@ -213,6 +213,12 @@ def place_connection(body):
     else:
         conn_status = ConnectionStateMachine.State.REJECTED
         body, _ = connection_state_machine(body, conn_status)
+        db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "status",
+            str(conn_status),
+        )
     logger.info(
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
