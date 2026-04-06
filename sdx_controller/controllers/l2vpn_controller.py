@@ -194,9 +194,6 @@ def place_connection(body):
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
 
-    conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-    body, _ = connection_state_machine(body, conn_status)
-
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     logger.info(
@@ -204,7 +201,7 @@ def place_connection(body):
     )
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    if code // 100 != 2:
+    if code // 100 == 2:
         conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
         body, _ = connection_state_machine(body, conn_status)
         db_instance.update_field_in_json(
