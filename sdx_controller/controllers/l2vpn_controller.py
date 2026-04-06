@@ -206,6 +206,7 @@ def place_connection(body):
 
     if code // 100 != 2:
         conn_status = ConnectionStateMachine.State.REJECTED
+        body, _ = connection_state_machine(body, conn_status)
         db_instance.update_field_in_json(
             MongoCollections.CONNECTIONS,
             service_id,
@@ -259,6 +260,19 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
+    # Validate the new request body before making any change to the existing connection.
+    # This is to avoid the case where we have already removed the original connection but the new request body is invalid, which will cause the connection to be deleted but not re-created.
+    # We can reuse the same validation function used in place_connection since the request body for patch_connection has the same schema as place_connection.
+    #
+    te_manager = current_app.te_manager  # Assuming te_manager is accessible like this
+    try:
+        # Validate the new request body
+        te_manager.generate_traffic_matrix(connection_request=new_body)
+    except Exception as request_err:
+        logger.error("ERROR: invalid patch request: " + str(request_err))
+        return f"Error: patch request is no valid: {request_err}", 400
+
+    logger.info("Modifying connection")
     # Get roll back connection before removing connection
     rollback_conn_body = copy.deepcopy(body)
     body.update(new_body)
