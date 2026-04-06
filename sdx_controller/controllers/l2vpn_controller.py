@@ -260,6 +260,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     logger.info(f"Gathered connexion JSON: {new_body}")
 
+    if "id" not in new_body:
+        new_body["id"] = service_id
+
     # Validate the new request body before making any change to the existing connection.
     # This is to avoid the case where we have already removed the original connection but the new request body is invalid, which will cause the connection to be deleted but not re-created.
     # We can reuse the same validation function used in place_connection since the request body for patch_connection has the same schema as place_connection.
