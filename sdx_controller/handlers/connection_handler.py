@@ -201,6 +201,9 @@ class ConnectionHandler:
             }
 
             if operation == "delete":
+                logger.debug(
+                    f"Handling delete operation for connection {connection_request}"
+                )
                 oxp_response = connection_request.get("oxp_response")
 
                 # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
