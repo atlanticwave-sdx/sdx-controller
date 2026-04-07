@@ -194,7 +194,7 @@ def place_connection(body):
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
 
-    # db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     logger.info(
         f"Handling request {service_id} with te_manager: {current_app.te_manager}"
