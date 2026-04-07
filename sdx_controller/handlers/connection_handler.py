@@ -5,6 +5,7 @@ import time
 import traceback
 from typing import Tuple
 
+from sdx_controller.models import connection
 from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, MessageQueueNames, MongoCollections
 from sdx_datamodel.parsing.exceptions import (
@@ -522,12 +523,13 @@ class ConnectionHandler:
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
                     )
-
+                    connection["oxp_success_count"] = 0
+                    connection["oxp_response"] = {}
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
                     _reason, code = self.place_connection(te_manager, connection)
-                    connection["oxp_success_count"] = 0
+
                     if code // 100 == 2:
                         # Service created successfully
                         conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
@@ -594,9 +596,13 @@ class ConnectionHandler:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
                     logger.info(f"Updating connection {service_id} status to 'down'.")
-                    connection["status"] = "DOWN"
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, connection
+                    conn_status = "DOWN"
+                    connection["status"] = conn_status
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        "status",
+                        str(conn_status),
                     )
                     logger.debug(f"Connection status updated for {service_id}")
             else:
@@ -635,9 +641,13 @@ class ConnectionHandler:
                         continue
 
                     logger.info(f"Updating connection {service_id} status to 'up'.")
-                    connection["status"] = "UP"
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, connection
+                    conn_status = "UP"
+                    connection["status"] = conn_status
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        "status",
+                        str(conn_status),
                     )
                     logger.debug(f"Connection status updated for {service_id}")
 
