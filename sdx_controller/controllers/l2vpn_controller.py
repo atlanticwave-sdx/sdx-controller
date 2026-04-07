@@ -189,7 +189,8 @@ def place_connection(body):
         body["id"] = service_id
         logger.info(f"Request has no ID. Generated ID: {service_id}")
 
-    body["status"] = str(ConnectionStateMachine.State.REQUESTED)
+    conn_status = ConnectionStateMachine.State.REQUESTED
+    body["status"] = str(conn_status)
 
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
@@ -337,6 +338,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     body["oxp_success_count"] = 0
+    body["oxp_response"] = {}
     if code // 100 == 2:
         # Service created successfully
         conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
@@ -367,6 +369,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     rollback_conn_body["status"] = str(ConnectionStateMachine.State.REQUESTED)
     # used in lc_message_handler to count the oxp success response
     rollback_conn_body["oxp_success_count"] = 0
+    rollback_conn_body["oxp_response"] = {}
 
     conn_request = rollback_conn_body
     conn_request["id"] = service_id

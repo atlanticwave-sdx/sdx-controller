@@ -118,11 +118,10 @@ class LcMessageHandler:
                             connection, conn_status
                         )
             else:
-                if (
+                if connection.get("status") and (
                     connection.get("status")
-                    and connection.get("status")
                     == str(ConnectionStateMachine.State.MODIFYING)
-                    and connection.get("status")
+                    or connection.get("status")
                     == str(ConnectionStateMachine.State.UNDER_PROVISIONING)
                 ):
                     conn_status = ConnectionStateMachine.State.DOWN

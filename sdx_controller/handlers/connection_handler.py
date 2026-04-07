@@ -544,8 +544,9 @@ class ConnectionHandler:
                         )
                         code = 201
                     else:
+                        conn_status = ConnectionStateMachine.State.ERROR
                         connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.ERROR
+                            connection, conn_status
                         )
                         self.db_instance.update_field_in_json(
                             MongoCollections.CONNECTIONS,
