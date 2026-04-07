@@ -134,6 +134,12 @@ class LcMessageHandler:
                 "status",
                 str(conn_status),
             )
+            self.db_instance.update_field_in_json(
+                MongoCollections.CONNECTIONS,
+                service_id,
+                "oxp_response",
+                oxp_response,
+            )
             logger.info("Connection updated: " + str(connection))
             return
 
