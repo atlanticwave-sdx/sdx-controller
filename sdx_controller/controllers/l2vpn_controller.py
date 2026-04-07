@@ -386,6 +386,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
                 "status",
                 str(conn_status),
             )
+            # still return 400 to indicate the patch request is not successful, since we have already rolled back to original connection, which is under provisioning state, so the connection is not down and not failed.
+            rollback_conn_code = 400
         else:
             conn_status = ConnectionStateMachine.State.REJECTED
             body, _ = connection_state_machine(body, conn_status)
