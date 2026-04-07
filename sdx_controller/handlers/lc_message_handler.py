@@ -109,8 +109,11 @@ class LcMessageHandler:
                 if msg_json.get("operation") != "delete":
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
-                    conn_status = ConnectionStateMachine.State.UP
+                    logger.info(
+                        f"Update oxp_success_count: {oxp_success_count}; oxp_number: {oxp_number}"
+                    )
                     if oxp_success_count == oxp_number:
+                        conn_status = ConnectionStateMachine.State.UP
                         connection, _ = connection_state_machine(
                             connection, conn_status
                         )
@@ -139,6 +142,12 @@ class LcMessageHandler:
                 service_id,
                 "oxp_response",
                 oxp_response,
+            )
+            self.db_instance.update_field_in_json(
+                MongoCollections.CONNECTIONS,
+                service_id,
+                "oxp_success_count",
+                oxp_success_count,
             )
             logger.info("Connection updated: " + str(connection))
             return
