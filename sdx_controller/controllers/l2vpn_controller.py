@@ -295,10 +295,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
         str(conn_status),
     )
 
-    body["oxp_success_count"] = 0
-
-    # db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
-
     try:
         logger.info("Removing connection")
         remove_conn_reason, remove_conn_code = connection_handler.remove_connection(
@@ -337,18 +333,16 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(
         f"Modifying: Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
-
+    # reset: the original one has been removed from db
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
+    body["oxp_success_count"] = 0
     if code // 100 == 2:
         # Service created successfully
         conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
         body, _ = connection_state_machine(body, conn_status)
-        db_instance.update_field_in_json(
-            MongoCollections.CONNECTIONS,
-            service_id,
-            "status",
-            str(conn_status),
+        db_instance.add_key_value_pair_to_db(
+            MongoCollections.CONNECTIONS, service_id, body
         )
         code = 201
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
@@ -361,15 +355,10 @@ def patch_connection(service_id, body=None):  # noqa: E501
 
     conn_status = ConnectionStateMachine.State.DOWN
     body, _ = connection_state_machine(body, conn_status)
-    db_instance.update_field_in_json(
-        MongoCollections.CONNECTIONS,
-        service_id,
-        "status",
-        str(conn_status),
-    )
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
     logger.info(
-        f"Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
+        f"Modifying: Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
     )
     logger.info("Rolling back to old connection.")
 
