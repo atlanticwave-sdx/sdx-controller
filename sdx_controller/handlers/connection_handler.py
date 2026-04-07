@@ -522,24 +522,46 @@ class ConnectionHandler:
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
                     )
-                    connection["oxp_success_count"] = 0
+
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
                     _reason, code = self.place_connection(te_manager, connection)
-                    if code // 100 != 2:
+                    connection["oxp_success_count"] = 0
+                    if code // 100 == 2:
+                        # Service created successfully
+                        conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+                        connection, _ = connection_state_machine(
+                            connection, conn_status
+                        )
+                        self.db_instance.update_field_in_json(
+                            MongoCollections.CONNECTIONS,
+                            service_id,
+                            "status",
+                            str(conn_status),
+                        )
+                        code = 201
+                    else:
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.ERROR
                         )
-                        self.db_instance.add_key_value_pair_to_db(
+                        self.db_instance.update_field_in_json(
                             MongoCollections.CONNECTIONS,
                             service_id,
-                            connection,
+                            "status",
+                            str(conn_status),
                         )
+                        code = 400
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
+                    response = {
+                        "service_id": service_id,
+                        "status": parse_conn_status(connection["status"]),
+                        "reason": _reason,
+                    }
+                    return response, code
 
     def handle_uni_ports_up_to_down(self, uni_ports_up_to_down):
         """

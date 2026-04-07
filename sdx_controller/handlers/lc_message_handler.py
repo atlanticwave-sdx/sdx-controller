@@ -93,6 +93,7 @@ class LcMessageHandler:
                 logger.info(f"Could not find breakdown for {service_id}")
                 return None
 
+            conn_status = connection.get("status")
             oxp_number = len(breakdown)
             oxp_success_count = connection.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
@@ -108,46 +109,32 @@ class LcMessageHandler:
                 if msg_json.get("operation") != "delete":
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
+                    conn_status = ConnectionStateMachine.State.UP
                     if oxp_success_count == oxp_number:
-                        if connection.get("status") and (
-                            connection.get("status")
-                            == str(ConnectionStateMachine.State.RECOVERING)
-                        ):
-                            connection, _ = connection_state_machine(
-                                connection,
-                                ConnectionStateMachine.State.UNDER_PROVISIONING,
-                            )
                         connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.UP
+                            connection, conn_status
                         )
             else:
-                if connection.get("status") and (
-                    connection.get("status")
-                    == str(ConnectionStateMachine.State.RECOVERING)
-                ):
-                    connection, _ = connection_state_machine(
-                        connection, ConnectionStateMachine.State.ERROR
-                    )
-                elif (
+                if (
                     connection.get("status")
                     and connection.get("status")
-                    != str(ConnectionStateMachine.State.DOWN)
+                    == str(ConnectionStateMachine.State.MODIFYING)
                     and connection.get("status")
-                    != str(ConnectionStateMachine.State.ERROR)
+                    == str(ConnectionStateMachine.State.UNDER_PROVISIONING)
                 ):
-                    connection, _ = connection_state_machine(
-                        connection, ConnectionStateMachine.State.DOWN
-                    )
+                    conn_status = ConnectionStateMachine.State.DOWN
+                    connection, _ = connection_state_machine(connection, conn_status)
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
             # to finalize the status of the connection.
-            self.db_instance.add_key_value_pair_to_db(
+            self.db_instance.update_field_in_json(
                 MongoCollections.CONNECTIONS,
                 service_id,
-                connection,
+                "status",
+                str(conn_status),
             )
-            logger.info("Connection updated: " + service_id)
+            logger.info("Connection updated: " + str(connection))
             return
 
         # topology message RPC from OXP: no exchange name is defined.
