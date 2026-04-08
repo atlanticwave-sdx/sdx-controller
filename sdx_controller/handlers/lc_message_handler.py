@@ -107,23 +107,37 @@ class LcMessageHandler:
             partial_cleanup_requested = connection.get(
                 "partial_cleanup_requested", False
             )
+            late_cleanup_domains = connection.get("late_cleanup_domains", [])
 
             if oxp_response_code // 100 == 2:
-                if operation != "delete" and not partial_cleanup_requested:
-                    oxp_success_count += 1
-                    connection["oxp_success_count"] = oxp_success_count
-                    if oxp_success_count == oxp_number:
-                        if connection.get("status") and (
-                            connection.get("status")
-                            == str(ConnectionStateMachine.State.RECOVERING)
-                        ):
-                            connection, _ = connection_state_machine(
-                                connection,
-                                ConnectionStateMachine.State.UNDER_PROVISIONING,
+                if operation != "delete":
+                    if partial_cleanup_requested:
+                        if lc_domain not in late_cleanup_domains:
+                            cleanup_status, cleanup_code = (
+                                self.connection_handler.cleanup_partial_connection_domain(
+                                    service_id, connection, lc_domain
+                                )
                             )
-                        connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.UP
-                        )
+                            logger.info(
+                                f"Late partial cleanup result for {service_id} in {lc_domain}: {cleanup_status}, code={cleanup_code}"
+                            )
+                            late_cleanup_domains.append(lc_domain)
+                            connection["late_cleanup_domains"] = late_cleanup_domains
+                    else:
+                        oxp_success_count += 1
+                        connection["oxp_success_count"] = oxp_success_count
+                        if oxp_success_count == oxp_number:
+                            if connection.get("status") and (
+                                connection.get("status")
+                                == str(ConnectionStateMachine.State.RECOVERING)
+                            ):
+                                connection, _ = connection_state_machine(
+                                    connection,
+                                    ConnectionStateMachine.State.UNDER_PROVISIONING,
+                                )
+                            connection, _ = connection_state_machine(
+                                connection, ConnectionStateMachine.State.UP
+                            )
             else:
                 if connection.get("status") and (
                     connection.get("status")

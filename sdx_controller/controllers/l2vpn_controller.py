@@ -1,6 +1,7 @@
 import copy
 import logging
 import os
+import time
 import uuid
 
 import connexion
@@ -91,7 +92,11 @@ def delete_connection(service_id):
 
         logger.info(f"Removing connection: {service_id} {connection.get('status')}")
 
-        connection_handler.remove_connection(current_app.te_manager, service_id, "API")
+        reason, code = connection_handler.remove_connection(
+            current_app.te_manager, service_id, "API"
+        )
+        if code // 100 != 2:
+            return reason, code
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
     except Exception as e:
@@ -193,6 +198,9 @@ def place_connection(body):
 
     # used in lc_message_handler to count the oxp success response
     body["oxp_success_count"] = 0
+    body["partial_cleanup_requested"] = False
+    body["provisioning_timeout_handled"] = False
+    body["provisioning_started_at"] = time.time()
 
     conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
     body, _ = connection_state_machine(body, conn_status)
@@ -266,6 +274,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body, _ = connection_state_machine(body, ConnectionStateMachine.State.MODIFYING)
 
     body["oxp_success_count"] = 0
+    body["partial_cleanup_requested"] = False
+    body["provisioning_timeout_handled"] = False
+    body["provisioning_started_at"] = time.time()
 
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
@@ -325,6 +336,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
     rollback_conn_body["status"] = str(ConnectionStateMachine.State.REQUESTED)
     # used in lc_message_handler to count the oxp success response
     rollback_conn_body["oxp_success_count"] = 0
+    rollback_conn_body["partial_cleanup_requested"] = False
+    rollback_conn_body["provisioning_timeout_handled"] = False
+    rollback_conn_body["provisioning_started_at"] = time.time()
     conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
     rollback_conn_body, _ = connection_state_machine(rollback_conn_body, conn_status)
 

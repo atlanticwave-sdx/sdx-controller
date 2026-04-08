@@ -54,6 +54,8 @@ services:
       # MQ settings
       - MQ_HOST=${MQ_HOST}
       - MQ_PORT=${MQ_PORT:-5672}
+      - OXP_RESPONSE_TIMEOUT=${OXP_RESPONSE_TIMEOUT:-60}
+      - PROVISIONING_MONITOR_INTERVAL=${PROVISIONING_MONITOR_INTERVAL:-5}
 
 volumes:
   mongodb:

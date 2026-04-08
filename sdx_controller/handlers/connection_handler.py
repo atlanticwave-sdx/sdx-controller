@@ -268,6 +268,29 @@ class ConnectionHandler:
 
         return status, code
 
+    def cleanup_partial_connection_domain(
+        self, service_id, connection_request, domain_name
+    ) -> Tuple[str, int]:
+        breakdown = self.db_instance.get_value_from_db(
+            MongoCollections.BREAKDOWNS, service_id
+        )
+        if not breakdown:
+            return "Did not find breakdown, cannot clean up connection", 404
+
+        domain_breakdown = None
+        for domain, segment in breakdown.items():
+            parsed_domain = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
+            if parsed_domain == domain_name:
+                domain_breakdown = {domain: segment}
+                break
+
+        if not domain_breakdown:
+            return f"Did not find breakdown for domain {domain_name}", 404
+
+        return self._send_breakdown_to_lc(
+            domain_breakdown, "delete", connection_request
+        )
+
     def place_connection(
         self, te_manager: TEManager, connection_request: dict
     ) -> Tuple[str, int]:
@@ -449,9 +472,11 @@ class ConnectionHandler:
                 connection_status
                 != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
             )
+            and (connection_status != str(ConnectionStateMachine.State.DOWN))
+            and (connection_status != str(ConnectionStateMachine.State.ERROR))
         ):
             logger.info(
-                f"Connection {service_id} {connection_status} is not {str(ConnectionStateMachine.State.UP)}, cannot remove connection."
+                f"Connection {service_id} {connection_status} is not in a removable state."
             )
             return "Connection is not UP, Archive", 404
 
