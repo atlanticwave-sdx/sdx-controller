@@ -152,6 +152,8 @@ class ConnectionHandler:
 
         connection_service_id = connection_request.get("id")
 
+        sent_domains = 0
+
         for domain, link in breakdown.items():
             port_list = []
             link_with_new_format = {}
@@ -210,10 +212,10 @@ class ConnectionHandler:
                 )
 
                 if not oxp_response or not evc_id:
-                    return (
-                        "Connection does not have OXP response, cannot remove connection",
-                        404,
+                    logger.info(
+                        f"Skipping delete for service {connection_service_id} in domain {domain_name}: missing evc_id"
                     )
+                    continue
                 mq_link["evc_id"] = evc_id
 
             producer = TopicQueueProducer(
@@ -221,12 +223,50 @@ class ConnectionHandler:
             )
             producer.call(json.dumps(mq_link))
             producer.stop_keep_alive()
+            sent_domains += 1
+
+        if operation == "delete" and sent_domains == 0:
+            return (
+                "Connection does not have OXP response, cannot remove connection",
+                404,
+            )
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
         return (
             "Connection deleted" if operation == "delete" else "Connection published"
         ), 201
+
+    def cleanup_partial_connection(
+        self, te_manager, service_id, connection_request
+    ) -> Tuple[str, int]:
+        try:
+            te_manager.delete_connection(service_id)
+        except Exception as e:
+            logger.info(
+                f"Failed to release local connection resources for {service_id}: {e}"
+            )
+
+        breakdown = self.db_instance.get_value_from_db(
+            MongoCollections.BREAKDOWNS, service_id
+        )
+        if not breakdown:
+            return "Did not find breakdown, cannot clean up connection", 404
+
+        status, code = self._send_breakdown_to_lc(
+            breakdown, "delete", connection_request
+        )
+        try:
+            self._process_path_to_db(
+                te_manager, operation="delete", connection_request=connection_request
+            )
+            topology_db_update(self.db_instance, te_manager)
+        except Exception as e:
+            logger.info(
+                f"Failed to update local state while cleaning up {service_id}: {e}"
+            )
+
+        return status, code
 
     def place_connection(
         self, te_manager: TEManager, connection_request: dict

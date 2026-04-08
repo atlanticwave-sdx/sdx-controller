@@ -98,14 +98,18 @@ class LcMessageHandler:
             lc_domain = msg_json.get("lc_domain")
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
+            operation = msg_json.get("operation")
             oxp_response = connection.get("oxp_response")
             if not oxp_response:
                 oxp_response = {}
             oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
             connection["oxp_response"] = oxp_response
+            partial_cleanup_requested = connection.get(
+                "partial_cleanup_requested", False
+            )
 
             if oxp_response_code // 100 == 2:
-                if msg_json.get("operation") != "delete":
+                if operation != "delete" and not partial_cleanup_requested:
                     oxp_success_count += 1
                     connection["oxp_success_count"] = oxp_success_count
                     if oxp_success_count == oxp_number:
@@ -137,6 +141,16 @@ class LcMessageHandler:
                 ):
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.DOWN
+                    )
+                if operation == "post" and not partial_cleanup_requested:
+                    connection["partial_cleanup_requested"] = True
+                    cleanup_status, cleanup_code = (
+                        self.connection_handler.cleanup_partial_connection(
+                            self.te_manager, service_id, connection
+                        )
+                    )
+                    logger.info(
+                        f"Partial cleanup result for {service_id}: {cleanup_status}, code={cleanup_code}"
                     )
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
