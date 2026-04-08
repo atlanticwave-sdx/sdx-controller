@@ -227,8 +227,8 @@ class ConnectionHandler:
 
         if operation == "delete" and sent_domains == 0:
             return (
-                "Connection does not have OXP response, cannot remove connection",
-                404,
+                "No provisioned OXP breakdowns found; connection removed locally",
+                200,
             )
 
         # We will get to this point only if all the previous steps
@@ -482,24 +482,28 @@ class ConnectionHandler:
 
         try:
             te_manager.delete_connection(service_id)
-            breakdown = self.db_instance.get_value_from_db(
-                MongoCollections.BREAKDOWNS, service_id
+        except Exception as e:
+            logger.info(
+                f"Failed to release local connection resources for {service_id}: {e}"
             )
-            if not breakdown:
-                return "Did not find breakdown, cannot remove connection", 404
 
+        breakdown = self.db_instance.get_value_from_db(
+            MongoCollections.BREAKDOWNS, service_id
+        )
+        if not breakdown:
+            self.archive_connection(service_id, archive_reason)
+            try:
+                topology_db_update(self.db_instance, te_manager)
+            except Exception as e:
+                logger.info(
+                    f"Failed to update local topology state for {service_id}: {e}"
+                )
+            return "Connection removed locally", 200
+
+        try:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
             )
-            self._process_path_to_db(
-                te_manager, operation="delete", connection_request=connection_request
-            )
-            self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
-            self.archive_connection(service_id, archive_reason)
-            logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
-            # update topology in DB with updated states (bandwidth and available vlan pool)
-            topology_db_update(self.db_instance, te_manager)
-            return status, code
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             logging.error(
@@ -507,6 +511,23 @@ class ConnectionHandler:
             )
             logger.error(f"Error when removing breakdown: {e}")
             return f"Error when removing breakdown: {e}", 400
+
+        try:
+            self._process_path_to_db(
+                te_manager, operation="delete", connection_request=connection_request
+            )
+        except Exception as e:
+            logger.info(f"Failed to release path state for {service_id}: {e}")
+
+        self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
+        self.archive_connection(service_id, archive_reason)
+        logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
+        try:
+            # update topology in DB with updated states (bandwidth and available vlan pool)
+            topology_db_update(self.db_instance, te_manager)
+        except Exception as e:
+            logger.info(f"Failed to update local topology state for {service_id}: {e}")
+        return status, code
 
     def handle_link_removal(self, te_manager, removed_links):
         logger.debug("Handling connections that contain removed links.")

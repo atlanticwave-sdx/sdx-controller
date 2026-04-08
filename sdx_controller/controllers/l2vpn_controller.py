@@ -69,27 +69,6 @@ def delete_connection(service_id):
             return "Did not find connection", 404
 
         logger.info(f"connection: {connection} {type(connection)}")
-        if connection.get("status") is None:
-            logger.error("Missing field: status is not in connection.")
-            connection["status"] = str(ConnectionStateMachine.State.DELETED)
-        elif connection["status"] == str(ConnectionStateMachine.State.UP):
-            connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.DELETED
-            )
-        elif connection["status"] == str(
-            ConnectionStateMachine.State.UNDER_PROVISIONING
-        ):
-            connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.DOWN
-            )
-            connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.DELETED
-            )
-        else:
-            connection, _ = connection_state_machine(
-                connection, ConnectionStateMachine.State.DELETED
-            )
-
         logger.info(f"Removing connection: {service_id} {connection.get('status')}")
 
         reason, code = connection_handler.remove_connection(
@@ -369,14 +348,16 @@ def patch_connection(service_id, body=None):  # noqa: E501
             str(conn_status),
         )
         logger.info(f"Rollback failed (connection id: {service_id}): {e}")
+        rollback_conn_reason = f"Rollback failed: {e}"
         rollback_conn_code = 500
 
+    response_code = code if rollback_conn_code // 100 == 2 else rollback_conn_code
     response = {
         "service_id": service_id,
         "reason": f"Patch Failure,rolled back to last successful L2VPN: {rollback_conn_reason}",
         "status": parse_conn_status(str(conn_status)),
     }
-    return response, rollback_conn_code
+    return response, response_code
 
 
 def get_archived_connections_by_id(service_id):
