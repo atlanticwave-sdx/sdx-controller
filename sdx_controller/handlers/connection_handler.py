@@ -204,14 +204,18 @@ class ConnectionHandler:
                 logger.debug(
                     f"Handling delete operation for connection {connection_request}"
                 )
-                oxp_response = connection_request.get("oxp_response")
-
-                # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-                evc_id = (
-                    oxp_response.get(domain_name, [None, {}])[1].get("service_id")
-                    if oxp_response
-                    else None
-                )
+                try:
+                    oxp_response = connection_request.get("oxp_response")
+                    # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
+                    evc_id = (
+                        oxp_response.get(domain_name, [None, {}])[1].get("service_id")
+                        if oxp_response
+                        else None
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Error occurred while processing OXP response in delete: {e}"
+                    )
 
                 if not oxp_response or not evc_id:
                     return (
