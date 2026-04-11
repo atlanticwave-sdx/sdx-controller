@@ -280,7 +280,8 @@ def patch_connection(service_id, body=None):  # noqa: E501
         te_manager.generate_traffic_matrix(connection_request=new_body)
     except Exception as request_err:
         logger.error("ERROR: invalid patch request: " + str(request_err))
-        return f"Error: patch request is no valid: {request_err}", 400
+        error_code = str(request_err).split("Code: ")[-1].replace(")", "").strip()
+        return f"Error: patch request is no valid: {request_err}", int(error_code)
 
     logger.info("Modifying connection")
     # Get roll back connection before removing connection
@@ -392,7 +393,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
                 str(conn_status),
             )
             # still return 400 to indicate the patch request is not successful, since we have already rolled back to original connection, which is under provisioning state, so the connection is not down and not failed.
-            rollback_conn_code = 400
+            rollback_conn_code = code
         else:
             conn_status = ConnectionStateMachine.State.REJECTED
             body, _ = connection_state_machine(body, conn_status)
