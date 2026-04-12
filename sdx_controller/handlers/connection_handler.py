@@ -529,6 +529,8 @@ class ConnectionHandler:
 
                     logger.debug("Removed connection:")
                     logger.debug(connection)
+                    time.sleep(10)
+
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
                     )

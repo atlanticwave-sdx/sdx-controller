@@ -1,6 +1,7 @@
 import copy
 import logging
 import os
+import time
 import uuid
 
 import connexion
@@ -331,7 +332,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             str(conn_status),
         )
         return f"Failed, reason: {e}", 500
-
+    time.sleep(10)
     logger.info(
         f"Modifying: Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
