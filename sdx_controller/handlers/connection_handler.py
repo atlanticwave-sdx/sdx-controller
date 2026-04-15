@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 import time
 import traceback
@@ -27,12 +28,47 @@ logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 MongoCollections.SOLUTIONS = "solutions"
+DELETE_PROPAGATION_WAIT_SECONDS = float(
+    os.getenv("DELETE_PROPAGATION_WAIT_SECONDS", "2")
+)
+UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS = float(
+    os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS", "5")
+)
+UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS = float(
+    os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS", "0.2")
+)
 
 
 class ConnectionHandler:
     def __init__(self, db_instance):
         self.db_instance = db_instance
         self.parse_helper = ParseHelper()
+
+    def _wait_for_provisioning_to_settle(self, service_id, expected_domains):
+        deadline = time.time() + UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS
+        latest_connection = self.db_instance.get_value_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
+
+        while time.time() < deadline:
+            latest_connection = self.db_instance.get_value_from_db(
+                MongoCollections.CONNECTIONS, service_id
+            )
+            if not latest_connection:
+                return None
+
+            latest_status = latest_connection.get("status")
+            oxp_response = latest_connection.get("oxp_response") or {}
+
+            if latest_status != str(ConnectionStateMachine.State.UNDER_PROVISIONING):
+                return latest_connection
+
+            if expected_domains and len(oxp_response) >= expected_domains:
+                return latest_connection
+
+            time.sleep(UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS)
+
+        return latest_connection
 
     def _process_port(self, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
@@ -230,6 +266,12 @@ class ConnectionHandler:
                 "No provisioned OXP breakdowns found; connection removed locally",
                 200,
             )
+
+        if operation == "delete" and DELETE_PROPAGATION_WAIT_SECONDS > 0:
+            logger.info(
+                f"Waiting {DELETE_PROPAGATION_WAIT_SECONDS}s for delete propagation."
+            )
+            time.sleep(DELETE_PROPAGATION_WAIT_SECONDS)
 
         # We will get to this point only if all the previous steps
         # leading up to this point were successful.
@@ -482,6 +524,24 @@ class ConnectionHandler:
             )
             return "Connection is not UP, Archive", 404
 
+        breakdown = self.db_instance.get_value_from_db(
+            MongoCollections.BREAKDOWNS, service_id
+        )
+
+        if (
+            connection_status == str(ConnectionStateMachine.State.UNDER_PROVISIONING)
+            and breakdown
+        ):
+            logger.info(
+                f"Waiting for in-flight provisioning to settle before removing {service_id}."
+            )
+            connection_request = self._wait_for_provisioning_to_settle(
+                service_id, len(breakdown)
+            )
+            if not connection_request:
+                return "Did not find connection request, cannot remove connection", 404
+            connection_status = connection_request.get("status")
+
         try:
             te_manager.delete_connection(service_id)
         except Exception as e:
@@ -489,9 +549,6 @@ class ConnectionHandler:
                 f"Failed to release local connection resources for {service_id}: {e}"
             )
 
-        breakdown = self.db_instance.get_value_from_db(
-            MongoCollections.BREAKDOWNS, service_id
-        )
         if not breakdown:
             self.archive_connection(service_id, archive_reason)
             try:

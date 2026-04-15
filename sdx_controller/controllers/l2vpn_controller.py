@@ -26,6 +26,12 @@ LOG_FORMAT = (
 logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 logger.setLevel(logging.getLevelName(os.getenv("LOG_LEVEL", "DEBUG")))
+ROLLBACK_SETTLE_TIMEOUT_SECONDS = float(
+    os.getenv("ROLLBACK_SETTLE_TIMEOUT_SECONDS", "5")
+)
+ROLLBACK_SETTLE_POLL_SECONDS = float(
+    os.getenv("ROLLBACK_SETTLE_POLL_SECONDS", "0.2")
+)
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
@@ -180,6 +186,7 @@ def place_connection(body):
     body["partial_cleanup_requested"] = False
     body["provisioning_timeout_handled"] = False
     body["provisioning_started_at"] = time.time()
+    body.pop("timeout_reason", None)
 
     conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
     body, _ = connection_state_machine(body, conn_status)
@@ -256,6 +263,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body["partial_cleanup_requested"] = False
     body["provisioning_timeout_handled"] = False
     body["provisioning_started_at"] = time.time()
+    body.pop("timeout_reason", None)
 
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
 
@@ -285,6 +293,14 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(
         f"Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
+
+    body["oxp_success_count"] = 0
+    body["oxp_response"] = {}
+    body["late_cleanup_domains"] = []
+    body["partial_cleanup_requested"] = False
+    body["provisioning_timeout_handled"] = False
+    body["provisioning_started_at"] = time.time()
+    body.pop("timeout_reason", None)
 
     body, _ = connection_state_machine(
         body, ConnectionStateMachine.State.UNDER_PROVISIONING
@@ -323,9 +339,12 @@ def patch_connection(service_id, body=None):  # noqa: E501
     conn_request["id"] = service_id
     conn_request["status"] = str(ConnectionStateMachine.State.REQUESTED)
     conn_request["oxp_success_count"] = 0
+    conn_request["oxp_response"] = {}
+    conn_request["late_cleanup_domains"] = []
     conn_request["partial_cleanup_requested"] = False
     conn_request["provisioning_timeout_handled"] = False
     conn_request["provisioning_started_at"] = time.time()
+    conn_request.pop("timeout_reason", None)
     conn_request, _ = connection_state_machine(
         conn_request, ConnectionStateMachine.State.UNDER_PROVISIONING
     )
@@ -338,6 +357,15 @@ def patch_connection(service_id, body=None):  # noqa: E501
             db_instance.add_key_value_pair_to_db(
                 MongoCollections.CONNECTIONS, service_id, conn_request
             )
+            deadline = time.time() + ROLLBACK_SETTLE_TIMEOUT_SECONDS
+            while time.time() < deadline:
+                current_conn = db_instance.get_value_from_db(
+                    MongoCollections.CONNECTIONS, service_id
+                )
+                current_status = current_conn.get("status") if current_conn else None
+                if current_status != str(ConnectionStateMachine.State.UNDER_PROVISIONING):
+                    break
+                time.sleep(ROLLBACK_SETTLE_POLL_SECONDS)
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
         )
