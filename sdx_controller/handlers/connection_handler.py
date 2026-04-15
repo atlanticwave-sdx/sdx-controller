@@ -607,6 +607,7 @@ class ConnectionHandler:
             return
 
         link_connections_dict = json.loads(link_connections_dict)
+        processed_service_ids = set()
 
         for link in failed_links:
             logger.info(f"Handling link failure on {link['id']}")
@@ -623,8 +624,14 @@ class ConnectionHandler:
 
             if simple_link in link_connections_dict:
                 logger.debug("Found failed link record!")
-                service_ids = link_connections_dict[simple_link]
-                for index, service_id in enumerate(service_ids):
+                service_ids = list(link_connections_dict[simple_link])
+                for service_id in service_ids:
+                    if service_id in processed_service_ids:
+                        logger.debug(
+                            f"Skipping already-processed failed service {service_id}"
+                        )
+                        continue
+                    processed_service_ids.add(service_id)
                     logger.info(
                         f"Connection {service_id} affected by link {link['id']}"
                     )
@@ -673,14 +680,19 @@ class ConnectionHandler:
                     )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
+                        logger.info(
+                            f"Recovery placement failed for {service_id}; archiving failed recovery state."
+                        )
+                        self.db_instance.delete_one_entry(
+                            MongoCollections.BREAKDOWNS, service_id
+                        )
                         connection, _ = connection_state_machine(
                             connection, ConnectionStateMachine.State.ERROR
                         )
                         self.db_instance.add_key_value_pair_to_db(
-                            MongoCollections.CONNECTIONS,
-                            service_id,
-                            connection,
+                            MongoCollections.CONNECTIONS, service_id, connection
                         )
+                        self.archive_connection(service_id, "RecoveryFailed")
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
