@@ -65,12 +65,13 @@ def create_provisioning_timeout_thread(app):
                 )
                 for connection_entry in connections:
                     service_id = next(iter(connection_entry), None)
-                    connection = connection_entry.get(service_id) if service_id else None
+                    connection = (
+                        connection_entry.get(service_id) if service_id else None
+                    )
                     if not isinstance(connection, dict):
                         continue
-                    if (
-                        connection.get("status")
-                        != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
+                    if connection.get("status") != str(
+                        ConnectionStateMachine.State.UNDER_PROVISIONING
                     ):
                         continue
 

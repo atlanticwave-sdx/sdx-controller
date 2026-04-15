@@ -279,7 +279,9 @@ class ConnectionHandler:
 
         domain_breakdown = None
         for domain, segment in breakdown.items():
-            parsed_domain = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
+            parsed_domain = (
+                self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
+            )
             if parsed_domain == domain_name:
                 domain_breakdown = {domain: segment}
                 break
