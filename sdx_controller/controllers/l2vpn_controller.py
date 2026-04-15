@@ -446,10 +446,15 @@ def patch_connection(service_id, body=None):  # noqa: E501
         rollback_conn_reason = f"Rollback failed: {e}"
         rollback_conn_code = 500
 
+    current_conn = db_instance.get_value_from_db(
+        MongoCollections.CONNECTIONS, f"{service_id}"
+    )
     response = {
         "service_id": service_id,
         "reason": f"Failure, rolled back to last successful L2VPN: {reason}",
-        "status": parse_conn_status(conn_request["status"]),
+        "status": parse_conn_status(
+            current_conn.get("status", "") if current_conn else ""
+        ),
     }
     return response, rollback_conn_code
 

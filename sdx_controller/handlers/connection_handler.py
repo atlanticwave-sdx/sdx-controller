@@ -214,17 +214,16 @@ class ConnectionHandler:
                         if oxp_response
                         else None
                     )
+                    if not oxp_response or not evc_id:
+                        return (
+                            "Connection does not have OXP response, cannot remove connection",
+                            404,
+                        )
+                    mq_link["evc_id"] = evc_id
                 except Exception as e:
                     logger.error(
                         f"Error occurred while processing OXP response in delete: {e}"
                     )
-
-                if not oxp_response or not evc_id:
-                    return (
-                        "Connection does not have OXP response, cannot remove connection",
-                        404,
-                    )
-                mq_link["evc_id"] = evc_id
 
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
