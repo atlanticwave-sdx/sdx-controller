@@ -92,7 +92,15 @@ def delete_connection(service_id):
 
         logger.info(f"Removing connection: {service_id} {connection.get('status')}")
 
-        connection_handler.remove_connection(current_app.te_manager, service_id, "API")
+        remove_reason, remove_code = connection_handler.remove_connection(
+            current_app.te_manager, service_id, "API"
+        )
+        if remove_code // 100 != 2:
+            logger.info(
+                f"Delete failed (connection id: {service_id}): "
+                f"reason='{remove_reason}', code={remove_code}"
+            )
+            return remove_reason, remove_code
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
     except Exception as e:
@@ -204,14 +212,15 @@ def place_connection(body):
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
-        conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-        body, _ = connection_state_machine(body, conn_status)
-        db_instance.update_field_in_json(
-            MongoCollections.CONNECTIONS,
-            service_id,
-            "status",
-            str(conn_status),
-        )
+        # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+        # body, _ = connection_state_machine(body, conn_status)
+        # db_instance.update_field_in_json(
+        #    MongoCollections.CONNECTIONS,
+        #    service_id,
+        #    "status",
+        #    str(conn_status),
+        # )
+        logger.info(f"place_connection succeeds: ID: {service_id} body='{body}'")
     else:
         conn_status = ConnectionStateMachine.State.REJECTED
         body, _ = connection_state_machine(body, conn_status)
@@ -281,8 +290,20 @@ def patch_connection(service_id, body=None):  # noqa: E501
         te_manager.generate_traffic_matrix(connection_request=new_body)
     except Exception as request_err:
         logger.error("ERROR: invalid patch request: " + str(request_err))
-        error_code = str(request_err).split("Code: ")[-1].replace(")", "").strip()
-        return f"Error: patch request is no valid: {request_err}", int(error_code)
+        error_code = getattr(request_err, "request_code", None)
+        if not isinstance(error_code, int):
+            # Backward-compatible fallback for exception strings like "... (Code: 400)".
+            error_code = 400
+            err_text = str(request_err)
+            if "Code:" in err_text:
+                candidate = err_text.split("Code:")[-1].replace(")", "").strip()
+                try:
+                    error_code = int(candidate)
+                except (TypeError, ValueError):
+                    logger.warning(
+                        f"Could not parse error code from patch validation error: {err_text}"
+                    )
+        return f"Error: patch request is not valid: {request_err}", error_code
 
     logger.info("Modifying connection")
     # Get roll back connection before removing connection
@@ -336,18 +357,22 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info(
         f"Modifying: Placing new connection {service_id} with te_manager: {current_app.te_manager}"
     )
-    # reset: the original one has been removed from db
+    # Reset: remove_connection archives/deletes the original entry,
+    # so persist the patched request before re-placement.
+    conn_status = ConnectionStateMachine.State.REQUESTED
+    body["status"] = str(conn_status)
+    db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     body["oxp_success_count"] = 0
     body["oxp_response"] = {}
     if code // 100 == 2:
         # Service created successfully
-        conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-        body, _ = connection_state_machine(body, conn_status)
-        db_instance.add_key_value_pair_to_db(
-            MongoCollections.CONNECTIONS, service_id, body
-        )
+        # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+        # body, _ = connection_state_machine(body, conn_status)
+        # db_instance.add_key_value_pair_to_db(
+        #    MongoCollections.CONNECTIONS, service_id, body
+        # )
         code = 201
         logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
         response = {
@@ -378,21 +403,22 @@ def patch_connection(service_id, body=None):  # noqa: E501
         MongoCollections.CONNECTIONS, service_id, conn_request
     )
 
+    rollback_conn_reason = "Rollback attempt did not complete"
     try:
         rollback_conn_reason, rollback_conn_code = connection_handler.place_connection(
             current_app.te_manager, conn_request
         )
         if rollback_conn_code // 100 == 2:
-            conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-            rollback_conn_body, _ = connection_state_machine(
-                rollback_conn_body, conn_status
-            )
-            db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
-                "status",
-                str(conn_status),
-            )
+            # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+            # rollback_conn_body, _ = connection_state_machine(
+            #    rollback_conn_body, conn_status
+            # )
+            # db_instance.update_field_in_json(
+            #    MongoCollections.CONNECTIONS,
+            #    service_id,
+            #    "status",
+            #    str(conn_status),
+            # )
             # still return 400 to indicate the patch request is not successful, since we have already rolled back to original connection, which is under provisioning state, so the connection is not down and not failed.
             rollback_conn_code = code
         else:
@@ -404,6 +430,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
                 "status",
                 str(conn_status),
             )
+            rollback_conn_code = 500
         logger.info(
             f"Roll back connection result: ID: {service_id} reason='{rollback_conn_reason}', code={rollback_conn_code}"
         )
@@ -416,6 +443,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
             str(conn_status),
         )
         logger.info(f"Rollback failed (connection id: {service_id}): {e}")
+        rollback_conn_reason = f"Rollback failed: {e}"
         rollback_conn_code = 500
 
     response = {

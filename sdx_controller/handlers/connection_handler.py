@@ -296,6 +296,17 @@ class ConnectionHandler:
                     MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
                 )
                 self._process_port(connection_request["id"], ctx.ingress_port, "post")
+                conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+                connection_request, _ = connection_state_machine(
+                    connection_request, conn_status
+                )
+                self.db_instance.update_field_in_json(
+                    MongoCollections.CONNECTIONS,
+                    connection_request["id"],
+                    "status",
+                    str(conn_status),
+                )
+
                 status, code = self._send_breakdown_to_lc(
                     breakdown, "post", connection_request
                 )
@@ -352,6 +363,16 @@ class ConnectionHandler:
                 te_manager,
                 operation="post",
                 connection_request=connection_request,
+            )
+            conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+            connection_request, _ = connection_state_machine(
+                connection_request, conn_status
+            )
+            self.db_instance.update_field_in_json(
+                MongoCollections.CONNECTIONS,
+                connection_request["id"],
+                "status",
+                str(conn_status),
             )
             status, code = self._send_breakdown_to_lc(
                 breakdown, "post", connection_request
@@ -436,6 +457,12 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
             )
+            if code // 100 != 2:
+                logger.error(
+                    f"Could not publish delete breakdown for {service_id}: "
+                    f"reason='{status}', code={code}"
+                )
+                return status, code
             self._process_path_to_db(
                 te_manager, operation="delete", connection_request=connection_request
             )
@@ -543,15 +570,18 @@ class ConnectionHandler:
 
                     if code // 100 == 2:
                         # Service created successfully
-                        conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-                        connection, _ = connection_state_machine(
-                            connection, conn_status
-                        )
-                        self.db_instance.update_field_in_json(
-                            MongoCollections.CONNECTIONS,
-                            service_id,
-                            "status",
-                            str(conn_status),
+                        # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+                        # connection, _ = connection_state_machine(
+                        #    connection, conn_status
+                        # )
+                        # self.db_instance.update_field_in_json(
+                        #    MongoCollections.CONNECTIONS,
+                        #    service_id,
+                        #    "status",
+                        #    str(conn_status),
+                        # )
+                        logger.info(
+                            f"link failure rerouting: place_connection succeeds: ID: {service_id} connection='{connection}'"
                         )
                         code = 201
                     else:
