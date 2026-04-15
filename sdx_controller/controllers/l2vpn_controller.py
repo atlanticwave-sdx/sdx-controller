@@ -29,9 +29,7 @@ logger.setLevel(logging.getLevelName(os.getenv("LOG_LEVEL", "DEBUG")))
 ROLLBACK_SETTLE_TIMEOUT_SECONDS = float(
     os.getenv("ROLLBACK_SETTLE_TIMEOUT_SECONDS", "5")
 )
-ROLLBACK_SETTLE_POLL_SECONDS = float(
-    os.getenv("ROLLBACK_SETTLE_POLL_SECONDS", "0.2")
-)
+ROLLBACK_SETTLE_POLL_SECONDS = float(os.getenv("ROLLBACK_SETTLE_POLL_SECONDS", "0.2"))
 
 # Get DB connection and tables set up.
 db_instance = DbUtils()
@@ -363,7 +361,9 @@ def patch_connection(service_id, body=None):  # noqa: E501
                     MongoCollections.CONNECTIONS, service_id
                 )
                 current_status = current_conn.get("status") if current_conn else None
-                if current_status != str(ConnectionStateMachine.State.UNDER_PROVISIONING):
+                if current_status != str(
+                    ConnectionStateMachine.State.UNDER_PROVISIONING
+                ):
                     break
                 time.sleep(ROLLBACK_SETTLE_POLL_SECONDS)
         logger.info(
