@@ -70,6 +70,23 @@ class ConnectionHandler:
 
         return latest_connection
 
+    def _get_oxp_service_id(self, oxp_response, domain_name):
+        if not isinstance(oxp_response, dict):
+            return None
+
+        domain_response = oxp_response.get(domain_name)
+        if isinstance(domain_response, dict):
+            return domain_response.get("service_id") or domain_response.get("evc_id")
+
+        if isinstance(domain_response, (list, tuple)) and len(domain_response) > 1:
+            response_payload = domain_response[1]
+            if isinstance(response_payload, dict):
+                return response_payload.get("service_id") or response_payload.get(
+                    "evc_id"
+                )
+
+        return None
+
     def _process_port(self, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
             MongoCollections.PORTS, Constants.PORT_CONNECTIONS_DICT
@@ -193,12 +210,21 @@ class ConnectionHandler:
         for domain, link in breakdown.items():
             port_list = []
             link_with_new_format = {}
-            for key in link.keys():
-                if "uni_" in key and "port_id" in link[key]:
+            if not isinstance(link, dict):
+                logger.warning(
+                    f"Skipping malformed breakdown segment for {domain}: {link}"
+                )
+                continue
+            for key, link_endpoint in link.items():
+                if (
+                    "uni_" in key
+                    and isinstance(link_endpoint, dict)
+                    and "port_id" in link_endpoint
+                ):
                     port_list.append(
                         {
-                            "port_id": link[key]["port_id"],
-                            "vlan_value": link[key].get("tag", {}).get("value"),
+                            "port_id": link_endpoint["port_id"],
+                            "vlan_value": link_endpoint.get("tag", {}).get("value"),
                         }
                     )
 
@@ -241,11 +267,7 @@ class ConnectionHandler:
                 oxp_response = connection_request.get("oxp_response")
 
                 # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-                evc_id = (
-                    oxp_response.get(domain_name, [None, {}])[1].get("service_id")
-                    if oxp_response
-                    else None
-                )
+                evc_id = self._get_oxp_service_id(oxp_response, domain_name)
 
                 if not oxp_response or not evc_id:
                     logger.info(

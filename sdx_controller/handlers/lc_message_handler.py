@@ -102,7 +102,21 @@ class LcMessageHandler:
             oxp_response = connection.get("oxp_response")
             if not oxp_response:
                 oxp_response = {}
-            oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
+
+            existing_domain_response = oxp_response.get(lc_domain)
+            if (
+                operation == "delete"
+                and isinstance(existing_domain_response, (list, tuple))
+                and len(existing_domain_response) > 1
+                and isinstance(existing_domain_response[1], dict)
+                and existing_domain_response[1].get("service_id")
+            ):
+                preserved_payload = dict(existing_domain_response[1])
+                if isinstance(oxp_response_msg, dict):
+                    preserved_payload.update(oxp_response_msg)
+                oxp_response[lc_domain] = (oxp_response_code, preserved_payload)
+            else:
+                oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
             connection["oxp_response"] = oxp_response
             partial_cleanup_requested = connection.get(
                 "partial_cleanup_requested", False
