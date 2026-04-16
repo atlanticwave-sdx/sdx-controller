@@ -100,7 +100,7 @@ def delete_connection(service_id):
                 f"Delete failed (connection id: {service_id}): "
                 f"reason='{remove_reason}', code={remove_code}"
             )
-            return remove_reason, remove_code
+            # return remove_reason, remove_code
         db_instance.mark_deleted(MongoCollections.CONNECTIONS, f"{service_id}")
         db_instance.mark_deleted(MongoCollections.BREAKDOWNS, f"{service_id}")
     except Exception as e:
