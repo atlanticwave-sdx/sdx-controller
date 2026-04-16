@@ -555,7 +555,7 @@ class ConnectionHandler:
 
                     logger.debug("Removed connection:")
                     logger.debug(connection)
-                    time.sleep(10)
+                    # time.sleep(10)
 
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
@@ -594,17 +594,20 @@ class ConnectionHandler:
                             "status",
                             str(conn_status),
                         )
+                        _reason = (
+                            "place_connection failed during link failure rerouting"
+                        )
                         code = 400
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
-                    response = {
-                        "service_id": service_id,
-                        "status": parse_conn_status(connection["status"]),
-                        "reason": _reason,
-                    }
-                    return response, code
+                    # response = {
+                    #    "service_id": service_id,
+                    #    "status": parse_conn_status(connection["status"]),
+                    #    "reason": _reason,
+                    # }
+                    # return response, code
 
     def handle_uni_ports_up_to_down(self, uni_ports_up_to_down):
         """

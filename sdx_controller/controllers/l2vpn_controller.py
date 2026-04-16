@@ -389,9 +389,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
         }
         return response, code
 
-    conn_status = ConnectionStateMachine.State.DOWN
-    body, _ = connection_state_machine(body, conn_status)
-
     logger.info(
         f"Modifying: Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
     )
