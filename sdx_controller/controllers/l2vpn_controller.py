@@ -368,11 +368,11 @@ def patch_connection(service_id, body=None):  # noqa: E501
     # so persist the patched request before re-placement.
     conn_status = ConnectionStateMachine.State.REQUESTED
     body["status"] = str(conn_status)
+    body["oxp_success_count"] = 0
+    body["oxp_response"] = {}
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
-    body["oxp_success_count"] = 0
-    body["oxp_response"] = {}
     if code // 100 == 2:
         # Service created successfully
         # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
