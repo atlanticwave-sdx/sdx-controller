@@ -234,9 +234,16 @@ def place_connection(body):
         f"place_connection result: ID: {service_id} reason='{reason}', code={code}"
     )
 
+    current_conn = db_instance.get_value_from_db(
+        MongoCollections.CONNECTIONS, f"{service_id}"
+    )
     response = {
         "service_id": service_id,
-        "status": parse_conn_status(str(conn_status)),
+        "status": parse_conn_status(
+            current_conn.get("status", str(conn_status))
+            if current_conn
+            else str(conn_status)
+        ),
         "reason": reason,
     }
 
