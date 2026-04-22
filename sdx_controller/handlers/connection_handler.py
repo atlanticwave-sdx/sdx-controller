@@ -88,6 +88,7 @@ class ConnectionHandler:
                 )
 
         return None
+
     def _get_domain_name(self, domain):
         domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
         return domain_name.split("__", 1)[0]
@@ -198,9 +199,7 @@ class ConnectionHandler:
                     f"Link object not found for path ports: {simple_link}"
                 )
             else:
-                temanager._logger.info(
-                    f"Links on path: {link.id} {s_port} {d_port}"
-                )
+                temanager._logger.info(f"Links on path: {link.id} {s_port} {d_port}")
             self._process_link_connection_dict(
                 temanager,
                 link_connections_dict,
@@ -558,9 +557,7 @@ class ConnectionHandler:
             connection_status.upper() if isinstance(connection_status, str) else None
         )
         normalized_removable_statuses = {
-            status.upper()
-            for status in removable_statuses
-            if isinstance(status, str)
+            status.upper() for status in removable_statuses if isinstance(status, str)
         }
         if normalized_status not in normalized_removable_statuses:
             logger.info(
