@@ -20,6 +20,96 @@ class LcMessageHandler:
         self.parse_helper = ParseHelper()
         self.connection_handler = ConnectionHandler(db_instance)
 
+    def _previous_vlan_ranges_by_port(self, topology):
+        vlan_ranges = {}
+        if not topology:
+            return vlan_ranges
+
+        for node in topology.get("nodes", []):
+            for port in node.get("ports", []):
+                port_id = port.get("id")
+                if not port_id:
+                    continue
+
+                services = port.get("services") or {}
+                for service_name in ("l2vpn-ptp", "l2vpn_ptp"):
+                    service = services.get(service_name)
+                    if service and service.get("vlan_range"):
+                        vlan_ranges[port_id] = deepcopy(service["vlan_range"])
+                        break
+
+        return vlan_ranges
+
+    def _is_valid_vlan_range(self, vlan_range):
+        if not vlan_range or not isinstance(vlan_range, list):
+            return False
+
+        for item in vlan_range:
+            parsed_item = item
+            if isinstance(parsed_item, str):
+                parsed_item = [
+                    int(vlan) for vlan in parsed_item.split("-") if vlan.isdigit()
+                ]
+                if len(parsed_item) == 1:
+                    parsed_item = parsed_item[0]
+
+            if isinstance(parsed_item, int):
+                if parsed_item < 0 or parsed_item > 4095:
+                    return False
+                continue
+
+            if not isinstance(parsed_item, list) or len(parsed_item) != 2:
+                return False
+
+            if not all(isinstance(vlan, int) for vlan in parsed_item):
+                return False
+
+            if (
+                parsed_item[0] > parsed_item[1]
+                or parsed_item[0] < 0
+                or parsed_item[1] < 0
+                or parsed_item[0] > 4095
+                or parsed_item[1] > 4095
+            ):
+                return False
+
+        return True
+
+    def _sanitize_vlan_ranges(self, topology_update, latest_topo):
+        previous_vlan_ranges = self._previous_vlan_ranges_by_port(latest_topo)
+
+        for node in topology_update.get("nodes", []):
+            for port in node.get("ports", []):
+                port_id = port.get("id")
+                services = port.get("services") or {}
+                previous_vlan_range = previous_vlan_ranges.get(port_id)
+
+                for service_name in ("l2vpn-ptp", "l2vpn_ptp"):
+                    service = services.get(service_name)
+                    if not service or "vlan_range" not in service:
+                        continue
+
+                    vlan_range = service.get("vlan_range")
+                    if self._is_valid_vlan_range(vlan_range):
+                        continue
+
+                    if previous_vlan_range:
+                        logger.warning(
+                            "Ignoring invalid VLAN range %s on port %s; keeping %s",
+                            vlan_range,
+                            port_id,
+                            previous_vlan_range,
+                        )
+                        service["vlan_range"] = deepcopy(previous_vlan_range)
+                    else:
+                        logger.warning(
+                            "Ignoring invalid VLAN range %s on port %s; using the "
+                            "default valid range",
+                            vlan_range,
+                            port_id,
+                        )
+                        service["vlan_range"] = [[1, 4095]]
+
     def process_lc_json_msg(
         self,
         msg,
@@ -96,6 +186,7 @@ class LcMessageHandler:
             oxp_number = len(breakdown)
             oxp_success_count = connection.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
+            response_domain = msg_json.get("breakdown_domain") or lc_domain
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
             operation = msg_json.get("operation")
@@ -103,7 +194,7 @@ class LcMessageHandler:
             if not oxp_response:
                 oxp_response = {}
 
-            existing_domain_response = oxp_response.get(lc_domain)
+            existing_domain_response = oxp_response.get(response_domain)
             if (
                 operation == "delete"
                 and isinstance(existing_domain_response, (list, tuple))
@@ -114,9 +205,9 @@ class LcMessageHandler:
                 preserved_payload = dict(existing_domain_response[1])
                 if isinstance(oxp_response_msg, dict):
                     preserved_payload.update(oxp_response_msg)
-                oxp_response[lc_domain] = (oxp_response_code, preserved_payload)
+                oxp_response[response_domain] = (oxp_response_code, preserved_payload)
             else:
-                oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
+                oxp_response[response_domain] = (oxp_response_code, oxp_response_msg)
             connection["oxp_response"] = oxp_response
             partial_cleanup_requested = connection.get(
                 "partial_cleanup_requested", False
@@ -198,6 +289,7 @@ class LcMessageHandler:
 
         domain_name = self.parse_helper.find_domain_name(msg_id, ":")
         msg_json["domain_name"] = domain_name
+        self._sanitize_vlan_ranges(msg_json, latest_topo)
 
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db

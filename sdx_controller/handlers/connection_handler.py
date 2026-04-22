@@ -75,6 +75,8 @@ class ConnectionHandler:
             return None
 
         domain_response = oxp_response.get(domain_name)
+        if domain_response is None:
+            domain_response = oxp_response.get(self._get_domain_name(domain_name))
         if isinstance(domain_response, dict):
             return domain_response.get("service_id") or domain_response.get("evc_id")
 
@@ -86,6 +88,9 @@ class ConnectionHandler:
                 )
 
         return None
+    def _get_domain_name(self, domain):
+        domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
+        return domain_name.split("__", 1)[0]
 
     def _process_port(self, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
@@ -181,14 +186,21 @@ class ConnectionHandler:
         else:
             temanager._logger.warning(f"No endpoints: {connection_request}")
 
-        for ports in links:
+        for ports in links or []:
             s_port = ports["source"]
             d_port = ports["destination"]
             link = temanager.topology_manager._topology.get_link_by_port_id(
                 s_port, d_port
             )
-            temanager._logger.info(f"Links on path: {link.id} {s_port} {d_port}")
             simple_link = SimpleLink([s_port, d_port]).to_string()
+            if link is None:
+                temanager._logger.warning(
+                    f"Link object not found for path ports: {simple_link}"
+                )
+            else:
+                temanager._logger.info(
+                    f"Links on path: {link.id} {s_port} {d_port}"
+                )
             self._process_link_connection_dict(
                 temanager,
                 link_connections_dict,
@@ -250,7 +262,7 @@ class ConnectionHandler:
             )
             # From "urn:ogf:network:sdx:topology:amlight.net", attempt to
             # extract a string like "amlight".
-            domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
+            domain_name = self._get_domain_name(domain)
             exchange_name = MessageQueueNames.CONNECTIONS
 
             logger.debug(
@@ -260,6 +272,7 @@ class ConnectionHandler:
             mq_link = {
                 "operation": operation,
                 "service_id": connection_service_id,
+                "breakdown_domain": domain,
                 "link": link_with_new_format,
             }
 
@@ -267,7 +280,9 @@ class ConnectionHandler:
                 oxp_response = connection_request.get("oxp_response")
 
                 # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-                evc_id = self._get_oxp_service_id(oxp_response, domain_name)
+                evc_id = self._get_oxp_service_id(
+                    oxp_response, domain
+                ) or self._get_oxp_service_id(oxp_response, domain_name)
 
                 if not oxp_response or not evc_id:
                     logger.info(
@@ -343,9 +358,7 @@ class ConnectionHandler:
 
         domain_breakdown = None
         for domain, segment in breakdown.items():
-            parsed_domain = (
-                self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
-            )
+            parsed_domain = self._get_domain_name(domain)
             if parsed_domain == domain_name:
                 domain_breakdown = {domain: segment}
                 break
@@ -522,7 +535,7 @@ class ConnectionHandler:
         logger.debug(f"Archived connection: {service_id}")
 
     def remove_connection(
-        self, te_manager, service_id, archive_reason
+        self, te_manager, service_id, archive_reason, archive=True
     ) -> Tuple[str, int]:
         connection_request = self.db_instance.get_value_from_db(
             MongoCollections.CONNECTIONS, service_id
@@ -531,20 +544,29 @@ class ConnectionHandler:
         if not connection_request:
             return "Did not find connection request, cannot remove connection", 404
         connection_status = connection_request.get("status")
-        if (
-            (connection_status != str(ConnectionStateMachine.State.UP))
-            and (connection_status != str(ConnectionStateMachine.State.MODIFYING))
-            and (
-                connection_status
-                != str(ConnectionStateMachine.State.UNDER_PROVISIONING)
-            )
-            and (connection_status != str(ConnectionStateMachine.State.DOWN))
-            and (connection_status != str(ConnectionStateMachine.State.ERROR))
-        ):
+        removable_statuses = {
+            str(ConnectionStateMachine.State.UP),
+            str(ConnectionStateMachine.State.MODIFYING),
+            str(ConnectionStateMachine.State.UNDER_PROVISIONING),
+            str(ConnectionStateMachine.State.DOWN),
+            str(ConnectionStateMachine.State.ERROR),
+            str(ConnectionStateMachine.State.RECOVERING),
+            str(ConnectionStateMachine.State.REQUESTED),
+            str(ConnectionStateMachine.State.REJECTED),
+        }
+        normalized_status = (
+            connection_status.upper() if isinstance(connection_status, str) else None
+        )
+        normalized_removable_statuses = {
+            status.upper()
+            for status in removable_statuses
+            if isinstance(status, str)
+        }
+        if normalized_status not in normalized_removable_statuses:
             logger.info(
                 f"Connection {service_id} {connection_status} is not in a removable state."
             )
-            return "Connection is not UP, Archive", 404
+            return f"Connection {connection_status} is not removable", 409
 
         breakdown = self.db_instance.get_value_from_db(
             MongoCollections.BREAKDOWNS, service_id
@@ -572,7 +594,8 @@ class ConnectionHandler:
             )
 
         if not breakdown:
-            self.archive_connection(service_id, archive_reason)
+            if archive:
+                self.archive_connection(service_id, archive_reason)
             try:
                 topology_db_update(self.db_instance, te_manager)
             except Exception as e:
@@ -601,7 +624,8 @@ class ConnectionHandler:
             logger.info(f"Failed to release path state for {service_id}: {e}")
 
         self.db_instance.delete_one_entry(MongoCollections.BREAKDOWNS, service_id)
-        self.archive_connection(service_id, archive_reason)
+        if archive:
+            self.archive_connection(service_id, archive_reason)
         logger.debug(f"Breakdown sent to LC, status: {status}, code: {code}")
         try:
             # update topology in DB with updated states (bandwidth and available vlan pool)
@@ -678,7 +702,10 @@ class ConnectionHandler:
                             f"Removing connection: {service_id} {connection.get('status')}"
                         )
                         _, code = self.remove_connection(
-                            te_manager, connection["id"], archive_reason="Failure"
+                            te_manager,
+                            connection["id"],
+                            archive_reason="Failure",
+                            archive=False,
                         )
                         if code // 100 != 2:
                             logger.info(
@@ -697,13 +724,17 @@ class ConnectionHandler:
                         connection, ConnectionStateMachine.State.RECOVERING
                     )
                     connection["oxp_success_count"] = 0
+                    connection["partial_cleanup_requested"] = False
+                    connection["provisioning_timeout_handled"] = False
+                    connection["provisioning_started_at"] = time.time()
+                    connection.pop("timeout_reason", None)
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
                     _reason, code = self.place_connection(te_manager, connection)
                     if code // 100 != 2:
                         logger.info(
-                            f"Recovery placement failed for {service_id}; archiving failed recovery state."
+                            f"Recovery placement failed for {service_id}; keeping failed recovery state active."
                         )
                         self.db_instance.delete_one_entry(
                             MongoCollections.BREAKDOWNS, service_id
@@ -714,7 +745,6 @@ class ConnectionHandler:
                         self.db_instance.add_key_value_pair_to_db(
                             MongoCollections.CONNECTIONS, service_id, connection
                         )
-                        self.archive_connection(service_id, "RecoveryFailed")
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"

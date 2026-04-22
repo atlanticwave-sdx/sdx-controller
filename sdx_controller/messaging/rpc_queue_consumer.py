@@ -258,7 +258,9 @@ class RpcConsumer(object):
                         vlan_tags_table = self.te_manager.vlan_tags_table
                         for domain, segment in domain_breakdown.items():
                             logger.debug(f"domain:{domain};segment:{segment}")
-                            domain_table = vlan_tags_table.get(domain)
+                            domain_table = vlan_tags_table.get(
+                                domain.split("__", 1)[0]
+                            )
                             uni_a = segment.get("uni_a")
                             vlan_table = domain_table.get(uni_a.get("port_id"))
                             vlan_table[uni_a.get("tag").get("value")] = service_id
