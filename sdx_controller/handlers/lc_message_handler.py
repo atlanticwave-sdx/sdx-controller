@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 
 from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, DomainStatus, MongoCollections
