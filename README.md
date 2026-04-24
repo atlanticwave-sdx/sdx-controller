@@ -199,25 +199,28 @@ $ docker run --rm -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
 $ docker run --rm -d --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=guest -e MONGO_INITDB_ROOT_PASSWORD=guest mongo:7.0.11
 ```
 
-Some environment variables are expected to be set for the tests to
-work as expected, so you may want to copy `env.template` to `.env` and
-edit it according to your environment, and make sure the env vars are
-present in your shell:
+Load environment variables from `env.template` directly into your shell
+(no need to copy it to `.env`), then override `MQ_HOST` and `MQ_PORT`
+to point at the local RabbitMQ container started above:
 
 ```console
-$ cp env.template .env 
-$ # and then edit .env to suit your environment
-$ source .env
+$ set -a; source env.template; set +a
+$ export MQ_HOST=localhost MQ_PORT=5672
 ```
 
-And now, activate a virtual environment, install the requirements, and
-then run `pytest`:
+Activate a virtual environment, install the requirements, and run `pytest`:
 
-```
+```console
 $ python3 -m venv venv --upgrade-deps
 $ source ./venv/bin/activate
 $ pip3 install --editable .[test]
 $ pytest
+```
+
+To run a specific test file, pass its path to `pytest`:
+
+```console
+$ pytest sdx_controller/test/test_l2vpn_controller_patch.py
 ```
 
 

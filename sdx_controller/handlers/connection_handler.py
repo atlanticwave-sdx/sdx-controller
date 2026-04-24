@@ -20,7 +20,6 @@ from sdx_pce.utils.exceptions import (
 )
 
 from sdx_controller.messaging.topic_queue_producer import TopicQueueProducer
-from sdx_controller.models import connection
 from sdx_controller.models.simple_link import SimpleLink
 from sdx_controller.utils.parse_helper import ParseHelper
 
