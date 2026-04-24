@@ -141,7 +141,10 @@ class RpcConsumer(object):
         self.channel = self.connection.channel()
         self.exchange_name = exchange_name
 
-        self.channel.queue_declare(queue=SUB_QUEUE)
+        # RabbitMQ no longer permits transient non-exclusive queues by default.
+        # This shared controller queue should be durable so it remains compatible
+        # with newer broker defaults.
+        self.channel.queue_declare(queue=SUB_QUEUE, durable=True)
         self._thread_queue = thread_queue
 
         self.te_manager = te_manager
