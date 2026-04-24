@@ -200,21 +200,29 @@ class ConnectionHandler:
             }
 
             if operation == "delete":
-                oxp_response = connection_request.get("oxp_response")
-
-                # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
-                evc_id = (
-                    oxp_response.get(domain_name, [None, {}])[1].get("service_id")
-                    if oxp_response
-                    else None
+                logger.debug(
+                    f"Handling delete operation for connection {connection_request}"
                 )
-
-                if not oxp_response or not evc_id:
-                    return (
-                        "Connection does not have OXP response, cannot remove connection",
-                        404,
+                oxp_response = None
+                evc_id = None
+                try:
+                    oxp_response = connection_request.get("oxp_response")
+                    # evc_id is the service_id in the OXP response, it differs from the service_id in the connection.
+                    evc_id = (
+                        oxp_response.get(domain_name, [None, {}])[1].get("service_id")
+                        if oxp_response
+                        else None
                     )
-                mq_link["evc_id"] = evc_id
+                    if not oxp_response or not evc_id:
+                        return (
+                            "Connection does not have OXP response, cannot remove connection",
+                            404,
+                        )
+                    mq_link["evc_id"] = evc_id
+                except Exception as e:
+                    logger.error(
+                        f"Error occurred while processing OXP response in delete: {e}"
+                    )
 
             producer = TopicQueueProducer(
                 timeout=5, exchange_name=exchange_name, routing_key=domain_name
@@ -286,6 +294,17 @@ class ConnectionHandler:
                     MongoCollections.BREAKDOWNS, connection_request["id"], breakdown
                 )
                 self._process_port(connection_request["id"], ctx.ingress_port, "post")
+                conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+                connection_request, _ = connection_state_machine(
+                    connection_request, conn_status
+                )
+                self.db_instance.update_field_in_json(
+                    MongoCollections.CONNECTIONS,
+                    connection_request["id"],
+                    "status",
+                    str(conn_status),
+                )
+
                 status, code = self._send_breakdown_to_lc(
                     breakdown, "post", connection_request
                 )
@@ -342,6 +361,16 @@ class ConnectionHandler:
                 te_manager,
                 operation="post",
                 connection_request=connection_request,
+            )
+            conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+            connection_request, _ = connection_state_machine(
+                connection_request, conn_status
+            )
+            self.db_instance.update_field_in_json(
+                MongoCollections.CONNECTIONS,
+                connection_request["id"],
+                "status",
+                str(conn_status),
             )
             status, code = self._send_breakdown_to_lc(
                 breakdown, "post", connection_request
@@ -426,6 +455,12 @@ class ConnectionHandler:
             status, code = self._send_breakdown_to_lc(
                 breakdown, "delete", connection_request
             )
+            if code // 100 != 2:
+                logger.error(
+                    f"Could not publish delete breakdown for {service_id}: "
+                    f"reason='{status}', code={code}"
+                )
+                return status, code
             self._process_path_to_db(
                 te_manager, operation="delete", connection_request=connection_request
             )
@@ -519,27 +554,59 @@ class ConnectionHandler:
 
                     logger.debug("Removed connection:")
                     logger.debug(connection)
+                    # time.sleep(10)
+
                     connection, _ = connection_state_machine(
                         connection, ConnectionStateMachine.State.RECOVERING
                     )
                     connection["oxp_success_count"] = 0
+                    connection["oxp_response"] = {}
                     self.db_instance.add_key_value_pair_to_db(
                         MongoCollections.CONNECTIONS, service_id, connection
                     )
                     _reason, code = self.place_connection(te_manager, connection)
-                    if code // 100 != 2:
-                        connection, _ = connection_state_machine(
-                            connection, ConnectionStateMachine.State.ERROR
+
+                    if code // 100 == 2:
+                        # Service created successfully
+                        # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
+                        # connection, _ = connection_state_machine(
+                        #    connection, conn_status
+                        # )
+                        # self.db_instance.update_field_in_json(
+                        #    MongoCollections.CONNECTIONS,
+                        #    service_id,
+                        #    "status",
+                        #    str(conn_status),
+                        # )
+                        logger.info(
+                            f"link failure rerouting: place_connection succeeds: ID: {service_id} connection='{connection}'"
                         )
-                        self.db_instance.add_key_value_pair_to_db(
+                        code = 201
+                    else:
+                        conn_status = ConnectionStateMachine.State.ERROR
+                        connection, _ = connection_state_machine(
+                            connection, conn_status
+                        )
+                        self.db_instance.update_field_in_json(
                             MongoCollections.CONNECTIONS,
                             service_id,
-                            connection,
+                            "status",
+                            str(conn_status),
                         )
+                        _reason = (
+                            "place_connection failed during link failure rerouting"
+                        )
+                        code = 400
 
                     logger.info(
                         f"place_connection result: ID: {service_id} reason='{_reason}', code={code}"
                     )
+                    # response = {
+                    #    "service_id": service_id,
+                    #    "status": parse_conn_status(connection["status"]),
+                    #    "reason": _reason,
+                    # }
+                    # return response, code
 
     def handle_uni_ports_up_to_down(self, uni_ports_up_to_down):
         """
@@ -572,9 +639,13 @@ class ConnectionHandler:
                         logger.debug(f"Cannot find connection {service_id} in DB.")
                         continue
                     logger.info(f"Updating connection {service_id} status to 'down'.")
-                    connection["status"] = "DOWN"
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, connection
+                    conn_status = "DOWN"
+                    connection["status"] = conn_status
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        "status",
+                        str(conn_status),
                     )
                     logger.debug(f"Connection status updated for {service_id}")
             else:
@@ -613,9 +684,13 @@ class ConnectionHandler:
                         continue
 
                     logger.info(f"Updating connection {service_id} status to 'up'.")
-                    connection["status"] = "UP"
-                    self.db_instance.add_key_value_pair_to_db(
-                        MongoCollections.CONNECTIONS, service_id, connection
+                    conn_status = "UP"
+                    connection["status"] = conn_status
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        "status",
+                        str(conn_status),
                     )
                     logger.debug(f"Connection status updated for {service_id}")
 
