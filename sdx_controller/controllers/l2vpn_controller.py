@@ -281,7 +281,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     te_manager = current_app.te_manager  # Assuming te_manager is accessible like this
     try:
         # Validate the new request body
-        te_manager.generate_traffic_matrix(connection_request=new_body)
+        traffic_matrix = te_manager.generate_traffic_matrix(connection_request=new_body)
     except Exception as request_err:
         logger.error("ERROR: invalid patch request: " + str(request_err))
         error_code = getattr(request_err, "request_code", None)
@@ -298,6 +298,12 @@ def patch_connection(service_id, body=None):  # noqa: E501
                         f"Could not parse error code from patch validation error: {err_text}"
                     )
         return f"Error: patch request is not valid: {request_err}", error_code
+    if traffic_matrix is None:
+        return (
+            "Error: patch request is not valid: "
+            "Request does not have a valid JSON or body is incomplete/incorrect",
+            400,
+        )
 
     logger.info("Modifying connection")
     # Preserve the last successful request so rollback can recreate it cleanly.
@@ -398,9 +404,6 @@ def patch_connection(service_id, body=None):  # noqa: E501
     conn_request["provisioning_timeout_handled"] = False
     conn_request["provisioning_started_at"] = time.time()
     conn_request.pop("timeout_reason", None)
-    conn_request, _ = connection_state_machine(
-        conn_request, ConnectionStateMachine.State.UNDER_PROVISIONING
-    )
     db_instance.add_key_value_pair_to_db(
         MongoCollections.CONNECTIONS, service_id, conn_request
     )

@@ -276,7 +276,7 @@ class LcMessageHandler:
                 MongoCollections.CONNECTIONS,
                 service_id,
                 "status",
-                str(conn_status),
+                connection.get("status"),
             )
             self.db_instance.update_field_in_json(
                 MongoCollections.CONNECTIONS,
