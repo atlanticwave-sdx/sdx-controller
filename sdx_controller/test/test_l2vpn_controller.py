@@ -599,6 +599,68 @@ class TestL2vpnController(BaseTestCase):
 
         assert len(response.get_json()) != 0
 
+    @patch("sdx_controller.utils.db_utils.DbUtils.get_all_entries_in_collection")
+    def test_z106_get_archived_connections_fail(self, mock_get_all_entries):
+        """Test case for listing all archived connections."""
+        mock_get_all_entries.return_value = {}
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/archived",
+            method="GET",
+        )
+        assert response.status_code // 100 == 4
+
+    def test_z106_get_archived_connections_success(self):
+        """Test case for listing all archived connections."""
+        service_id = str(uuid.uuid4())
+        archived_payload = [
+            {"2025-01-01 00:00:00": {"connection": {"id": service_id}, "reason": "API"}}
+        ]
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.HISTORICAL_CONNECTIONS,
+            service_id,
+            archived_payload,
+        )
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/archived",
+            method="GET",
+        )
+
+        self.assertStatus(response, 200)
+        response_data = response.get_json()
+        self.assertIn(service_id, response_data)
+        self.assertEqual(response_data[service_id], archived_payload)
+
+    def test_z107_get_archived_connections_by_id_not_found(self):
+        """Test case for archived history by unknown service ID."""
+        service_id = str(uuid.uuid4())
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}/archived",
+            method="GET",
+        )
+
+        self.assertStatus(response, 404)
+
+    def test_z107_get_archived_connections_by_id_success(self):
+        """Test case for archived history by service ID."""
+        service_id = str(uuid.uuid4())
+        archived_payload = [
+            {"2025-01-01 00:00:00": {"connection": {"id": service_id}, "reason": "API"}}
+        ]
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.HISTORICAL_CONNECTIONS,
+            service_id,
+            archived_payload,
+        )
+
+        response = self.client.open(
+            f"{BASE_PATH}/l2vpn/1.0/{service_id}/archived",
+            method="GET",
+        )
+
+        self.assertStatus(response, 200)
+        self.assertEqual(response.get_json(), {service_id: archived_payload})
+
     def test_place_connection_with_three_topologies_v2(self):
         """
         See https://github.com/atlanticwave-sdx/sdx-controller/issues/356
