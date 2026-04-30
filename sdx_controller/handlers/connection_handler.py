@@ -28,14 +28,29 @@ logger = logging.getLogger(__name__)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 MongoCollections.SOLUTIONS = "solutions"
-DELETE_PROPAGATION_WAIT_SECONDS = float(
+
+# Wait after publishing OXP delete requests so asynchronous delete callbacks
+# have a chance to reach the controller before local cleanup continues.
+DELETE_PROPAGATION_WAIT_SECONDS = int(
     os.getenv("DELETE_PROPAGATION_WAIT_SECONDS", "2")
 )
-UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS = float(
+
+# When deleting a connection that is still under provisioning, wait briefly for
+# in-flight OXP create responses so cleanup can target only provisioned EVCs.
+UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS = int(
     os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS", "5")
 )
-UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS = float(
-    os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS", "0.2")
+UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS = int(
+    os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS", "1")
+)
+
+# Retry endpoint validation when the latest topology has arrived but the TE
+# graph has not caught up yet, avoiding transient "node not found" failures.
+TOPOLOGY_SETTLE_RETRY_SECONDS = int(
+    os.getenv("TOPOLOGY_SETTLE_RETRY_SECONDS", "5")
+)
+TOPOLOGY_SETTLE_RETRY_POLL_SECONDS = int(
+    os.getenv("TOPOLOGY_SETTLE_RETRY_POLL_SECONDS", "1")
 )
 
 
@@ -92,6 +107,30 @@ class ConnectionHandler:
     def _get_domain_name(self, domain):
         domain_name = self.parse_helper.find_domain_name(domain, ":") or f"{domain}"
         return domain_name.split("__", 1)[0]
+
+    def _generate_graph_and_traffic_matrix(self, te_manager, connection_request):
+        deadline = time.time() + TOPOLOGY_SETTLE_RETRY_SECONDS
+
+        while True:
+            graph = te_manager.generate_graph_te()
+            if graph is None:
+                return None, None
+
+            try:
+                traffic_matrix = te_manager.generate_traffic_matrix(
+                    connection_request=connection_request
+                )
+                return graph, traffic_matrix
+            except RequestValidationError as request_err:
+                if "not found in the graph" not in str(request_err):
+                    raise
+                if time.time() >= deadline:
+                    raise
+                logger.info(
+                    f"Topology graph does not yet contain request endpoint for "
+                    f"{connection_request.get('id')}; retrying."
+                )
+                time.sleep(TOPOLOGY_SETTLE_RETRY_POLL_SECONDS)
 
     def _process_port(self, connection_service_id, port_id, operation):
         port_connections_dict_json = self.db_instance.get_value_from_db(
@@ -388,13 +427,12 @@ class ConnectionHandler:
         # for num, val in enumerate(te_manager.get_topology_map().values()):
         #     logger.debug(f"TE topology #{num}: {val}")
 
-        graph = te_manager.generate_graph_te()
-        if graph is None:
-            return "No SDX topology found", 424
         try:
-            traffic_matrix = te_manager.generate_traffic_matrix(
-                connection_request=connection_request
+            graph, traffic_matrix = self._generate_graph_and_traffic_matrix(
+                te_manager, connection_request
             )
+            if graph is None:
+                return "No SDX topology found", 424
         except RequestValidationError as request_err:
             err = traceback.format_exc().replace("\n", ", ")
             logger.error(

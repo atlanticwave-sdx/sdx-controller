@@ -207,9 +207,9 @@ class LcMessageHandler:
                 preserved_payload = dict(existing_domain_response[1])
                 if isinstance(oxp_response_msg, dict):
                     preserved_payload.update(oxp_response_msg)
-                oxp_response[response_domain] = (oxp_response_code, preserved_payload)
+                oxp_response[response_domain] = [oxp_response_code, preserved_payload]
             else:
-                oxp_response[response_domain] = (oxp_response_code, oxp_response_msg)
+                oxp_response[response_domain] = [oxp_response_code, oxp_response_msg]
             connection["oxp_response"] = oxp_response
             partial_cleanup_requested = connection.get(
                 "partial_cleanup_requested", False
@@ -272,24 +272,20 @@ class LcMessageHandler:
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
             # to finalize the status of the connection.
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
+            for field_name in (
                 "status",
-                connection.get("status"),
-            )
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
                 "oxp_response",
-                oxp_response,
-            )
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
                 "oxp_success_count",
-                oxp_success_count,
-            )
+                "partial_cleanup_requested",
+                "late_cleanup_domains",
+            ):
+                if field_name in connection:
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        field_name,
+                        connection.get(field_name),
+                    )
             logger.info("Connection updated: " + str(connection))
             return
 
