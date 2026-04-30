@@ -64,12 +64,8 @@ def _wait_for_patch_provisioning_to_settle(service_id):
                 MongoCollections.BREAKDOWNS, service_id
             )
             expected_oxp_responses = len(breakdown) if breakdown else 0
-            if (
-                connection.get("partial_cleanup_requested")
-                and (
-                    not expected_oxp_responses
-                    or len(oxp_response) < expected_oxp_responses
-                )
+            if connection.get("partial_cleanup_requested") and (
+                not expected_oxp_responses or len(oxp_response) < expected_oxp_responses
             ):
                 time.sleep(PATCH_PROVISIONING_SETTLE_POLL_SECONDS)
                 continue

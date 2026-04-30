@@ -31,9 +31,7 @@ MongoCollections.SOLUTIONS = "solutions"
 
 # Wait after publishing OXP delete requests so asynchronous delete callbacks
 # have a chance to reach the controller before local cleanup continues.
-DELETE_PROPAGATION_WAIT_SECONDS = int(
-    os.getenv("DELETE_PROPAGATION_WAIT_SECONDS", "2")
-)
+DELETE_PROPAGATION_WAIT_SECONDS = int(os.getenv("DELETE_PROPAGATION_WAIT_SECONDS", "2"))
 
 # When deleting a connection that is still under provisioning, wait briefly for
 # OXP create responses so cleanup can target only provisioned EVCs.
@@ -46,9 +44,7 @@ UNDER_PROVISIONING_DELETE_SETTLE_POLL_SECONDS = int(
 
 # Retry endpoint validation when the latest topology has arrived but the TE
 # graph has not caught up yet, avoiding transient "node not found" failures.
-TOPOLOGY_SETTLE_RETRY_SECONDS = int(
-    os.getenv("TOPOLOGY_SETTLE_RETRY_SECONDS", "5")
-)
+TOPOLOGY_SETTLE_RETRY_SECONDS = int(os.getenv("TOPOLOGY_SETTLE_RETRY_SECONDS", "5"))
 TOPOLOGY_SETTLE_RETRY_POLL_SECONDS = int(
     os.getenv("TOPOLOGY_SETTLE_RETRY_POLL_SECONDS", "1")
 )
