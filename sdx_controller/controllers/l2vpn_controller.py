@@ -31,10 +31,53 @@ ROLLBACK_SETTLE_TIMEOUT_SECONDS = float(
 )
 ROLLBACK_SETTLE_POLL_SECONDS = float(os.getenv("ROLLBACK_SETTLE_POLL_SECONDS", "0.2"))
 
+# PATCH must wait for async OXP provisioning responses before deciding whether
+# the new service is really up or needs rollback to the previous request.
+PATCH_PROVISIONING_SETTLE_TIMEOUT_SECONDS = int(
+    os.getenv("PATCH_PROVISIONING_SETTLE_TIMEOUT_SECONDS", "10")
+)
+PATCH_PROVISIONING_SETTLE_POLL_SECONDS = int(
+    os.getenv("PATCH_PROVISIONING_SETTLE_POLL_SECONDS", "1")
+)
+
 # Get DB connection and tables set up.
 db_instance = DbUtils()
 db_instance.initialize_db()
 connection_handler = ConnectionHandler(db_instance)
+
+
+def _wait_for_patch_provisioning_to_settle(service_id):
+    deadline = time.time() + PATCH_PROVISIONING_SETTLE_TIMEOUT_SECONDS
+    connection = db_instance.get_value_from_db(MongoCollections.CONNECTIONS, service_id)
+
+    while time.time() < deadline:
+        connection = db_instance.get_value_from_db(
+            MongoCollections.CONNECTIONS, service_id
+        )
+        if not connection:
+            return None
+
+        status = connection.get("status")
+        if status != str(ConnectionStateMachine.State.UNDER_PROVISIONING):
+            oxp_response = connection.get("oxp_response") or {}
+            breakdown = db_instance.get_value_from_db(
+                MongoCollections.BREAKDOWNS, service_id
+            )
+            expected_oxp_responses = len(breakdown) if breakdown else 0
+            if (
+                connection.get("partial_cleanup_requested")
+                and (
+                    not expected_oxp_responses
+                    or len(oxp_response) < expected_oxp_responses
+                )
+            ):
+                time.sleep(PATCH_PROVISIONING_SETTLE_POLL_SECONDS)
+                continue
+            return connection
+
+        time.sleep(PATCH_PROVISIONING_SETTLE_POLL_SECONDS)
+
+    return connection
 
 
 def delete_connection(service_id):
@@ -367,20 +410,33 @@ def patch_connection(service_id, body=None):  # noqa: E501
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
     if code // 100 == 2:
-        # Service created successfully
-        # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-        # body, _ = connection_state_machine(body, conn_status)
-        # db_instance.add_key_value_pair_to_db(
-        #    MongoCollections.CONNECTIONS, service_id, body
-        # )
-        code = 201
-        logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
-        response = {
-            "service_id": service_id,
-            "status": parse_conn_status(body["status"]),
-            "reason": reason,
-        }
-        return response, code
+        patched_conn = _wait_for_patch_provisioning_to_settle(service_id)
+        patched_status = patched_conn.get("status") if patched_conn else None
+        if patched_status == str(ConnectionStateMachine.State.UP):
+            code = 201
+            logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
+            response = {
+                "service_id": service_id,
+                "status": parse_conn_status(patched_status),
+                "reason": reason,
+            }
+            return response, code
+
+        if patched_status == str(ConnectionStateMachine.State.UNDER_PROVISIONING):
+            code = 201
+            logger.info(
+                f"Patch placement for {service_id} is still under provisioning; "
+                "returning current state."
+            )
+            response = {
+                "service_id": service_id,
+                "status": parse_conn_status(patched_status),
+                "reason": reason,
+            }
+            return response, code
+
+        reason = f"Patched connection provisioning failed: {patched_status}"
+        code = 400
 
     logger.info(
         f"Modifying: Failed to place new connection. ID: {service_id} reason='{reason}', code={code}"
@@ -414,18 +470,17 @@ def patch_connection(service_id, body=None):  # noqa: E501
             current_app.te_manager, conn_request
         )
         if rollback_conn_code // 100 == 2:
-            # conn_status = ConnectionStateMachine.State.UNDER_PROVISIONING
-            # rollback_conn_body, _ = connection_state_machine(
-            #    rollback_conn_body, conn_status
-            # )
-            # db_instance.update_field_in_json(
-            #    MongoCollections.CONNECTIONS,
-            #    service_id,
-            #    "status",
-            #    str(conn_status),
-            # )
-            # still return 400 to indicate the patch request is not successful, since we have already rolled back to original connection, which is under provisioning state, so the connection is not down and not failed.
-            rollback_conn_code = code
+            rollback_conn = _wait_for_patch_provisioning_to_settle(service_id)
+            rollback_status = rollback_conn.get("status") if rollback_conn else None
+            if rollback_status == str(ConnectionStateMachine.State.UP):
+                # Still return the patch failure code to indicate the requested
+                # modification failed, even though rollback succeeded.
+                rollback_conn_code = code
+            else:
+                rollback_conn_reason = (
+                    f"Rollback provisioning did not recover service: {rollback_status}"
+                )
+                rollback_conn_code = 500
         else:
             conn_status = ConnectionStateMachine.State.REJECTED
             body, _ = connection_state_machine(body, conn_status)

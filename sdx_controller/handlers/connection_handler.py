@@ -36,7 +36,7 @@ DELETE_PROPAGATION_WAIT_SECONDS = int(
 )
 
 # When deleting a connection that is still under provisioning, wait briefly for
-# in-flight OXP create responses so cleanup can target only provisioned EVCs.
+# OXP create responses so cleanup can target only provisioned EVCs.
 UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS = int(
     os.getenv("UNDER_PROVISIONING_DELETE_SETTLE_TIMEOUT_SECONDS", "5")
 )
