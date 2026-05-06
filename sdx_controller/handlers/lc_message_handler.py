@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from copy import deepcopy
 
 from sdx_datamodel.connection_sm import ConnectionStateMachine
@@ -20,6 +21,59 @@ class LcMessageHandler:
         self.te_manager = te_manager
         self.parse_helper = ParseHelper()
         self.connection_handler = ConnectionHandler(db_instance)
+
+    def _failed_patch_cleanup_is_complete(self, connection, breakdown):
+        if not connection.get("rollback_on_failure"):
+            return False
+        if connection.get("rollback_in_progress"):
+            return False
+        if connection.get("status") != str(ConnectionStateMachine.State.DOWN):
+            return False
+        if not connection.get("partial_cleanup_requested"):
+            return False
+        if not isinstance(connection.get("rollback_request"), dict):
+            return False
+
+        oxp_response = connection.get("oxp_response") or {}
+        return bool(breakdown) and len(oxp_response) >= len(breakdown)
+
+    def _rollback_failed_patch(self, service_id, connection):
+        rollback_request = deepcopy(connection.get("rollback_request") or {})
+        if not rollback_request:
+            return
+
+        logger.info(f"Rolling back failed PATCH for {service_id}")
+        self.db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "rollback_in_progress",
+            True,
+        )
+
+        rollback_request["id"] = service_id
+        rollback_request["status"] = str(ConnectionStateMachine.State.REQUESTED)
+        rollback_request["oxp_success_count"] = 0
+        rollback_request["oxp_response"] = {}
+        rollback_request["late_cleanup_domains"] = []
+        rollback_request["partial_cleanup_requested"] = False
+        rollback_request["rollback_on_failure"] = False
+        rollback_request["rollback_performed_for_failed_patch"] = True
+        rollback_request.pop("rollback_request", None)
+        rollback_request.pop("rollback_in_progress", None)
+        rollback_request["provisioning_timeout_handled"] = False
+        rollback_request["provisioning_started_at"] = time.time()
+        rollback_request.pop("timeout_reason", None)
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.CONNECTIONS, service_id, rollback_request
+        )
+        rollback_reason, rollback_code = self.connection_handler.place_connection(
+            self.te_manager, rollback_request
+        )
+        logger.info(
+            f"Async PATCH rollback result for {service_id}: "
+            f"reason='{rollback_reason}', code={rollback_code}"
+        )
 
     def _previous_vlan_ranges_by_port(self, topology):
         vlan_ranges = {}
@@ -278,6 +332,9 @@ class LcMessageHandler:
                 "oxp_success_count",
                 "partial_cleanup_requested",
                 "late_cleanup_domains",
+                "rollback_on_failure",
+                "rollback_request",
+                "rollback_in_progress",
             ):
                 if field_name in connection:
                     self.db_instance.update_field_in_json(
@@ -287,6 +344,8 @@ class LcMessageHandler:
                         connection.get(field_name),
                     )
             logger.info("Connection updated: " + str(connection))
+            if self._failed_patch_cleanup_is_complete(connection, breakdown):
+                self._rollback_failed_patch(service_id, connection)
             return
 
         # topology message RPC from OXP: no exchange name is defined.

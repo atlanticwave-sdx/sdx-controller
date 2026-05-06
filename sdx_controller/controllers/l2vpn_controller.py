@@ -347,6 +347,7 @@ def patch_connection(service_id, body=None):  # noqa: E501
     logger.info("Modifying connection")
     # Preserve the last successful request so rollback can recreate it cleanly.
     rollback_conn_body = copy.deepcopy(body)
+    rollback_conn_body.pop("rollback_performed_for_failed_patch", None)
     body.update(new_body)
 
     conn_status = ConnectionStateMachine.State.MODIFYING
@@ -402,6 +403,10 @@ def patch_connection(service_id, body=None):  # noqa: E501
     body["status"] = str(conn_status)
     body["oxp_success_count"] = 0
     body["oxp_response"] = {}
+    body["rollback_on_failure"] = True
+    body["rollback_request"] = rollback_conn_body
+    body["rollback_in_progress"] = False
+    body.pop("rollback_performed_for_failed_patch", None)
     db_instance.add_key_value_pair_to_db(MongoCollections.CONNECTIONS, service_id, body)
     reason, code = connection_handler.place_connection(current_app.te_manager, body)
 
@@ -409,15 +414,23 @@ def patch_connection(service_id, body=None):  # noqa: E501
         patched_conn = _wait_for_patch_provisioning_to_settle(service_id)
         patched_status = patched_conn.get("status") if patched_conn else None
         if patched_status == str(ConnectionStateMachine.State.UP):
-            code = 201
-            logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
-            response = {
-                "service_id": service_id,
-                "status": parse_conn_status(patched_status),
-                "reason": reason,
-            }
-            return response, code
-
+            if patched_conn.get("rollback_performed_for_failed_patch"):
+                response = {
+                    "service_id": service_id,
+                    "status": parse_conn_status(patched_status),
+                    "reason": "Failure, rolled back to last successful L2VPN: "
+                    "Patched connection provisioning failed",
+                }
+                return response, 400
+            else:
+                code = 201
+                logger.info(f"Placed: ID: {service_id} reason='{reason}', code={code}")
+                response = {
+                    "service_id": service_id,
+                    "status": parse_conn_status(patched_status),
+                    "reason": reason,
+                }
+                return response, code
         if patched_status == str(ConnectionStateMachine.State.UNDER_PROVISIONING):
             code = 201
             logger.info(
@@ -453,6 +466,10 @@ def patch_connection(service_id, body=None):  # noqa: E501
     conn_request["oxp_response"] = {}
     conn_request["late_cleanup_domains"] = []
     conn_request["partial_cleanup_requested"] = False
+    conn_request["rollback_on_failure"] = False
+    conn_request["rollback_performed_for_failed_patch"] = True
+    conn_request.pop("rollback_request", None)
+    conn_request.pop("rollback_in_progress", None)
     conn_request["provisioning_timeout_handled"] = False
     conn_request["provisioning_started_at"] = time.time()
     conn_request.pop("timeout_reason", None)
