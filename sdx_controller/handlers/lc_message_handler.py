@@ -1,5 +1,7 @@
 import json
 import logging
+import time
+from copy import deepcopy
 
 from sdx_datamodel.connection_sm import ConnectionStateMachine
 from sdx_datamodel.constants import Constants, DomainStatus, MongoCollections
@@ -19,6 +21,149 @@ class LcMessageHandler:
         self.te_manager = te_manager
         self.parse_helper = ParseHelper()
         self.connection_handler = ConnectionHandler(db_instance)
+
+    def _failed_patch_cleanup_is_complete(self, connection, breakdown):
+        if not connection.get("rollback_on_failure"):
+            return False
+        if connection.get("rollback_in_progress"):
+            return False
+        if connection.get("status") != str(ConnectionStateMachine.State.DOWN):
+            return False
+        if not connection.get("partial_cleanup_requested"):
+            return False
+        if not isinstance(connection.get("rollback_request"), dict):
+            return False
+
+        oxp_response = connection.get("oxp_response") or {}
+        return bool(breakdown) and len(oxp_response) >= len(breakdown)
+
+    def _rollback_failed_patch(self, service_id, connection):
+        rollback_request = deepcopy(connection.get("rollback_request") or {})
+        if not rollback_request:
+            return
+
+        logger.info(f"Rolling back failed PATCH for {service_id}")
+        self.db_instance.update_field_in_json(
+            MongoCollections.CONNECTIONS,
+            service_id,
+            "rollback_in_progress",
+            True,
+        )
+
+        rollback_request["id"] = service_id
+        rollback_request["status"] = str(ConnectionStateMachine.State.REQUESTED)
+        rollback_request["oxp_success_count"] = 0
+        rollback_request["oxp_response"] = {}
+        rollback_request["late_cleanup_domains"] = []
+        rollback_request["partial_cleanup_requested"] = False
+        rollback_request["rollback_on_failure"] = False
+        rollback_request["rollback_performed_for_failed_patch"] = True
+        rollback_request.pop("rollback_request", None)
+        rollback_request.pop("rollback_in_progress", None)
+        rollback_request["provisioning_timeout_handled"] = False
+        rollback_request["provisioning_started_at"] = time.time()
+        rollback_request.pop("timeout_reason", None)
+
+        self.db_instance.add_key_value_pair_to_db(
+            MongoCollections.CONNECTIONS, service_id, rollback_request
+        )
+        rollback_reason, rollback_code = self.connection_handler.place_connection(
+            self.te_manager, rollback_request
+        )
+        logger.info(
+            f"Async PATCH rollback result for {service_id}: "
+            f"reason='{rollback_reason}', code={rollback_code}"
+        )
+
+    def _previous_vlan_ranges_by_port(self, topology):
+        vlan_ranges = {}
+        if not topology:
+            return vlan_ranges
+
+        for node in topology.get("nodes", []):
+            for port in node.get("ports", []):
+                port_id = port.get("id")
+                if not port_id:
+                    continue
+
+                services = port.get("services") or {}
+                for service_name in ("l2vpn-ptp", "l2vpn_ptp"):
+                    service = services.get(service_name)
+                    if service and service.get("vlan_range"):
+                        vlan_ranges[port_id] = deepcopy(service["vlan_range"])
+                        break
+
+        return vlan_ranges
+
+    def _is_valid_vlan_range(self, vlan_range):
+        if not vlan_range or not isinstance(vlan_range, list):
+            return False
+
+        for item in vlan_range:
+            parsed_item = item
+            if isinstance(parsed_item, str):
+                parsed_item = [
+                    int(vlan) for vlan in parsed_item.split("-") if vlan.isdigit()
+                ]
+                if len(parsed_item) == 1:
+                    parsed_item = parsed_item[0]
+
+            if isinstance(parsed_item, int):
+                if parsed_item < 0 or parsed_item > 4095:
+                    return False
+                continue
+
+            if not isinstance(parsed_item, list) or len(parsed_item) != 2:
+                return False
+
+            if not all(isinstance(vlan, int) for vlan in parsed_item):
+                return False
+
+            if (
+                parsed_item[0] > parsed_item[1]
+                or parsed_item[0] < 0
+                or parsed_item[1] < 0
+                or parsed_item[0] > 4095
+                or parsed_item[1] > 4095
+            ):
+                return False
+
+        return True
+
+    def _sanitize_vlan_ranges(self, topology_update, latest_topo):
+        previous_vlan_ranges = self._previous_vlan_ranges_by_port(latest_topo)
+
+        for node in topology_update.get("nodes", []):
+            for port in node.get("ports", []):
+                port_id = port.get("id")
+                services = port.get("services") or {}
+                previous_vlan_range = previous_vlan_ranges.get(port_id)
+
+                for service_name in ("l2vpn-ptp", "l2vpn_ptp"):
+                    service = services.get(service_name)
+                    if not service or "vlan_range" not in service:
+                        continue
+
+                    vlan_range = service.get("vlan_range")
+                    if self._is_valid_vlan_range(vlan_range):
+                        continue
+
+                    if previous_vlan_range:
+                        logger.warning(
+                            "Ignoring invalid VLAN range %s on port %s; keeping %s",
+                            vlan_range,
+                            port_id,
+                            previous_vlan_range,
+                        )
+                        service["vlan_range"] = deepcopy(previous_vlan_range)
+                    else:
+                        logger.warning(
+                            "Ignoring invalid VLAN range %s on port %s; using the "
+                            "default valid range",
+                            vlan_range,
+                            port_id,
+                        )
+                        service["vlan_range"] = [[1, 4095]]
 
     def process_lc_json_msg(
         self,
@@ -97,26 +242,66 @@ class LcMessageHandler:
             oxp_number = len(breakdown)
             oxp_success_count = connection.get("oxp_success_count", 0)
             lc_domain = msg_json.get("lc_domain")
+            response_domain = msg_json.get("breakdown_domain") or lc_domain
             oxp_response_code = msg_json.get("oxp_response_code")
             oxp_response_msg = msg_json.get("oxp_response")
+            operation = msg_json.get("operation")
             oxp_response = connection.get("oxp_response")
             if not oxp_response:
                 oxp_response = {}
-            oxp_response[lc_domain] = (oxp_response_code, oxp_response_msg)
+
+            existing_domain_response = oxp_response.get(response_domain)
+            if (
+                operation == "delete"
+                and isinstance(existing_domain_response, (list, tuple))
+                and len(existing_domain_response) > 1
+                and isinstance(existing_domain_response[1], dict)
+                and existing_domain_response[1].get("service_id")
+            ):
+                preserved_payload = dict(existing_domain_response[1])
+                if isinstance(oxp_response_msg, dict):
+                    preserved_payload.update(oxp_response_msg)
+                oxp_response[response_domain] = [oxp_response_code, preserved_payload]
+            else:
+                oxp_response[response_domain] = [oxp_response_code, oxp_response_msg]
             connection["oxp_response"] = oxp_response
+            partial_cleanup_requested = connection.get(
+                "partial_cleanup_requested", False
+            )
+            late_cleanup_domains = connection.get("late_cleanup_domains", [])
 
             if oxp_response_code // 100 == 2:
-                if msg_json.get("operation") != "delete":
-                    oxp_success_count += 1
-                    connection["oxp_success_count"] = oxp_success_count
-                    logger.info(
-                        f"Update oxp_success_count: {oxp_success_count}; oxp_number: {oxp_number}"
-                    )
-                    if oxp_success_count == oxp_number:
-                        conn_status = ConnectionStateMachine.State.UP
-                        connection, _ = connection_state_machine(
-                            connection, conn_status
+                if operation != "delete":
+                    if partial_cleanup_requested:
+                        if lc_domain not in late_cleanup_domains:
+                            cleanup_status, cleanup_code = (
+                                self.connection_handler.cleanup_partial_connection_domain(
+                                    service_id, connection, lc_domain
+                                )
+                            )
+                            logger.info(
+                                f"Late partial cleanup result for {service_id} in {lc_domain}: {cleanup_status}, code={cleanup_code}"
+                            )
+                            late_cleanup_domains.append(lc_domain)
+                            connection["late_cleanup_domains"] = late_cleanup_domains
+                    else:
+                        oxp_success_count += 1
+                        connection["oxp_success_count"] = oxp_success_count
+                        logger.info(
+                            f"Update oxp_success_count: {oxp_success_count}; oxp_number: {oxp_number}"
                         )
+                        if oxp_success_count == oxp_number:
+                            if connection.get("status") and (
+                                connection.get("status")
+                                == str(ConnectionStateMachine.State.RECOVERING)
+                            ):
+                                connection, _ = connection_state_machine(
+                                    connection,
+                                    ConnectionStateMachine.State.UNDER_PROVISIONING,
+                                )
+                            connection, _ = connection_state_machine(
+                                connection, ConnectionStateMachine.State.UP
+                            )
             else:
                 if connection.get("status") and (
                     connection.get("status")
@@ -124,31 +309,43 @@ class LcMessageHandler:
                     or connection.get("status")
                     == str(ConnectionStateMachine.State.UNDER_PROVISIONING)
                 ):
-                    conn_status = ConnectionStateMachine.State.DOWN
-                    connection, _ = connection_state_machine(connection, conn_status)
+                    connection, _ = connection_state_machine(
+                        connection, ConnectionStateMachine.State.DOWN
+                    )
+                if operation == "post" and not partial_cleanup_requested:
+                    connection["partial_cleanup_requested"] = True
+                    cleanup_status, cleanup_code = (
+                        self.connection_handler.cleanup_partial_connection(
+                            self.te_manager, service_id, connection
+                        )
+                    )
+                    logger.info(
+                        f"Partial cleanup result for {service_id}: {cleanup_status}, code={cleanup_code}"
+                    )
 
             # ToDo: eg: if 3 oxps in the breakdowns: (1) all up: up (2) parital down: remove_connection()
             # release successful oxp circuits if some are down: remove_connection() (3) count the responses
             # to finalize the status of the connection.
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
+            for field_name in (
                 "status",
-                str(conn_status),
-            )
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
                 "oxp_response",
-                oxp_response,
-            )
-            self.db_instance.update_field_in_json(
-                MongoCollections.CONNECTIONS,
-                service_id,
                 "oxp_success_count",
-                oxp_success_count,
-            )
+                "partial_cleanup_requested",
+                "late_cleanup_domains",
+                "rollback_on_failure",
+                "rollback_request",
+                "rollback_in_progress",
+            ):
+                if field_name in connection:
+                    self.db_instance.update_field_in_json(
+                        MongoCollections.CONNECTIONS,
+                        service_id,
+                        field_name,
+                        connection.get(field_name),
+                    )
             logger.info("Connection updated: " + str(connection))
+            if self._failed_patch_cleanup_is_complete(connection, breakdown):
+                self._rollback_failed_patch(service_id, connection)
             return
 
         # topology message RPC from OXP: no exchange name is defined.
@@ -157,6 +354,7 @@ class LcMessageHandler:
 
         domain_name = self.parse_helper.find_domain_name(msg_id, ":")
         msg_json["domain_name"] = domain_name
+        self._sanitize_vlan_ranges(msg_json, latest_topo)
 
         db_msg_id = str(msg_id) + "-" + str(msg_version)
         # add message to db
